@@ -8,8 +8,15 @@ public class SerializableTreeLogger extends AbstractTreeLogger {
 //	private List<JsonObject> possibleBranches = new ArrayList<JsonObject>();
 	private final Object mutex = new Object();
 	
+	private final SerializableTreeLogger parent;
+	
 	private final JsonObject me = new JsonObject();
+	
 	public SerializableTreeLogger() {
+		this(null);
+	}
+	private SerializableTreeLogger(SerializableTreeLogger parent) {
+		this.parent = parent;
 		me.add("children", new JsonArray());
 		me.add("log", new JsonArray());
 	}
@@ -17,19 +24,25 @@ public class SerializableTreeLogger extends AbstractTreeLogger {
 	public JsonObject getJsonObject() {
 		return me;
 	}
-	
+
+	private void addToParent() {
+		//TODO get the order right?
+		if (parent != null) {
+			System.out.println(getJsonObject());
+			parent.me.get("children").getAsJsonArray().add(me);
+			parent.addToParent();
+		}
+	}
 
 	@Override
 	protected AbstractTreeLogger doBranch() {
-		SerializableTreeLogger tree = new SerializableTreeLogger();
-//		possibleBranches.add(tree.getJsonObject());
-		me.get("children").getAsJsonArray().add(tree.getJsonObject());
-		return tree;
+		return new SerializableTreeLogger(this);
 	}
 
 	  @Override
 	  protected void doCommitBranch(AbstractTreeLogger childBeingCommitted,
 			  Type type, String msg, Throwable caught, HelpInfo helpInfo) {
+		  addToParent();
 		  doLog(childBeingCommitted.getBranchedIndex(), type, msg, caught, helpInfo);
 	  }
 

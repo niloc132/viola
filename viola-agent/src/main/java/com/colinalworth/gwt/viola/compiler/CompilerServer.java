@@ -21,17 +21,17 @@ public class CompilerServer {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws Exception {
-		BlobAntiPatternObject.DEBUG_SENDJSON = true;
-		
-		
+		//		BlobAntiPatternObject.DEBUG_SENDJSON = true;
+
+
 
 		Injector i = Guice.createInjector(new ViolaModule(), new AbstractModule() {
-			
+
 			@Override
 			protected void configure() {
 				bindConstant().annotatedWith(Names.named("hostname")).to("0.0.0.0");
-				bindConstant().annotatedWith(Names.named("port")).to(8080);
-				
+				bindConstant().annotatedWith(Names.named("port")).to(9090);
+
 				try {
 					bind(URL[].class).annotatedWith(Names.named("gwtCompilerClasspath")).toInstance(new URL[]{
 							new URL("file:///home/colin/.m2/repository/com/google/gwt/gwt-dev/2.6.0/gwt-dev-2.6.0.jar"),
@@ -43,7 +43,7 @@ public class CompilerServer {
 				}
 			}
 		}, new RxfModule());
-		
+
 		final RelaxFactoryServer server = i.getInstance(RelaxFactoryServer.class);
 		new Thread() {
 			public void run() {
@@ -59,15 +59,15 @@ public class CompilerServer {
 			Thread.sleep(10);
 		}
 
-		
+
 		CouchCompiler c = i.getInstance(CouchCompiler.class);
-		
+
 		Thread.sleep(100);
-		
+
 		c.start();
-		
-		System.out.println("returning from main");
-		
+
+		System.out.println("agent successfully started");
+
 	}
 
 }

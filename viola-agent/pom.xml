@@ -9,7 +9,7 @@
 	<artifactId>viola-agent</artifactId>
 	<dependencies>
 		<dependency>
-			<groupId>com.colinalworth.gwt</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>viola-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>

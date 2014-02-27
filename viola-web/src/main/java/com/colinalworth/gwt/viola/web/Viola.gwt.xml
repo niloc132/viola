@@ -1,0 +1,7 @@
+<module rename-to="viola">
+	<inherits name="com.google.gwt.user.User" />
+<!-- 	<inherits name="com.sencha.gxt.ui.GXT" /> -->
+
+
+	<entry-point class="com.colinalworth.gwt.viola.web.client.ViolaApp" />
+</module>

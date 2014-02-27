@@ -4,6 +4,7 @@ package com.colinalworth.gwt.viola.ioc;
 import rxf.server.guice.CouchModuleBuilder;
 
 import com.colinalworth.gwt.viola.entity.CompiledProject;
+import com.colinalworth.gwt.viola.entity.CompilerLog;
 import com.colinalworth.gwt.viola.entity.SourceProject;
 import com.colinalworth.gwt.viola.entity.User;
 import com.colinalworth.gwt.viola.service.JobService;
@@ -18,8 +19,10 @@ public class ViolaModule extends AbstractModule {
 		.withEntity(User.class)
 		.withEntity(SourceProject.class)
 		.withEntity(CompiledProject.class)
+		.withEntity(CompilerLog.class)
 		.withService(JobService.CompiledProjectQueries.class)
 		.withService(JobService.SourceProjectQueries.class)
+		.withService(JobService.LogQueries.class)
 		.build());
 	}
 

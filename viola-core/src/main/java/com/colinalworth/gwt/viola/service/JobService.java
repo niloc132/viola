@@ -16,10 +16,13 @@ import rxf.server.CouchService;
 import rxf.server.CouchService.Attachments;
 import rxf.server.CouchTx;
 import rxf.server.driver.CouchMetaDriver;
+import rxf.server.gen.CouchDriver.JsonSend;
 
 import com.colinalworth.gwt.viola.entity.CompiledProject;
 import com.colinalworth.gwt.viola.entity.CompiledProject.Status;
+import com.colinalworth.gwt.viola.entity.CompilerLog;
 import com.colinalworth.gwt.viola.entity.SourceProject;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 
@@ -37,9 +40,13 @@ public class JobService {
 		@Limit(5)
 		List<CompiledProject> getProjectsWithStatus(@Key CompiledProject.Status status);
 	}
+	public interface LogQueries extends CouchService<CompilerLog> {
+		
+	}
 	
 	@Inject SourceProjectQueries sourceQueries;
 	@Inject CompiledProjectQueries compiledQueries;
+	@Inject LogQueries logQueries;
 	
 	public SourceProject createJob(SourceProject project) {
 		String id = sourceQueries.persist(project).id();
@@ -132,5 +139,12 @@ public class JobService {
 		String data = sourceQueries.attachments(source).getAttachment(name);
 		
 		return new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
+	}
+	
+	public void saveLogs(CompiledProject proj, JsonObject log) {
+		JsonObject root = new JsonObject();
+		root.addProperty("compiledProjectId", proj.getId());
+		root.add("node", log);
+		//TODO
 	}
 }

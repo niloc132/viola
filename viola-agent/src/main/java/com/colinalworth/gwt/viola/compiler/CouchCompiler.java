@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.List;
@@ -70,7 +69,7 @@ public class CouchCompiler {
 				} catch (Exception e) {
 					e.printStackTrace();
 				} finally {
-					start();		
+					start();
 				}
 
 			}
@@ -113,21 +112,12 @@ public class CouchCompiler {
 			File deployDir = new File(jobDir, "deploy");
 			deployDir.mkdir();
 			
-//			ClassLoader gwtClassLoader = new/ URLClassLoader(getCompilerClasspathElements(), old);
 			
 			ClassLoader jobClassLoader = new URLClassLoader(new URL[]{ sourceDir.toURI().toURL() }, old);
-			
 			Thread.currentThread().setContextClassLoader(jobClassLoader);
 
-//			Class<?> helper = Class.forName/("com.colinalworth.gwt.viola.compiler.CompilerHelper", true, jobClassLoader);
-			
-//			helper.newInstance();
-			
-//			System.out.println(helper.getClassLoader());
-//			System.out.println(helper.newInstance().getClass().getClassLoader());
-			
-			AbstractTreeLogger logger = new PrintWriterTreeLogger();
-			logger.setMaxDetail(TreeLogger.DEBUG);
+			SerializableTreeLogger logger = new SerializableTreeLogger();
+			logger.setMaxDetail(TreeLogger.INFO);
 			
 			CompilerOptions options = (CompilerOptions) makeOptions(source, warDir, workDir, deployDir);
 			
@@ -135,10 +125,7 @@ public class CouchCompiler {
 		    CompilerContext compilerContext = compilerContextBuilder.options(options).build();
 
 			ModuleDef module = makeModule(source, compilerContext, logger);
-			
 			compilerContext = compilerContextBuilder.module(module).build();
-
-
 
 			//precompile
 			proj = jobs.setJobStatus(proj, Status.PRECOMPILING);
@@ -156,18 +143,16 @@ public class CouchCompiler {
 
 			//link
 			proj = jobs.setJobStatus(proj, Status.LINKING);
-			File absPath = new File(options.getWarDir(), module.getName());
-			absPath = absPath.getAbsoluteFile();
-
-			Link.link(logger, module,
-					generatedArtifacts, allPerms, resultFiles, precompileOptions, options);
+			Link.link(logger, module, generatedArtifacts, allPerms, resultFiles, precompileOptions, options);
 
 			//attach results to document
 			proj = jobs.attachOutputDir(proj, new File(warDir, module.getName()));
+			
+			System.out.println(logger.getJsonObject());
 
-			proj = jobs.setJobStatus(proj, Status.COMPLETE);			
+			proj = jobs.setJobStatus(proj, Status.COMPLETE);
 
-		} catch (Exception ex) {
+		} catch (Throwable ex) {
 			ex.printStackTrace();
 			proj = jobs.setJobStatus(proj, Status.FAILED);
 			//TODO report error/s
