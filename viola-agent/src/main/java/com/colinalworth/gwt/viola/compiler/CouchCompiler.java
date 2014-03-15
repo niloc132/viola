@@ -1,16 +1,6 @@
 package com.colinalworth.gwt.viola.compiler;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.List;
-
-import rxf.server.BlobAntiPatternObject;
-
+import com.colinalworth.gwt.viola.compiler.status.StatusUpdateService;
 import com.colinalworth.gwt.viola.entity.CompiledProject;
 import com.colinalworth.gwt.viola.entity.CompiledProject.Status;
 import com.colinalworth.gwt.viola.entity.SourceProject;
@@ -30,64 +20,93 @@ import com.google.gwt.dev.cfg.ModuleDefLoader;
 import com.google.gwt.dev.jjs.JJSOptions;
 import com.google.gwt.dev.jjs.PermutationResult;
 import com.google.gwt.dev.util.FileBackedObject;
-import com.google.gwt.dev.util.log.AbstractTreeLogger;
-import com.google.gwt.dev.util.log.PrintWriterTreeLogger;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+@Singleton
 public class CouchCompiler {
-	private volatile boolean shutdown = false;
-	private volatile long lastBusy;
-	
+	private static final int jobCheckPeriodMillis = 10000;
+	private static final int shutdownCheckPeriodSeconds = 5;//at least 1s to avoid monopolizing db
+	private static final int shutdownTimeoutSeconds = 60 * 5;//at least 60s to allow compilation to complete
+
+	//distinct pool from rxf to allow independent shutdown
+	private ScheduledExecutorService pool = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
+
 	@Inject JobService jobs;
 	@Inject @Named("gwtCompilerClasspath") URL[] gwtCompilerClasspath;
 
-	public void start() {
-		BlobAntiPatternObject.getEXECUTOR_SERVICE().submit(new Runnable() {
-			public void run() {
-				if (shutdown) {
-					System.out.println("shutting down");
-					return;
-				}
-				System.out.println("checking for work");
-				try {
-					CompiledProject proj = jobs.unqueue();
-					if (proj != null) {
-						//may be several, for now just one?
-						List<SourceProject> sources = jobs.getSources(proj);
-		
-						//TODO handle more than one
-						//TODO figure out how to merge them in the first place
-						compile(sources, proj);
-						
-						lastBusy = System.currentTimeMillis();
-					} else {
-						Thread.sleep(1000);
-					}
-				} catch (InterruptedException e) {
-					return;
-				} catch (Exception e) {
-					e.printStackTrace();
-				} finally {
-					start();
-				}
-
+	@Inject StatusUpdateService status;
+	private Thread shutdownHook = new Thread(){
+		@Override
+		public void run() {
+			System.out.println("JVM shutdown, notifying db");
+			try {
+				//TODO actually stop current job
+				status.notifyStopped();
+			} catch (Exception ex) {
+				ex.printStackTrace();
 			}
-		});
+		}
+	};
+
+	public void serveUntilShutdown() {
+		Runtime.getRuntime().addShutdownHook(shutdownHook);
+
+		pool.scheduleAtFixedRate(new Runnable() {
+			public void run() {
+				checkForWork();
+			}
+		}, 0, jobCheckPeriodMillis, TimeUnit.MILLISECONDS);
+
+		System.out.println("agent successfully started");
+
+		while (!status.shouldShutdown()) {
+			try {
+				Thread.sleep(shutdownCheckPeriodSeconds * 1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		status.notifyShuttingDown();
+
+		shutdownAndAwaitTermination(shutdownTimeoutSeconds);//allow 5 minutes to shutdown
+
+		status.notifyStopped();
+		Runtime.getRuntime().removeShutdownHook(shutdownHook);
 	}
-	
-	public void stop() {
-		shutdown = true;
+
+	public void checkForWork() {
+		System.out.println("checking for work, idle time: " + status.getTimeIdle());
+		try {
+			CompiledProject proj = jobs.unqueue(status.getAgentId());
+			if (proj != null) {
+				SourceProject source = proj.getSource();
+				status.notifyWorking();
+				compile(source, proj);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			status.notifyIdle();
+		}
 	}
-	
-	public int getTimeIdle() {
-		return (int) (System.currentTimeMillis() - lastBusy);
-	}
-	
-	
-	private void compile(List<SourceProject> sources, CompiledProject proj) {
-		assert !sources.isEmpty();
-		SourceProject source = sources.get(0);
+
+
+	private void compile(SourceProject source, CompiledProject proj) {
 
 		ClassLoader old = Thread.currentThread().getContextClassLoader();
 		File jobDir = null;
@@ -99,30 +118,30 @@ public class CouchCompiler {
 			File sourceDir = new File(jobDir, "source");
 			sourceDir.mkdir();
 			unpack(source, sourceDir);
-			
+
 			File warDir = new File(jobDir, "war");
 			warDir.mkdir();
-			
+
 			File genDir = new File(jobDir, "gen");
 			genDir.mkdir();
-			
+
 			File workDir = new File(jobDir, "work");
 			workDir.mkdir();
-			
+
 			File deployDir = new File(jobDir, "deploy");
 			deployDir.mkdir();
-			
-			
+
+
 			ClassLoader jobClassLoader = new URLClassLoader(new URL[]{ sourceDir.toURI().toURL() }, old);
 			Thread.currentThread().setContextClassLoader(jobClassLoader);
 
 			SerializableTreeLogger logger = new SerializableTreeLogger();
 			logger.setMaxDetail(TreeLogger.INFO);
-			
+
 			CompilerOptions options = (CompilerOptions) makeOptions(source, warDir, workDir, deployDir);
-			
-		    CompilerContext.Builder compilerContextBuilder = new CompilerContext.Builder();
-		    CompilerContext compilerContext = compilerContextBuilder.options(options).build();
+
+			CompilerContext.Builder compilerContextBuilder = new CompilerContext.Builder();
+			CompilerContext compilerContext = compilerContextBuilder.options(options).build();
 
 			ModuleDef module = makeModule(source, compilerContext, logger);
 			compilerContext = compilerContextBuilder.module(module).build();
@@ -147,7 +166,7 @@ public class CouchCompiler {
 
 			//attach results to document
 			proj = jobs.attachOutputDir(proj, new File(warDir, module.getName()));
-			
+
 			System.out.println(logger.getJsonObject());
 
 			proj = jobs.setJobStatus(proj, Status.COMPLETE);
@@ -159,16 +178,16 @@ public class CouchCompiler {
 		} finally {
 			//remove classloader
 			Thread.currentThread().setContextClassLoader(old);
-			
+
 			//remove modules from internal gwt cache
 			ModuleDefLoader.clearModuleCache();
-			
+
 			//cleanup files
 			//war, work
 			if (jobDir != null) {
 				jobDir.delete();
 			}
-			
+
 		}
 	}
 
@@ -177,7 +196,7 @@ public class CouchCompiler {
 			File newFile = new File(sourceDir, path);
 			newFile.getParentFile().mkdirs();
 			byte[] buffer = new byte[8 * 1024];
-			
+
 			InputStream stream = jobs.getSourceAsStream(source, path);
 			try {
 				OutputStream out = new FileOutputStream(newFile);
@@ -198,13 +217,34 @@ public class CouchCompiler {
 	private Object makeOptions(SourceProject source, File warDir, File workDir, File deployDir) {
 		return new CouchCompilerOptions(warDir, workDir, deployDir);
 	}
-	
+
 	private ModuleDef makeModule(final SourceProject source, CompilerContext ctx, TreeLogger logger) throws UnableToCompleteException {
 		return ModuleDefLoader.loadFromClassPath(logger, ctx, source.getModule());
 	}
-	
+
 	private URL[] getCompilerClasspathElements() {
 		return gwtCompilerClasspath;
 	}
+
+	private void shutdownAndAwaitTermination(int timeoutInSeconds) {
+		pool.shutdown(); // Disable new tasks from being submitted
+		try {
+			// Wait a while for existing tasks to terminate
+			if (!pool.awaitTermination(timeoutInSeconds, TimeUnit.SECONDS)) {
+				pool.shutdownNow(); // Cancel currently executing tasks
+				// Wait a while for tasks to respond to being cancelled
+				if (!pool.awaitTermination(timeoutInSeconds, TimeUnit.SECONDS)) {
+					System.err.println("Pool did not terminate");
+					throw new IllegalStateException("Pool failed to terminate after " + timeoutInSeconds + " second timeout when requested");
+				}
+			}
+		} catch (InterruptedException ie) {
+			// (Re-)Cancel if current thread also interrupted
+			pool.shutdownNow();
+			// Preserve interrupt status
+			Thread.currentThread().interrupt();
+		}
+	}
+
 
 }

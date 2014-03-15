@@ -1,12 +1,8 @@
 package com.colinalworth.gwt.viola.entity;
 
 import java.util.Date;
-import java.util.List;
 
 public class SourceProject extends CouchEntityWithAttachments {
-	private String compiledId;
-	private transient CompiledProject compiled;
-	
 	private String authorId;
 	private transient User author;
 	
@@ -20,19 +16,7 @@ public class SourceProject extends CouchEntityWithAttachments {
 	
 	private String previousVersionSource;
 
-	
-	public String getCompiledId() {
-		return compiledId;
-	}
-	public void setCompiledId(String compiledId) {
-		this.compiledId = compiledId;
-	}
-	public CompiledProject getCompiled() {
-		return compiled;
-	}
-	public void setCompiled(CompiledProject compiled) {
-		this.compiled = compiled;
-	}
+
 	public String getAuthorId() {
 		return authorId;
 	}

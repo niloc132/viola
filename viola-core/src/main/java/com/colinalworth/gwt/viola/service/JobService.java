@@ -1,5 +1,17 @@
 package com.colinalworth.gwt.viola.service;
 
+import rxf.server.CouchService;
+import rxf.server.CouchService.Attachments;
+import rxf.server.CouchTx;
+import rxf.server.driver.CouchMetaDriver;
+
+import com.colinalworth.gwt.viola.entity.CompiledProject;
+import com.colinalworth.gwt.viola.entity.CompiledProject.Status;
+import com.colinalworth.gwt.viola.entity.CompilerLog;
+import com.colinalworth.gwt.viola.entity.SourceProject;
+import com.google.gson.JsonObject;
+import com.google.inject.Inject;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,65 +24,53 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-import rxf.server.CouchService;
-import rxf.server.CouchService.Attachments;
-import rxf.server.CouchTx;
-import rxf.server.driver.CouchMetaDriver;
-import rxf.server.gen.CouchDriver.JsonSend;
-
-import com.colinalworth.gwt.viola.entity.CompiledProject;
-import com.colinalworth.gwt.viola.entity.CompiledProject.Status;
-import com.colinalworth.gwt.viola.entity.CompilerLog;
-import com.colinalworth.gwt.viola.entity.SourceProject;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.inject.Inject;
-
 public class JobService {
 	public interface SourceProjectQueries extends CouchService<SourceProject> {
-		@View(map = "function(doc) {" +
-						"emit(doc.compiledId, doc);" +
-					"}")
-		List<SourceProject> getSourcesForCompiledProject(@Key String compiledId);
 	}
 	public interface CompiledProjectQueries extends CouchService<CompiledProject> {
 		@View(map = "function(doc){" +
-						"emit(doc.status, doc);" +
-					"}")
+				"emit(doc.status, doc);" +
+				"}")
 		@Limit(5)
 		List<CompiledProject> getProjectsWithStatus(@Key CompiledProject.Status status);
+
+		@View(map = "function(doc) {" +
+				"emit(doc.sourceId, doc);" +
+				"}")
+		List<CompiledProject> getCompiledForSource(@Key String id);
 	}
 	public interface LogQueries extends CouchService<CompilerLog> {
-		
+
 	}
-	
+
 	@Inject SourceProjectQueries sourceQueries;
 	@Inject CompiledProjectQueries compiledQueries;
 	@Inject LogQueries logQueries;
-	
+
 	public SourceProject createJob(SourceProject project) {
 		String id = sourceQueries.persist(project).id();
 		return sourceQueries.find(id);
 	}
-	
+
 	public SourceProject saveProject(SourceProject project) {
-		if (project.getCompiled() != null) {
-			//TODO copy and make a new one, link to old one, save it, return new one
-			return null;
-		} else {
-			sourceQueries.persist(project);
-			return project;
+		String id = project.getId();
+		CouchTx tx = sourceQueries.persist(project);
+		if (!tx.ok()) {
+			throw new IllegalStateException("Can't save project, was modified not up to date");
 		}
+		assert tx.id().equals(id);
+		return sourceQueries.find(id);
 	}
-	
+
 	public void submitJob(SourceProject project) {
 		CompiledProject compiled = new CompiledProject();
 		compiled.setStatus(Status.QUEUED);
+		compiled.setSourceId(project.getId());
 		String id = compiledQueries.persist(compiled).id();
-		project.setCompiledId(id);
+//		project.setCompiledId(id);
 	}
-	
-	
+
+
 	public CompiledProject setJobStatus(CompiledProject job, CompiledProject.Status status) {
 		CompiledProject.Status oldStatus = job.getStatus();
 		job.setStatus(status);
@@ -86,7 +86,12 @@ public class JobService {
 		}
 	}
 
-	public CompiledProject unqueue() {
+	/**
+	 *
+	 * @param agentId the id of the server that will do the compiling
+	 * @return a project that needs to be compiled, ready for use on the specified agent
+	 */
+	public CompiledProject unqueue(String agentId) {
 		List<CompiledProject> possibleJobs = compiledQueries.getProjectsWithStatus(Status.QUEUED);
 		for (CompiledProject proj : possibleJobs) {
 			CompiledProject updated = setJobStatus(proj, Status.ACCEPTED);
@@ -97,10 +102,6 @@ public class JobService {
 		//either list was short/empty, or we got to the end without finding something that wasn't taken while 
 		//we were looking at it, either way seems we're out of work to do
 		return null;
-	}
-
-	public List<SourceProject> getSources(CompiledProject proj) {
-		return sourceQueries.getSourcesForCompiledProject(proj.getId());
 	}
 
 	public CompiledProject attachOutputDir(CompiledProject proj, File warDir) throws FileNotFoundException {
@@ -117,7 +118,7 @@ public class JobService {
 		} else {
 			String fileName = root.toURI().relativize(current.toURI()).getPath();
 			String type = URLConnection.guessContentTypeFromName(current.getAbsolutePath());
-			
+
 			CouchTx tx = attachments.addAttachment(readFileAsString(current), fileName, type);
 			if (!tx.ok()) {
 				throw new RuntimeException("Failed to updated: " + tx.error());
@@ -137,10 +138,10 @@ public class JobService {
 
 	public InputStream getSourceAsStream(SourceProject source, String name) {
 		String data = sourceQueries.attachments(source).getAttachment(name);
-		
+
 		return new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
 	}
-	
+
 	public void saveLogs(CompiledProject proj, JsonObject log) {
 		JsonObject root = new JsonObject();
 		root.addProperty("compiledProjectId", proj.getId());
