@@ -1,16 +1,16 @@
 package com.colinalworth.gwt.viola.compiler;
 
-import rxf.server.RelaxFactoryServer;
-import rxf.server.guice.CouchModuleBuilder;
-import rxf.server.guice.RxfModule;
-
 import com.colinalworth.gwt.viola.compiler.status.StatusUpdateService;
 import com.colinalworth.gwt.viola.compiler.status.StatusUpdateService.StatusUpdateQueries;
 import com.colinalworth.gwt.viola.ioc.ViolaModule;
+import com.colinalworth.gwt.viola.service.AgentStatusService.CompiledProjectQueries;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.name.Names;
+import rxf.server.RelaxFactoryServer;
+import rxf.server.guice.CouchModuleBuilder;
+import rxf.server.guice.RxfModule;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -39,6 +39,7 @@ public class CompilerServer {
 
 					install(new CouchModuleBuilder("v")
 							.withService(StatusUpdateQueries.class)
+							.withService(CompiledProjectQueries.class)
 							.build());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
