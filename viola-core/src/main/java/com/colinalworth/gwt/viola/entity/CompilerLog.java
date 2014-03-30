@@ -4,7 +4,6 @@ import java.util.List;
 
 public class CompilerLog extends CouchEntity {
 	private String compiledProjectId;
-	private transient CompiledProject compiledProject;
 	private LogNode node;
 	
 	

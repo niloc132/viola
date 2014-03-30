@@ -19,6 +19,7 @@ import java.net.URL;
 public class CompilerServer {
 
 	public static void main(String[] args) throws Exception {
+		String myId = args[0];
 		//		BlobAntiPatternObject.DEBUG_SENDJSON = true;
 
 
@@ -66,7 +67,7 @@ public class CompilerServer {
 
 		CouchCompiler c = i.getInstance(CouchCompiler.class);
 		StatusUpdateService status = i.getInstance(StatusUpdateService.class);
-		status.register();
+		status.register(myId);
 
 //    Thread.sleep(100);
 

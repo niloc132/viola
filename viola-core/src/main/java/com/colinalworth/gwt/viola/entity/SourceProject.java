@@ -4,8 +4,7 @@ import java.util.Date;
 
 public class SourceProject extends CouchEntityWithAttachments {
 	private String authorId;
-	private transient User author;
-	
+
 	private String title;
 	private String description;
 	
@@ -22,12 +21,6 @@ public class SourceProject extends CouchEntityWithAttachments {
 	}
 	public void setAuthorId(String authorId) {
 		this.authorId = authorId;
-	}
-	public User getAuthor() {
-		return author;
-	}
-	public void setAuthor(User author) {
-		this.author = author;
 	}
 	public String getTitle() {
 		return title;

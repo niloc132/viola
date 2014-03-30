@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.colinalworth.gwt</groupId>
@@ -10,6 +10,7 @@
 	<properties>
 		<gwt.plugin.version>2.6.0</gwt.plugin.version>
 		<gxt.version>3.1.0-beta</gxt.version>
+		<gin.version>2.1.2</gin.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -26,7 +27,7 @@
 			<groupId>rxf</groupId>
 			<artifactId>rxf-guice</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.sencha.gxt</groupId>
 			<artifactId>gxt</artifactId>
@@ -52,7 +53,12 @@
 		</dependency>
 	</dependencies>
 	<build>
-
+		<resources>
+			<resource>
+				<directory>src/main/webapp</directory>
+				<targetPath>${project.build.directory}/web</targetPath>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -77,6 +83,29 @@
 						<goals>
 							<goal>compile</goal>
 						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<webappDirectory>${project.build.directory}/web</webappDirectory>
+				</configuration>
+			</plugin>
+			<!-- Build out a runnable jar containing all dependencies -->
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals><goal>single</goal></goals>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<archive>
+								<manifest>
+									<mainClass>com.colinalworth.gwt.viola.web.server.WebServer</mainClass>
+								</manifest>
+							</archive>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>

@@ -94,7 +94,7 @@ public class CouchCompiler {
 		try {
 			CompiledProject proj = jobs.unqueue(status.getAgentId());
 			if (proj != null) {
-				SourceProject source = proj.getSource();
+				SourceProject source = jobs.getSourceProject(proj);
 				status.notifyWorking();
 				compile(source, proj);
 			}

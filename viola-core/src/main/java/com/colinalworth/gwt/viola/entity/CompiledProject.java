@@ -18,12 +18,10 @@ public class CompiledProject extends CouchEntityWithAttachments {
 	private Status status;
 
 	private String agentId;
-	private transient AgentStatus agent;
 
 	private Date compiled;
 
 	private String sourceId;
-	private transient SourceProject source;
 
 	public Status getStatus() {
 		return status;
@@ -39,14 +37,6 @@ public class CompiledProject extends CouchEntityWithAttachments {
 
 	public void setAgentId(String agentId) {
 		this.agentId = agentId;
-	}
-
-	public AgentStatus getAgent() {
-		return agent;
-	}
-
-	public void setAgent(AgentStatus agent) {
-		this.agent = agent;
 	}
 
 	public Date getCompiled() {
@@ -65,11 +55,4 @@ public class CompiledProject extends CouchEntityWithAttachments {
 		this.sourceId = sourceId;
 	}
 
-	public SourceProject getSource() {
-		return source;
-	}
-
-	public void setSource(SourceProject source) {
-		this.source = source;
-	}
 }

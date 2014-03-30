@@ -1,15 +1,15 @@
 package com.colinalworth.gwt.viola.entity;
 
-import java.util.Collections;
-import java.util.Map;
-
 import com.google.gson.annotations.SerializedName;
-
 import rxf.server.Attachment;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CouchEntityWithAttachments extends CouchEntity {
 	@SerializedName("_attachments")
-	private Map<String, Attachment> attachments;
+	private Map<String, Attachment> attachments = new HashMap<>();
 
 	public Map<String, Attachment> getAttachments() {
 		return Collections.unmodifiableMap(attachments);

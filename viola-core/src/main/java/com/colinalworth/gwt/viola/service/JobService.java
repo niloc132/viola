@@ -1,16 +1,16 @@
 package com.colinalworth.gwt.viola.service;
 
-import rxf.server.CouchService;
-import rxf.server.CouchService.Attachments;
-import rxf.server.CouchTx;
-import rxf.server.driver.CouchMetaDriver;
-
 import com.colinalworth.gwt.viola.entity.CompiledProject;
 import com.colinalworth.gwt.viola.entity.CompiledProject.Status;
 import com.colinalworth.gwt.viola.entity.CompilerLog;
 import com.colinalworth.gwt.viola.entity.SourceProject;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import rxf.server.CouchService;
+import rxf.server.CouchService.Attachments;
+import rxf.server.driver.CouchMetaDriver;
+import rxf.shared.CouchTx;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -22,8 +22,10 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.List;
 
+@Singleton
 public class JobService {
 	public interface SourceProjectQueries extends CouchService<SourceProject> {
 	}
@@ -52,8 +54,46 @@ public class JobService {
 		return sourceQueries.find(id);
 	}
 
+	public SourceProject createProject() {
+		SourceProject project = new SourceProject();
+	    project.setLastUpdated(new Date());
+		project.setModule("project.Sample");
+		CouchTx tx = sourceQueries.persist(project);
+		if (!tx.ok()) {
+			throw new IllegalStateException(tx.error());
+		}
+		project = sourceQueries.find(tx.id());
+
+		Attachments attachments = sourceQueries.attachments(project);
+		attachments.addAttachment("<module>\n" +
+				"  <inherits name=\"com.google.gwt.user.User\" />\n" +
+				"  <entry-point class=\"project.client.SampleEntryPoint\" />\n" +
+				"</module>", "project/Sample.gwt.xml", "application/xml");
+		attachments.addAttachment("<!DOCTYPE html>\n" +
+				"<html>\n" +
+				"<head>\n" +
+				"    <title>Sample App</title>\n" +
+				"</head>\n" +
+				"<body>\n" +
+				"<script type=\"text/javascript\" src=\"project.Sample.nocache.js\"></script>\n" +
+				"</body>\n" +
+				"</html>", "project/public/index.html", "text/html");
+		attachments.addAttachment("package project.client;\n" +
+				"\n" +
+				"import com.google.gwt.core.client.EntryPoint;\n" +
+				"\n" +
+				"public class SampleEntryPoint implements EntryPoint {\n" +
+				"\tpublic void onModuleLoad() {\n" +
+				"\t\tcom.google.gwt.user.client.Window.alert(\"SampleEntryPoint.java\");\n" +
+				"\t}\n" +
+				"}","project/client/SampleEntryPoint.java", "application/java");
+
+		return project;
+	}
+
 	public SourceProject saveProject(SourceProject project) {
 		String id = project.getId();
+		project.setLastUpdated(new Date());
 		CouchTx tx = sourceQueries.persist(project);
 		if (!tx.ok()) {
 			throw new IllegalStateException("Can't save project, was modified not up to date");
@@ -136,8 +176,11 @@ public class JobService {
 		}
 	}
 
-	public InputStream getSourceAsStream(SourceProject source, String name) {
-		String data = sourceQueries.attachments(source).getAttachment(name);
+	public String getSourceAsString(SourceProject source, String path) {
+		return sourceQueries.attachments(source).getAttachment(path);
+	}
+	public InputStream getSourceAsStream(SourceProject source, String path) {
+		String data = getSourceAsString(source, path);
 
 		return new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
 	}
@@ -147,5 +190,31 @@ public class JobService {
 		root.addProperty("compiledProjectId", proj.getId());
 		root.add("node", log);
 		//TODO
+	}
+
+	public SourceProject getSourceProject(CompiledProject proj) {
+		return sourceQueries.find(proj.getSourceId());
+	}
+
+	public List<CompiledProject> getCompiledOuput(SourceProject proj) {
+		return compiledQueries.getCompiledForSource(proj.getId());
+	}
+
+	public SourceProject find(String id) {
+		return sourceQueries.find(id);
+	}
+
+	public CouchTx createSourceFile(SourceProject proj, String path, String contents) {
+		String type = URLConnection.guessContentTypeFromName(path);
+		return sourceQueries.attachments(proj).addAttachment(contents, path, type);
+	}
+
+	public CouchTx updateSourceFile(SourceProject proj, String path, String contents) {
+		String type = URLConnection.guessContentTypeFromName(path);
+		return sourceQueries.attachments(proj).updateAttachment(contents, path, type);
+	}
+
+	public CouchTx deleteSourceFile(SourceProject proj, String path) {
+		return sourceQueries.attachments(proj).deleteAttachment(path);
 	}
 }

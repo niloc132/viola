@@ -1,10 +1,25 @@
 package com.colinalworth.gwt.viola.entity;
 
+import com.google.gson.JsonElement;
+
 import java.util.Date;
 
 public class AgentStatus extends CouchEntity {
 	public static enum State {
-		IDLE, WORKING, STUCK, SHUTTING_DOWN, STOPPED
+		/** Agent has been requested by AgentManager, but has not yet connected */
+		STARTING,
+		/** Agent appears to be connected, but is not currently busy */
+		IDLE,
+		/** Agent is connected and busy */
+		WORKING,
+		/** Agent has not been heard from in a while, may be dead or unable to communicate */
+		STUCK,
+		/** Agent has received request to halt, but is still finishing work */
+		SHUTTING_DOWN,
+		/** Agent has stopped, but box may still be running, responsibility is back to AgentManager */
+		STOPPED
+		/** Agent has been fully cleaned up, and this entity only is a marker that it used to be running */
+
 	}
 	private Date startup;
 	private Date lastHeardFrom;
@@ -12,6 +27,9 @@ public class AgentStatus extends CouchEntity {
 
 	private boolean shutdownRequested;
 	private State state;
+
+	private String serverType;
+	private JsonElement serverData;
 
 
 	public Date getStartup() {
@@ -52,5 +70,21 @@ public class AgentStatus extends CouchEntity {
 
 	public void setState(State state) {
 		this.state = state;
+	}
+
+	public String getServerType() {
+		return serverType;
+	}
+
+	public void setServerType(String serverType) {
+		this.serverType = serverType;
+	}
+
+	public JsonElement getServerData() {
+		return serverData;
+	}
+
+	public void setServerData(JsonElement serverData) {
+		this.serverData = serverData;
 	}
 }
