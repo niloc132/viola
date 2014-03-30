@@ -8,6 +8,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.name.Names;
+import rxf.server.BlobAntiPatternObject;
 import rxf.server.RelaxFactoryServer;
 import rxf.server.guice.CouchModuleBuilder;
 import rxf.server.guice.RxfModule;
@@ -15,11 +16,13 @@ import rxf.server.guice.RxfModule;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.Executors;
 
 public class CompilerServer {
 
 	public static void main(String[] args) throws Exception {
 		String myId = args[0];
+		BlobAntiPatternObject.EXECUTOR_SERVICE = Executors.newScheduledThreadPool(10);
 		//		BlobAntiPatternObject.DEBUG_SENDJSON = true;
 
 
@@ -64,12 +67,13 @@ public class CompilerServer {
 			Thread.sleep(10);
 		}
 
+		// a minor delay here seems to make the system start significantly more consistently
+		Thread.sleep(100);
 
 		CouchCompiler c = i.getInstance(CouchCompiler.class);
 		StatusUpdateService status = i.getInstance(StatusUpdateService.class);
 		status.register(myId);
 
-//    Thread.sleep(100);
 
 		//blocking call, run this until we're done
 		try {

@@ -19,6 +19,20 @@ public class StatusUpdateService {
 	private volatile AgentStatus me;
 	private long lastBusy = System.currentTimeMillis();
 
+	//TODO factor out manager calls like these to a new class
+	public AgentStatus create(String type) {
+		AgentStatus agentStatus = new AgentStatus();
+		agentStatus.setServerType(type);
+		agentStatus.setState(State.STARTING);
+		CouchTx tx = queries.persist(agentStatus);
+
+		return queries.find(tx.id());
+	}
+	public AgentStatus persist(AgentStatus status) {
+		return queries.find(queries.persist(status).id());
+	}
+	//end manager calls
+
 	public synchronized void register(String id) {
 		me = queries.find(id);
 		if (me == null) {

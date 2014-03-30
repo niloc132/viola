@@ -5,6 +5,7 @@ import com.colinalworth.gwt.viola.entity.AgentStatus;
 import com.colinalworth.gwt.viola.entity.AgentStatus.State;
 import com.colinalworth.gwt.viola.ioc.ViolaModule;
 import com.colinalworth.gwt.viola.service.AgentStatusService;
+import com.colinalworth.gwt.viola.service.AgentStatusService.CompiledProjectQueries;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -19,6 +20,7 @@ import rxf.server.guice.RxfModule;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +28,7 @@ import java.util.Map;
 
 public class Governer {
 
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(final String[] args) throws InterruptedException {
 		//		BlobAntiPatternObject.DEBUG_SENDJSON = true;
 
 		Injector i = Guice.createInjector(new ViolaModule(), new AbstractModule() {
@@ -45,12 +47,20 @@ public class Governer {
 
 					install(new CouchModuleBuilder("v")
 							.withService(StatusUpdateService.StatusUpdateQueries.class)
+							.withService(CompiledProjectQueries.class)
 							.build());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
 				MapBinder<String, AgentManager> managers = MapBinder.newMapBinder(binder(), String.class, AgentManager.class);
-//				managers.addBinding("gcu").to(GCUAgentManager.class);
+				for (String arg : args) {
+					String[] parts = arg.split(":", 2);
+					try {
+						managers.addBinding(parts[0]).to((Class) Class.forName(parts[1]));
+					} catch (ClassNotFoundException e) {
+						throw new RuntimeException("Failed to startup without " + parts[1] + " on classpath", e);
+					}
+				}
 			}
 		}, new RxfModule());
 
@@ -74,14 +84,15 @@ public class Governer {
 
 		int maxIdleAgents = 3;
 		int minIdleAgents = 1;
-		int maxIdleTime = 120;
-		int checkInterval = 30;//should be at least 2x CouchCompiler#jobCheckPeriodMillis
+		int maxIdleTime = 300;//seconds since working, 600 = 5 minutes
+		int checkInterval = 120;//seconds between check, should be at least 2x CouchCompiler#jobCheckPeriodMillis
 		Map<String, Date> lastHeardFrom = new HashMap<>();
 
 		while (true) {
 			//look for agents marked as shutdown or stuck, and power them off
-			List<AgentStatus> killme = service.getAgentsInState(State.STOPPED, State.STUCK);
+			List<AgentStatus> killme = service.getAgentsInState(State.SHUTTING_DOWN, State.STUCK);
 			for (AgentStatus agent : killme) {
+				System.out.println("Stopping " + agent.getServerData() + " in state " + agent.getState());
 				poweroff(agentManagement, agent);
 			}
 
@@ -89,23 +100,31 @@ public class Governer {
 			List<AgentStatus> idleAgents = service.getAgentsIdleMoreThan(maxIdleTime * 1000);
 			if (idleAgents.size() > maxIdleAgents) {
 				for (int index = 0; index < idleAgents.size() - maxIdleAgents; index++) {
+					System.out.println("Requesting shutdown for " + idleAgents.get(index).getServerData());
 					service.requestShutdown(idleAgents.get(index));
-					System.out.println("Requested shutdown for " + idleAgents.get(index));
 				}
 			} else if (idleAgents.size() < minIdleAgents) {
 				// start servers!
-				startServers(agentManagement, minIdleAgents - idleAgents.size());
+				//TODO do something with these to make sure they start up correctly. Or is it enough to look for starting below?
+				System.out.println("Running low on agents, starting " + (minIdleAgents - idleAgents.size()) + " more");
+				List<AgentStatus> started = startServers(agentManagement, minIdleAgents - idleAgents.size());
 			}
 
-			//look for stuck agents
-			List<AgentStatus> runningAgents = service.getAgentsInState(State.IDLE);
+			//look for stuck/disconnected agents
+			List<AgentStatus> runningAgents = service.getAgentsInState(State.IDLE, State.WORKING, State.STARTING);
 			for (AgentStatus agent : runningAgents) {
 				if (lastHeardFrom.containsKey(agent.getId()) &&
 						lastHeardFrom.get(agent.getId()).equals(agent.getLastHeardFrom())) {
 					service.markStuck(agent);
+					System.out.println("Marking " + agent.getServerData() + " as stuck");
 					//TODO look for any non-finished jobs and mark them as stuck as well
 				} else {
-					lastHeardFrom.put(agent.getId(), agent.getLastHeardFrom());
+					//if lastHeardFrom is null, then it stuck while starting, leave it running for manual inspection
+					if (agent.getLastHeardFrom() != null) {
+						lastHeardFrom.put(agent.getId(), agent.getLastHeardFrom());
+					} else {
+						System.out.println("Possible stuck while starting: " + agent.getServerData());
+					}
 				}
 			}
 
@@ -118,16 +137,26 @@ public class Governer {
 	}
 
 	private static void poweroff(Map<String, AgentManager> agentManagement, AgentStatus agent) {
-		agentManagement.get(agent.getServerType()).poweroff(agent);
+		AgentManager manager = agentManagement.get(agent.getServerType());
+		if (manager == null) {
+			System.err.println("No manager available for type " + agent.getServerType() + ", please stop agent manually: ");
+			System.err.println("\tid: " + agent.getId() + "\n\tserverData: " + agent.getServerData() + "\n\tstate: " + agent.getState());
+		} else {
+			manager.poweroff(agent);
+		}
 	}
 
-	private static void startServers(Map<String, AgentManager> agentManagement, int count) {
+	private static List<AgentStatus> startServers(Map<String, AgentManager> agentManagement, int count) {
+		List<AgentStatus> serversStarted = new ArrayList<>();
 		for (AgentManager manager : agentManagement.values()) {
+			List<AgentStatus> newlyStartedServers = manager.startServers(count);
+			serversStarted.addAll(newlyStartedServers);
+			count -= newlyStartedServers.size();
 			if (count <= 0) {
-				return;
+				break;
 			}
-			count -= manager.startServers(count);
 		}
+		return serversStarted;
 	}
 
 	private static void cleanup(Map<String,AgentManager> agentManagement) {
@@ -138,7 +167,7 @@ public class Governer {
 
 	public interface AgentManager {
 		void poweroff(AgentStatus agent);
-		int startServers(int count);
+		List<AgentStatus> startServers(int count);
 		void cleanup();
 	}
 }
