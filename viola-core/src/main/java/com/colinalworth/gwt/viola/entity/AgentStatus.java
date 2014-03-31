@@ -17,9 +17,9 @@ public class AgentStatus extends CouchEntity {
 		/** Agent has received request to halt, but is still finishing work */
 		SHUTTING_DOWN,
 		/** Agent has stopped, but box may still be running, responsibility is back to AgentManager */
-		STOPPED
+		STOPPED,
 		/** Agent has been fully cleaned up, and this entity only is a marker that it used to be running */
-
+		COMPLETE
 	}
 	private Date startup;
 	private Date lastHeardFrom;

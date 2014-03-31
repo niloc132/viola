@@ -136,6 +136,9 @@ public class JobService {
 		for (CompiledProject proj : possibleJobs) {
 			CompiledProject updated = setJobStatus(proj, Status.ACCEPTED);
 			if (updated != null) {
+				//now owned by the given agent (no one else will take it while marked ACCEPTED)), stick the id on it
+				updated.setAgentId(agentId);
+				updated = compiledQueries.find(compiledQueries.persist(updated).id());
 				return updated;
 			}
 		}

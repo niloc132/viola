@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+//TODO monitor updated agent.jar image, and cycle out all agents as available
 public class Governer {
 
 	public static void main(final String[] args) throws InterruptedException {
@@ -82,36 +83,39 @@ public class Governer {
 		AgentStatusService service = i.getInstance(AgentStatusService.class);
 		Map<String, AgentManager> agentManagement = i.getInstance(Key.get(new TypeLiteral<Map<String, AgentManager>>(){}));
 
-		int maxIdleAgents = 3;
+		int maxIdleAgents = 2;
 		int minIdleAgents = 1;
 		int maxIdleTime = 300;//seconds since working, 600 = 5 minutes
-		int checkInterval = 120;//seconds between check, should be at least 2x CouchCompiler#jobCheckPeriodMillis
+		int checkInterval = 150;//seconds between check, should be at least 2x CouchCompiler#jobCheckPeriodMillis
 		Map<String, Date> lastHeardFrom = new HashMap<>();
 
 		while (true) {
 			//look for agents marked as shutdown or stuck, and power them off
-			List<AgentStatus> killme = service.getAgentsInState(State.SHUTTING_DOWN, State.STUCK);
+			List<AgentStatus> killme = service.getAgentsInState(State.STOPPED, State.STUCK);
 			for (AgentStatus agent : killme) {
 				System.out.println("Stopping " + agent.getServerData() + " in state " + agent.getState());
 				poweroff(agentManagement, agent);
 			}
 
 			// start/stop agents as necessary
-			List<AgentStatus> idleAgents = service.getAgentsIdleMoreThan(maxIdleTime * 1000);
-			if (idleAgents.size() > maxIdleAgents) {
-				for (int index = 0; index < idleAgents.size() - maxIdleAgents; index++) {
-					System.out.println("Requesting shutdown for " + idleAgents.get(index).getServerData());
-					service.requestShutdown(idleAgents.get(index));
+			List<AgentStatus> maxIdleTimeAgents = service.getAgentsIdleMoreThan(maxIdleTime * 1000);
+			List<AgentStatus> idleAgents = service.getAgentsInState(State.IDLE);
+			if (maxIdleTimeAgents.size() > maxIdleAgents) {
+				for (int index = 0; index < maxIdleTimeAgents.size() - maxIdleAgents; index++) {
+					AgentStatus agent = maxIdleTimeAgents.get(index);
+					System.out.println("Requesting shutdown for " + agent.getServerData());
+					service.requestShutdown(agent);
 				}
 			} else if (idleAgents.size() < minIdleAgents) {
 				// start servers!
 				//TODO do something with these to make sure they start up correctly. Or is it enough to look for starting below?
-				System.out.println("Running low on agents, starting " + (minIdleAgents - idleAgents.size()) + " more");
-				List<AgentStatus> started = startServers(agentManagement, minIdleAgents - idleAgents.size());
+				int agentsNeeded = minIdleAgents - idleAgents.size();
+				System.out.println("Running low on agents, starting " + agentsNeeded + " more");
+				List<AgentStatus> started = startServers(agentManagement, agentsNeeded);
 			}
 
 			//look for stuck/disconnected agents
-			List<AgentStatus> runningAgents = service.getAgentsInState(State.IDLE, State.WORKING, State.STARTING);
+			List<AgentStatus> runningAgents = service.getAgentsInState(State.IDLE, State.WORKING, State.STARTING, State.SHUTTING_DOWN);
 			for (AgentStatus agent : runningAgents) {
 				if (lastHeardFrom.containsKey(agent.getId()) &&
 						lastHeardFrom.get(agent.getId()).equals(agent.getLastHeardFrom())) {
