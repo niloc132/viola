@@ -36,6 +36,13 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.sencha.gxt</groupId>
+			<artifactId>gxt-theme-neptune</artifactId>
+			<version>${gxt.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-dev</artifactId>
 			<scope>provided</scope>
@@ -44,12 +51,31 @@
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>
-			<scope>provided</scope>
+			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.google.inject</groupId>
 			<artifactId>guice</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt.inject</groupId>
+			<artifactId>gin</artifactId>
+			<version>${gin.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.colinalworth</groupId>
+			<artifactId>rpq</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+
+		</dependency>
+
+
+		<dependency>
+			<groupId>de.barop.gwt</groupId>
+			<artifactId>gwt-pushstate</artifactId>
+			<version>1.0.0</version>
 		</dependency>
 	</dependencies>
 	<build>

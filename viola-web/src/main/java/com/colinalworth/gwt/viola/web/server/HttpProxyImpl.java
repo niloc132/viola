@@ -1,14 +1,6 @@
-package com.colinalworth.gwt.viola.web;
+package com.colinalworth.gwt.viola.web.server;
 
-import static java.nio.channels.SelectionKey.OP_READ;
-
-import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
-import java.util.concurrent.Future;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.google.gwt.safehtml.shared.UriUtils;
 import one.xio.AsioVisitor.Impl;
 import one.xio.HttpHeaders;
 import rxf.server.BlobAntiPatternObject;
@@ -19,7 +11,14 @@ import rxf.server.Rfc822HeaderState.HttpResponse;
 import rxf.server.gen.CouchDriver;
 import rxf.server.gen.CouchDriver.DocFetch.DocFetchActionBuilder;
 
-import com.google.gwt.safehtml.shared.UriUtils;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
+import java.util.concurrent.Future;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static java.nio.channels.SelectionKey.OP_READ;
 
 public class HttpProxyImpl extends Impl implements PreRead {
 	private final Pattern passthroughExpr;
@@ -57,6 +56,9 @@ public class HttpProxyImpl extends Impl implements PreRead {
 			return;
 		}
 		String link = UriUtils.sanitizeUri(prefix + matcher.group(1) + suffix);
+		if (link.endsWith("/")) {
+			link += "index.html";
+		}
 		DocFetchActionBuilder to = CouchDriver.DocFetch.$().db("").docId(link).to();
 		final Rfc822HeaderState state = to.state();
 		final Future<ByteBuffer> result = to.fire().future();

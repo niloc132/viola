@@ -1,19 +1,17 @@
-package com.colinalworth.gwt.viola.web;
-
-import java.io.IOException;
-
-import rxf.server.BlobAntiPatternObject;
-import rxf.server.RelaxFactoryServer;
+package com.colinalworth.gwt.viola.web.server;
 
 import com.colinalworth.gwt.viola.ioc.ViolaModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import rxf.server.RelaxFactoryServer;
+
+import java.io.IOException;
 
 public class WebServer {
 
 	public static void main(String[] args) throws Exception {
-		BlobAntiPatternObject.DEBUG_SENDJSON = false;
-
+//		BlobAntiPatternObject.EXECUTOR_SERVICE = Executors.newScheduledThreadPool(100);
+//		BlobAntiPatternObject.DEBUG_SENDJSON = true;
 
 		Injector i = Guice.createInjector(new ViolaModule(), new ViolaWebModule());
 

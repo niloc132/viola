@@ -53,6 +53,7 @@
 		<module>viola-core</module>
 		<module>viola-agent</module>
 		<module>viola-web</module>
+		<module>viola-gc-agent</module>
 	</modules>
 
 	<build>

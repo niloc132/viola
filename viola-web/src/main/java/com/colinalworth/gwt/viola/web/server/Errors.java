@@ -1,8 +1,4 @@
-package com.colinalworth.gwt.viola.web;
-
-import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
+package com.colinalworth.gwt.viola.web.server;
 
 import one.xio.AsioVisitor.Impl;
 import one.xio.HttpHeaders;
@@ -10,7 +6,21 @@ import one.xio.HttpMethod;
 import one.xio.HttpStatus;
 import rxf.server.Rfc822HeaderState;
 
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.SocketChannel;
+
 public final class Errors {
+	public static void $303(SelectionKey key, String newUrl) {
+		key.attach(new Impl() {
+			@Override
+			public void onWrite(SelectionKey key) throws Exception {
+
+			}
+		});
+		key.interestOps(SelectionKey.OP_WRITE);
+	}
+
 	public static void $400(SelectionKey key) {
 		error(key, HttpStatus.$400, "Bad Request");
 	}
@@ -19,7 +29,7 @@ public final class Errors {
 		error(key, HttpStatus.$404, "Not Found: " + path);
 	}
 	public static void $500(SelectionKey key) {
-		error(key, HttpStatus.$500, "Interal Server Error");
+		error(key, HttpStatus.$500, "Internal Server Error");
 	}
 
 	private static void error(SelectionKey key, final HttpStatus code, final String html) {

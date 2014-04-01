@@ -127,7 +127,7 @@ public class Governer {
 					if (agent.getLastHeardFrom() != null) {
 						lastHeardFrom.put(agent.getId(), agent.getLastHeardFrom());
 					} else {
-						System.out.println("Possible stuck while starting: " + agent.getServerData());
+						System.out.println("Possibly stuck while starting: " + agent.getServerData());
 					}
 				}
 			}
