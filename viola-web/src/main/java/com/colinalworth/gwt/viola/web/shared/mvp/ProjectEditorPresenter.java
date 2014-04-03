@@ -67,7 +67,7 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 	protected void updateWithProject(Project result) {
 		current = result;
 		getView().setFileList(result.files);
-		if (getCurrentPlace().getActiveFile() != null) {
+		if (getCurrentPlace().getActiveFile() != null && !"".equals(getCurrentPlace().getActiveFile())) {
 			getView().setActiveFile(getCurrentPlace().getActiveFile());
 			javaEditor.go(getView().getCodeEditorSlot(), getCurrentPlace());
 			editor = javaEditor;

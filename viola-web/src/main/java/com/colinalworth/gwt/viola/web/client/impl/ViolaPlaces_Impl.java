@@ -32,7 +32,7 @@ public class ViolaPlaces_Impl extends AbstractPlacesImpl implements ViolaPlaces 
 	String validateRegex = "^(?:example/(?:[a-zA-Z0-9%]*)/)|" +
 			"(?:search/\\?q=(?:[a-zA-Z0-9%]*))|" +
 			"(?:proj/new)|" +
-			"(?:proj/([a-zA-Z0-9%]+)(?:/(?:[a-zA-Z0-9%./]+)?))|" +
+			"(?:proj/([a-zA-Z0-9%]+)(?:/([a-zA-Z0-9%./]*))?)|" +
 			"(?:)$";
 	RegExp example = RegExp.compile("^example/([a-zA-Z0-9%]*)/$");
 	RegExp search = RegExp.compile("^search/\\?q=([a-zA-Z0-9%]*)$");
