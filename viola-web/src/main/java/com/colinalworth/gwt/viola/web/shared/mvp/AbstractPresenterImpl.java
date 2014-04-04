@@ -14,7 +14,7 @@ public abstract class AbstractPresenterImpl<V extends View, P extends Place> imp
 
 	@Override
 	public void go(AcceptsView parent, P place) {
-		assert currentPlace == null : "Apparently still at previous place " + currentPlace;
+//		assert currentPlace == null : "Apparently still at previous place " + currentPlace;
 		this.currentPlace = place;
 		view.setPresenter(this);
 		parent.setView(view);

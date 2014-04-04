@@ -12,7 +12,9 @@ import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Label;
 import com.sencha.gxt.core.client.IdentityValueProvider;
+import com.sencha.gxt.core.client.Style.LayoutRegion;
 import com.sencha.gxt.core.client.Style.SelectionMode;
+import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.data.shared.Store.StoreSortInfo;
@@ -22,7 +24,6 @@ import com.sencha.gxt.widget.core.client.ProgressBar;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData;
-import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
@@ -39,6 +40,8 @@ import java.util.List;
 
 public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPresenter> implements ProjectEditorView {
 
+
+	private BorderLayoutContainer blc;
 	private final TreeStore<String> paths = new TreeStore<>(new ModelKeyProvider<String>() {
 		@Override
 		public String getKey(String s) {
@@ -48,23 +51,21 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 	private final Tree<String, String> files;
 
 	private final SimpleAcceptsView codeEditor = new SimpleAcceptsView();
-//	private final SimpleAcceptsView runningExample = new SimpleAcceptsView();
+	private final SimpleAcceptsView runningExample = new SimpleAcceptsView();
 
 	private ProgressBar progress = new ProgressBar();
 	private Label error = new Label("An error occurred compiling");// TODO link to error msg
 	private HyperlinkPushState compiledLink = new HyperlinkPushState();
 
 	public ProjectEditorViewImpl() {
-		BorderLayoutContainer blc = new BorderLayoutContainer();
+		blc = new BorderLayoutContainer();
 
-		VerticalLayoutContainer westContainer = new VerticalLayoutContainer();
 		ContentPanel projectDetailsPanel = new ContentPanel();
+		VerticalLayoutContainer container = new VerticalLayoutContainer();
 		projectDetailsPanel.setHeadingText("Project Details");
-		CssFloatLayoutContainer container = new CssFloatLayoutContainer();
 		projectDetailsPanel.setWidget(container);
-		container.add(new FieldLabel(new TextField(), "Name"));
-		container.add(new FieldLabel(new TextArea(), "Description"));
-		westContainer.add(projectDetailsPanel, new VerticalLayoutData(1, -1));
+		container.add(new FieldLabel(new TextField(), "Name"), new VerticalLayoutData(1, -1, new Margins(0, 10, 0, 10)));
+		container.add(new FieldLabel(new TextArea(), "Description"), new VerticalLayoutData(1, -1, new Margins(0, 10, 0, 10)));
 
 		ContentPanel filePanel = new ContentPanel();
 		filePanel.setHeadingText("Project Files");
@@ -93,12 +94,14 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 		});
 
 		filePanel.setWidget(files);
-		westContainer.add(filePanel, new VerticalLayoutData(1, 1));
+		container.add(filePanel, new VerticalLayoutData(1, 1));
 
 		BorderLayoutData west = new BorderLayoutData(300);
+		west.setMaxSize(5000);
 		west.setSplit(true);
-//		west.setCollapsible(true);
-		blc.setWestWidget(westContainer, west);
+		west.setCollapsible(true);
+		west.setMargins(new Margins(0, 8, 0, 0));
+		blc.setWestWidget(projectDetailsPanel, west);
 
 		VerticalLayoutContainer center = new VerticalLayoutContainer();
 
@@ -114,6 +117,7 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 			@Override
 			public void onSelect(SelectEvent event) {
 				getPresenter().compile();
+				blc.collapse(LayoutRegion.EAST);
 			}
 		}));
 		progress.hide();
@@ -124,12 +128,36 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 
 		blc.setCenterWidget(center);
 
+		ContentPanel east = new ContentPanel();
+		east.setHeadingText("Latest Compiled");
+//		east.addTool(new ToolButton(ToolButton.REFRESH, new SelectHandler() {
+//			@Override
+//			public void onSelect(SelectEvent event) {
+//				getPresenter().compile();
+//			}
+//		}));
+		east.setWidget(runningExample);
+
+		BorderLayoutData eastData = new BorderLayoutData(200);
+		eastData.setMaxSize(5000);
+		eastData.setCollapsible(true);
+		eastData.setSplit(true);
+		eastData.setFloatable(false);
+		eastData.setMargins(new Margins(0, 0, 0, 8));
+		blc.setEastWidget(east, eastData);
+		blc.collapse(LayoutRegion.EAST);
+
 		initWidget(blc);
 	}
 
 	@Override
 	public AcceptsView getCodeEditorSlot() {
 		return codeEditor;
+	}
+
+	@Override
+	public SimpleAcceptsView getRunningExampleSlot() {
+		return runningExample;
 	}
 
 	@Override
@@ -184,5 +212,9 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 		double progress = ((double) index) / 5.0;
 
 		this.progress.updateProgress(progress, status.name());
+
+		if (status == CompiledProjectStatus.COMPLETE) {
+			blc.expand(LayoutRegion.EAST);
+		}
 	}
 }

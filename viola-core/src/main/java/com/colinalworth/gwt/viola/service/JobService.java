@@ -39,6 +39,7 @@ public class JobService {
 		@View(map = "function(doc) {" +
 				"emit(doc.sourceId, doc);" +
 				"}")
+		@Descending(true)
 		List<CompiledProject> getCompiledForSource(@Key String id);
 	}
 	public interface LogQueries extends CouchService<CompilerLog> {

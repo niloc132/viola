@@ -5,35 +5,62 @@ import com.colinalworth.gwt.viola.web.shared.mvp.AbstractPresenterImpl.AbstractS
 import com.colinalworth.gwt.viola.web.shared.mvp.AcceptsView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorView;
+import com.colinalworth.gwt.viola.web.shared.mvp.View;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 import java.util.List;
 
 public class ProjectEditorViewImpl extends AbstractServerView<ProjectEditorPresenter> implements ProjectEditorView {
+	private View<?> codeEd;
+	private List<String> fileList;
+	private String activeFile;
 
 	@Override
 	public AcceptsView getCodeEditorSlot() {
-		return null;  //To change body of implemented methods use File | Settings | File Templates.
+		return new AcceptsView() {
+			@Override
+			public void setView(View view) {
+				codeEd = view;
+			}
+		};
+	}
+
+	@Override
+	public AcceptsView getRunningExampleSlot() {
+		return new AcceptsView() {
+			@Override
+			public void setView(View view) {
+				//ignore
+			}
+		};
 	}
 
 	@Override
 	public void setFileList(List<String> fileList) {
-		//To change body of implemented methods use File | Settings | File Templates.
+		this.fileList = fileList;
 	}
 
 	@Override
 	public void setActiveFile(String activeFile) {
-		//To change body of implemented methods use File | Settings | File Templates.
+		this.activeFile = activeFile;
 	}
 
 	@Override
 	public void showProgress(CompiledProjectStatus status) {
-		//To change body of implemented methods use File | Settings | File Templates.
+		//no op
 	}
 
 	@Override
 	public SafeHtml asSafeHtml() {
-		return SafeHtmlUtils.fromString("Gotta edit some code");
+		SafeHtmlBuilder sb = new SafeHtmlBuilder();
+		sb.appendHtmlConstant("<div>");
+				//TODO proj details
+				//TODO fileList with links
+		if (codeEd != null) {
+			sb.append(codeEd.asSafeHtml());
+		}
+
+		return sb.appendHtmlConstant("</div>").toSafeHtml();
 	}
 }

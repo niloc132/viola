@@ -21,45 +21,43 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 public class ViolaServerApp extends Impl implements PreRead {
-	private static final String APP_RESPONSE_HEAD = "<!doctype html>\n" +
+	private static final byte[] APP_RESPONSE_HEAD = ("<!doctype html>\n" +
 			"<html>\n" +
 			"<head>\n" +
 			"    <link rel=\"stylesheet\" type=\"text/css\" href=\"/static/viola/reset.css\" />\n" +
 			"    <script language='javascript' src='/static/viola/viola.nocache.js'></script>\n" +
 			"</head>\n" +
 			"<body>\n" +
-			"<noscript>";
-	private static final String APP_RESPONSE_TAIL = "\n" +
+			"<noscript>").getBytes();
+	private static final byte[] APP_RESPONSE_TAIL = ("\n" +
 			"</noscript>\n" +
 			"</body>\n" +
-			"</html>";
+			"</html>").getBytes();
+
+	private static final int APP_RESPONSE_WRAPPER_SIZE = APP_RESPONSE_HEAD.length + APP_RESPONSE_TAIL.length;
 	@Inject
 	PlaceFactory placeFactory;
 	@Inject
 	PlaceBasedPresenterFactory presenterFactory;
 	@Override
 	public void onRead(final SelectionKey key) throws Exception {
-		ByteBuffer cursor1 = null;
 		HttpRequest req1 = null;
 		if (key.attachment() instanceof Object[]) {
 			Object[] ar = (Object[]) key.attachment();
 			for (Object o : ar) {
-				if (o instanceof ByteBuffer) {
-					cursor1 = (ByteBuffer) o;
-				} else if (o instanceof Rfc822HeaderState) {
+				if (o instanceof Rfc822HeaderState) {
 					req1 = ((Rfc822HeaderState) o).$req();
 				}
 			}
 		}
 		final HttpRequest request = req1;
-		final ByteBuffer cursor = cursor1;
-		if (request == null || cursor == null) {
+		if (request == null) {
 			Errors.$500(key);
 			return;//fail, something miswired
 		}
 		final String path = request.path();
 
-		//peel off the leading / since the client never has it
+		//peel off the leading '/' since the client never has it
 		final Place place = placeFactory.route(path.substring(1));
 		if (place == null) {
 			//either we're looking at a 404, or a static file
@@ -88,24 +86,33 @@ public class ViolaServerApp extends Impl implements PreRead {
 
 				final String response = viewWrapper[0] == null ? null :
 						viewWrapper[0].asSafeHtml() == null ? null :
-						APP_RESPONSE_HEAD + viewWrapper[0].asSafeHtml().asString() + APP_RESPONSE_TAIL;
+								viewWrapper[0].asSafeHtml().asString();
 				if (response == null) {
 					// assume that if it returns null that it already sent back a response
 					return;
 				}
+
+				ByteBuffer resp = request.$res()
+						.resCode(HttpStatus.$200)
+						.headerString(HttpHeaders.Content$2dType, "text/html")
+						.headerString(HttpHeaders.Content$2dLength, String.valueOf(APP_RESPONSE_WRAPPER_SIZE + response.length()))
+						.as(ByteBuffer.class);
+				int needed = resp.rewind().limit() + APP_RESPONSE_WRAPPER_SIZE + response.length();
+				final ByteBuffer payload = (ByteBuffer) ByteBuffer.allocate(needed)
+						.put(resp)
+						.put(APP_RESPONSE_HEAD)
+						.put(HttpMethod.UTF8.encode(response))
+						.put(APP_RESPONSE_TAIL).rewind();
+
+				//ok, data in hand, lets get ready to write
 				key.attach(new Impl(){
 					@Override
 					public void onWrite(SelectionKey key) throws Exception {
-						ByteBuffer resp = new Rfc822HeaderState().$res()
-								.resCode(HttpStatus.$200)
-								.headerString(HttpHeaders.Content$2dType, "text/html")
-								.headerString(HttpHeaders.Content$2dLength, String.valueOf(response.length()))
-								.as(ByteBuffer.class);
-
-						((SocketChannel) key.channel()).write(resp);
-						((SocketChannel) key.channel()).write(HttpMethod.UTF8.encode(response));
-						key.selector().wakeup();
-						key.interestOps(SelectionKey.OP_READ).attach(null);
+						((SocketChannel) key.channel()).write(payload);
+						if (!payload.hasRemaining()) {
+							key.selector().wakeup();
+							key.interestOps(SelectionKey.OP_READ).attach(null);
+						}
 					}
 				});
 				key.interestOps(SelectionKey.OP_WRITE);

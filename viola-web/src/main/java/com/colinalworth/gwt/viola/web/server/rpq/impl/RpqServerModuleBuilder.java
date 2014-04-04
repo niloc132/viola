@@ -90,7 +90,7 @@ public class RpqServerModuleBuilder {
 	private static class RequestQueueInvocationHandler implements InvocationHandler {
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			return null;  //To change body of implemented methods use File | Settings | File Templates.
+			return null;
 		}
 	}
 }

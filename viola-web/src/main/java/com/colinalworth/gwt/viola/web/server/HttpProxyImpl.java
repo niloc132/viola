@@ -7,7 +7,6 @@ import rxf.server.BlobAntiPatternObject;
 import rxf.server.PreRead;
 import rxf.server.Rfc822HeaderState;
 import rxf.server.Rfc822HeaderState.HttpRequest;
-import rxf.server.Rfc822HeaderState.HttpResponse;
 import rxf.server.gen.CouchDriver;
 import rxf.server.gen.CouchDriver.DocFetch.DocFetchActionBuilder;
 
@@ -61,6 +60,7 @@ public class HttpProxyImpl extends Impl implements PreRead {
 		}
 		DocFetchActionBuilder to = CouchDriver.DocFetch.$().db("").docId(link).to();
 		final Rfc822HeaderState state = to.state();
+		state.addHeaderInterest(HttpHeaders.Content$2dType);
 		final Future<ByteBuffer> result = to.fire().future();
 
 		key.attach(new Impl() {
@@ -92,10 +92,9 @@ public class HttpProxyImpl extends Impl implements PreRead {
 								return;
 							}
 
-							HttpResponse response = req.$res();
-
-							ByteBuffer headers = response
-									.status(state.protocolStatus())
+							ByteBuffer headers = req.$res()
+									.resCode(state.pathResCode())
+//									.status(state.protocolStatus())
 									.headerString(HttpHeaders.Content$2dType, state.headerString(HttpHeaders.Content$2dType))
 									.headerString(HttpHeaders.Content$2dLength, state.headerString(HttpHeaders.Content$2dLength))
 									.as(ByteBuffer.class);

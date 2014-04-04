@@ -2,6 +2,7 @@ package com.colinalworth.gwt.viola.web.shared.mvp;
 
 import com.colinalworth.gwt.viola.web.shared.dto.CompiledProjectStatus;
 import com.colinalworth.gwt.viola.web.shared.dto.Project;
+import com.colinalworth.gwt.viola.web.shared.mvp.ExamplePresenter.ExamplePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorView;
 import com.colinalworth.gwt.viola.web.shared.request.JobRequest;
@@ -18,6 +19,7 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 	public interface ProjectEditorView extends View<ProjectEditorPresenter> {
 
 		AcceptsView getCodeEditorSlot();
+		AcceptsView getRunningExampleSlot();
 
 		void setFileList(List<String> fileList);
 		void setActiveFile(String activeFile);
@@ -38,6 +40,9 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 	JavaCodeEditorPresenter javaEditor;
 	@Inject
 	PlaceManager placeManager;
+
+	@Inject
+	ExamplePresenter examplePresenter;
 
 	private Object editor;
 
@@ -72,6 +77,7 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 			javaEditor.go(getView().getCodeEditorSlot(), getCurrentPlace());
 			editor = javaEditor;
 		}
+		updateCompiledId();
 	}
 
 	public boolean tryLoadFile(String path) {
@@ -108,6 +114,25 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 			@Override
 			public void onSuccess(Void result) {
 				poll();
+				updateCompiledId();
+			}
+		});
+	}
+
+	private void updateCompiledId() {
+		jobRequest.get().getCompiledId(getCurrentPlace().getId(), new AsyncCallback<String>(){
+			@Override
+			public void onFailure(Throwable caught) {
+				Window.alert(caught.getMessage());
+			}
+
+			@Override
+			public void onSuccess(String result) {
+				if (result != null) {
+					ExamplePlace exPlace = placeManager.create(ExamplePlace.class);
+					exPlace.setId(result);
+					examplePresenter.go(getView().getRunningExampleSlot(), exPlace);
+				}
 			}
 		});
 	}
@@ -121,6 +146,7 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 
 			@Override
 			public void onSuccess(CompiledProjectStatus result) {
+
 				getView().showProgress(result);
 
 				switch (result) {
@@ -135,4 +161,10 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 		});
 	}
 
+
+	@Override
+	public boolean equals(Object obj) {
+		//always return true for another of the same type so that we dont rebuild
+		return obj instanceof ProjectEditorPresenter;
+	}
 }

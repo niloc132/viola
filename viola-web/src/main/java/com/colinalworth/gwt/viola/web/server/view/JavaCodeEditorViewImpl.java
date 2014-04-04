@@ -4,21 +4,24 @@ import com.colinalworth.gwt.viola.web.shared.mvp.AbstractPresenterImpl.AbstractS
 import com.colinalworth.gwt.viola.web.shared.mvp.JavaCodeEditorPresenter;
 import com.colinalworth.gwt.viola.web.shared.mvp.JavaCodeEditorPresenter.JavaCodeEditorView;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 public class JavaCodeEditorViewImpl extends AbstractServerView<JavaCodeEditorPresenter> implements JavaCodeEditorView {
-	@Override
-	public SafeHtml asSafeHtml() {
-		return SafeHtmlUtils.fromString("This is java.");  //To change body of implemented methods use File | Settings | File Templates.
-	}
-
+	private String java;
 	@Override
 	public String getValue() {
-		return null;  //To change body of implemented methods use File | Settings | File Templates.
+		return java;
 	}
 
 	@Override
 	public void setValue(String code) {
-		//To change body of implemented methods use File | Settings | File Templates.
+		this.java = code;
+	}
+	@Override
+	public SafeHtml asSafeHtml() {
+		return new SafeHtmlBuilder()
+				.appendHtmlConstant("<textarea>")
+				.appendEscaped(java)
+				.appendHtmlConstant("</textarea>").toSafeHtml();
 	}
 }

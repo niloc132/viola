@@ -67,7 +67,20 @@ public class ClientPlaceManager implements PlaceManager {
 			return false;
 		}
 
+		Presenter presenter = presenters.getPresenterInstance(place);
+
+
 		if (active != null) {
+			if (active.equals(presenter)) {
+				//already have the right instance, re-trigger our presense
+				//this allows .equals to say 'dont make a new one'
+
+				//dont fire an event, just track the current place and re-call go()
+				((Presenter) active).go(this.new ViewWrapper(), place);
+				current = place;
+				return true;
+			}
+
 			//if existing running,
 			if (started) {
 				// maybe stop existing
@@ -83,8 +96,7 @@ public class ClientPlaceManager implements PlaceManager {
 		}
 
 		started = false;
-		Presenter presenter = presenters.getPresenterInstance(place);
-		presenter.go(new ViewWrapper(), place);
+		presenter.go(this.new ViewWrapper(), place);
 		active = presenter;
 		current = place;
 		ValueChangeEvent.fire(this, place);

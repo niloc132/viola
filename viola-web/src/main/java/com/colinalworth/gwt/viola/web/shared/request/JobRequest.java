@@ -21,4 +21,6 @@ public interface JobRequest {
 
 	void build(String projectId, AsyncCallback<Void> callback);
 	void checkStatus(String projectId, AsyncCallback<CompiledProjectStatus> callback);
+
+	void getCompiledId(String id, AsyncCallback<String> asyncCallback);
 }

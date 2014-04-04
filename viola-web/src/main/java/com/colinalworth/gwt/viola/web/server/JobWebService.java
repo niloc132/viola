@@ -83,4 +83,12 @@ public class JobWebService {
 	public CompiledProjectStatus checkStatus(String projectId) {
 		return CompiledProjectStatus.values()[jobService.getCompiledOuput(jobService.find(projectId)).get(0).getStatus().ordinal()];
 	}
+
+	public String getCompiledId(String id) {
+		List<CompiledProject> output = jobService.getCompiledOuput(jobService.find(id));
+		if (output.isEmpty()) {
+			return null;
+		}
+		return output.get(0).getId();
+	}
 }
