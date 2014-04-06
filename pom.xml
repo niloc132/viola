@@ -13,7 +13,7 @@
 
 		<gwt.version>2.6.0</gwt.version>
 		<guice.version>3.0</guice.version>
-		<rxf.version>0.9.7.2.2</rxf.version>
+		<rxf.version>0.9.7.3</rxf.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
