@@ -43,7 +43,7 @@ public class CouchCompiler {
 	private static final int shutdownTimeoutSeconds = 60 * 5;//at least 60s to allow compilation to complete
 
 	//distinct pool from rxf to allow independent shutdown
-	private ScheduledExecutorService pool = Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
+	private ScheduledExecutorService pool = Executors.newScheduledThreadPool(2);
 
 	@Inject JobService jobs;
 	@Inject @Named("gwtCompilerClasspath") URL[] gwtCompilerClasspath;
@@ -65,7 +65,7 @@ public class CouchCompiler {
 	public void serveUntilShutdown() {
 		Runtime.getRuntime().addShutdownHook(shutdownHook);
 
-		pool.scheduleAtFixedRate(new Runnable() {
+		pool.scheduleWithFixedDelay(new Runnable() {
 			public void run() {
 				checkForWork();
 			}
@@ -73,10 +73,14 @@ public class CouchCompiler {
 
 		System.out.println("agent successfully started");
 
-		while (!status.shouldShutdown()) {
+		while (true) {
 			try {
+				if (status.shouldShutdown()) {
+					break;
+				}
 				Thread.sleep(shutdownCheckPeriodSeconds * 1000);
-			} catch (InterruptedException e) {
+			} catch (Exception e) {
+				//failure in checking on shutdown status (network issue?) or interrupt
 				e.printStackTrace();
 			}
 		}
