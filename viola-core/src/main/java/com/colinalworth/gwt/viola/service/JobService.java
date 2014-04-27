@@ -55,10 +55,12 @@ public class JobService {
 		return sourceQueries.find(id);
 	}
 
-	public SourceProject createProject() {
+	public SourceProject createProject(String authorId) {
+		assert authorId != null;
 		SourceProject project = new SourceProject();
 	    project.setLastUpdated(new Date());
 		project.setModule("project.Sample");
+		project.setAuthorId(authorId);
 		CouchTx tx = sourceQueries.persist(project);
 		if (!tx.ok()) {
 			throw new IllegalStateException(tx.error());

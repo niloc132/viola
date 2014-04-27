@@ -35,7 +35,7 @@ public class SearchService {
 		for (int i = search.size() - 1; i >= 0; i--) {
 			for (int j = 0; j < i; j++) {
 				if (search.get(i)._id.equals(search.get(j)._id)) {
-					search.remove(i);
+					search.remove(i--);
 				}
 			}
 		}

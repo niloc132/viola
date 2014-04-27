@@ -32,6 +32,7 @@ public abstract class AbstractPlacesImpl implements PlaceFactory {
 		AutoBeanUtils.getAutoBean(place).setFrozen(true);
 
 		String url = innerRoute(place);
+		assert url != null : "Unsupported place type " + place.getClass();
 		assert verifyValid(url) : "Generated url is invalid";
 		return url;
 	}

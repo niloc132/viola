@@ -71,9 +71,6 @@ public class ViolaPlaces_Impl extends AbstractPlacesImpl implements ViolaPlaces 
 
 	@Override
 	protected String innerRoute(Place place) {
-		if (place == null) {
-			return null;
-		}
 		if (place instanceof SearchPlace) {
 			return "search/?q=" + UriUtils.encode(((SearchPlace) place).getQuery()) + "";
 		}
@@ -90,7 +87,6 @@ public class ViolaPlaces_Impl extends AbstractPlacesImpl implements ViolaPlaces 
 		if (place instanceof HomePlace) {
 			return "";
 		}
-		assert false : "Unsupported place type " + place.getClass();
 		return null;
 	}
 

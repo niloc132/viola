@@ -1,6 +1,7 @@
 package com.colinalworth.gwt.viola.web.server;
 
 import com.colinalworth.gwt.viola.web.server.SearchService.SearchQueries;
+import com.colinalworth.gwt.viola.web.server.oauth.OAuthCallbackVisitor;
 import com.colinalworth.gwt.viola.web.server.rpq.impl.RpqServerModuleBuilder;
 import com.colinalworth.gwt.viola.web.server.view.CreateProjectViewImpl;
 import com.colinalworth.gwt.viola.web.server.view.ExampleViewImpl;
@@ -40,6 +41,8 @@ public class ViolaWebModule extends RxfModule {
 		bind(BatchServiceLocator.class).to(InjectingBatchServiceLocator.class);
 
 		get("/static/.*").with(new ContentRootImpl("web", Pattern.compile("/static/(.*)")));
+
+		get("/oauth2callback.*").with(OAuthCallbackVisitor.class);
 
 		get("/.*").with(ViolaServerApp.class);
 

@@ -11,6 +11,23 @@ public interface PlaceManager extends HasValueChangeHandlers<Place> {
 
 	void back();
 
+	/**
+	 * Urls that exist in the app that are handled by various presenters, and the places that
+	 * hold the state of those various urls. These URLs are somewhat like regular expressions -
+	 * there are tokens that can be added to them that represent widcards.
+	 * <p/>
+	 * The order of methods matter - earlier methods will be tested first, which allows the last
+	 * method to match otherwise unmatched urls for 404s, or two methods to be ambiguous, and
+	 * only resolved by order.
+	 * <p/>
+	 * All urls are assumed to be absolute, and no url will have a leading '/'.
+	 * <p/>
+	 * Each url is divided into two sections, the path, which is ordered and split on '/', and the
+	 * query which is unordered but represented as key/value pairs joined by =, and split on '&'.
+	 * Parametrized url sections may contain a '/' only if they are directly followed by '?'.
+	 * <p/>
+	 * Url variables are contained in {}'s, and correspond to properties in the place itself.
+	 */
 	public interface PlaceFactory {
 		public @interface Route {
 			String value();

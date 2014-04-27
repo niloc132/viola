@@ -55,8 +55,18 @@ public class ProjectEditorViewImpl extends AbstractServerView<ProjectEditorPrese
 	public SafeHtml asSafeHtml() {
 		SafeHtmlBuilder sb = new SafeHtmlBuilder();
 		sb.appendHtmlConstant("<div>");
-				//TODO proj details
-				//TODO fileList with links
+		//TODO proj details
+
+		if (fileList != null) {
+			sb.appendHtmlConstant("<div>");
+			sb.appendHtmlConstant("<div>").appendEscaped("Project Files").appendHtmlConstant("</div>");
+			for (String file : fileList) {
+//				sb.appendHtmlConstant("<a href='/proj/").appendEscaped(file).appendHtmlConstant("'>")
+//						.appendEscaped(file.substring(file.lastIndexOf("/") + 1)).appendHtmlConstant("</a>");
+			}
+			sb.appendHtmlConstant("</div>");
+		}
+
 		if (codeEd != null) {
 			sb.append(codeEd.asSafeHtml());
 		}

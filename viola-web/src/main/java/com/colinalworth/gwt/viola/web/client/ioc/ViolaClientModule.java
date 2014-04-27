@@ -1,6 +1,7 @@
 package com.colinalworth.gwt.viola.web.client.ioc;
 
 import com.colinalworth.gwt.viola.web.client.impl.ViolaPlaces_Impl;
+import com.colinalworth.gwt.viola.web.client.ioc.Session.SessionProvider;
 import com.colinalworth.gwt.viola.web.client.mvp.ClientPlaceManager;
 import com.colinalworth.gwt.viola.web.client.view.CreateProjectViewImpl;
 import com.colinalworth.gwt.viola.web.client.view.ExampleViewImpl;
@@ -53,28 +54,32 @@ public class ViolaClientModule extends AbstractGinModule {
 		bind(HomeView.class).to(HomeViewImpl.class);
 
 		bind(JavaCodeEditorView.class).to(JavaCodeEditorViewImpl.class);
+
+		bind(String.class).annotatedWith(Session.class).toProvider(SessionProvider.class);
 	}
 
 
 	@Provides
-	SearchRequest provideSearchRequest(final ViolaRequestQueue queue) {
+	SearchRequest provideSearchRequest(final ViolaRequestQueue queue, @Session String sessionId) {
 		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 			@Override
 			public void execute() {
 				queue.fire();
 			}
 		});
+		queue.session().setSessionId(sessionId);
 		return queue.search();
 	}
 
 	@Provides
-	JobRequest provideJobRequest(final ViolaRequestQueue queue) {
+	JobRequest provideJobRequest(final ViolaRequestQueue queue, @Session String sessionId) {
 		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 			@Override
 			public void execute() {
 				queue.fire();
 			}
 		});
+		queue.session().setSessionId(sessionId);
 		return queue.job();
 	}
 

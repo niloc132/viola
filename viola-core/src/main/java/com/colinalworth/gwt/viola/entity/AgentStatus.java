@@ -28,6 +28,7 @@ public class AgentStatus extends CouchEntity {
 	private boolean shutdownRequested;
 	private State state;
 
+	private String serverVersion;
 	private String serverType;
 	private JsonElement serverData;
 
@@ -86,5 +87,13 @@ public class AgentStatus extends CouchEntity {
 
 	public void setServerData(JsonElement serverData) {
 		this.serverData = serverData;
+	}
+
+	public String getServerVersion() {
+		return serverVersion;
+	}
+
+	public void setServerVersion(String serverVersion) {
+		this.serverVersion = serverVersion;
 	}
 }

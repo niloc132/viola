@@ -3,6 +3,7 @@ package com.colinalworth.gwt.viola.web.server;
 import com.colinalworth.gwt.viola.entity.CompiledProject;
 import com.colinalworth.gwt.viola.entity.SourceProject;
 import com.colinalworth.gwt.viola.service.JobService;
+import com.colinalworth.gwt.viola.service.UserService;
 import com.colinalworth.gwt.viola.web.shared.dto.CompiledProjectStatus;
 import com.colinalworth.gwt.viola.web.shared.dto.Project;
 import com.colinalworth.gwt.viola.web.shared.dto.ProjectSearchResult;
@@ -18,6 +19,12 @@ import java.util.List;
 public class JobWebService {
 	@Inject
 	JobService jobService;
+
+	@Inject
+	SessionService sessionService;
+	@Inject
+	UserService userService;
+
 	public List<ProjectSearchResult> getMyJobs() {
 		return null;
 	}
@@ -29,19 +36,29 @@ public class JobWebService {
 	public Project attach(String projectId, String filename, String contents) {
 		//TODO limit to owner
 		SourceProject proj = jobService.find(projectId);
-		final CouchTx tx;
-		if (proj.getAttachments().containsKey(filename)) {
-			tx = jobService.updateSourceFile(proj, filename, contents);
-		} else {
-			tx = jobService.createSourceFile(proj, filename, contents);
+		if (proj.getAuthorId().equals(sessionService.getThreadLocalUserId("attach"))) {
+			final CouchTx tx;
+			if (proj.getAttachments().containsKey(filename)) {
+				tx = jobService.updateSourceFile(proj, filename, contents);
+			} else {
+				tx = jobService.createSourceFile(proj, filename, contents);
+			}
+			return getProject(tx.id());
 		}
-		return getProject(tx.id());
+		throw new IllegalStateException("Can't change files of project you don't own");
 	}
 
 	public Project delete(String projectId, String filename) {
 		//TODO limit to owner
-		CouchTx tx = jobService.deleteSourceFile(jobService.find(projectId), filename);
-		return getProject(tx.id());
+
+
+		SourceProject proj = jobService.find(projectId);
+		if (proj.getAuthorId().equals(sessionService.getThreadLocalUserId("delete"))) {
+			CouchTx tx = jobService.deleteSourceFile(proj, filename);
+			return getProject(tx.id());
+		}
+
+		throw new IllegalStateException("Can't delete a project you don't own");
 	}
 
 	public Project getProject(String id) {
@@ -62,22 +79,32 @@ public class JobWebService {
 	}
 
 	public Project createProject() {
-		//TODO set owner
-		return getProject(jobService.createProject().getId());
+		String owner = sessionService.getThreadLocalUserId("create");
+
+		SourceProject project = jobService.createProject(owner);
+
+		return getProject(project.getId());
 	}
 	public Project saveProject(Project project) {
-		//TODO limit to owner
 		SourceProject sourceProject = jobService.find(project._id);
-		sourceProject.setDescription(project.description);
-		sourceProject.setTitle(project.title);
+		if (sourceProject.getAuthorId().equals(sessionService.getThreadLocalUserId("save"))) {
+			sourceProject.setDescription(project.description);
+			sourceProject.setTitle(project.title);
 
-		jobService.saveProject(sourceProject);
+			jobService.saveProject(sourceProject);
 
-		return getProject(project._id);
+			return getProject(project._id);
+		}
+		throw new IllegalStateException("Can't save project user doesn't own");
 	}
 
 	public void build(String projectId) {
-		jobService.submitJob(jobService.find(projectId));
+		SourceProject project = jobService.find(projectId);
+		if (project.getAuthorId().equals(sessionService.getThreadLocalUserId("compile"))) {
+			jobService.submitJob(project);
+		} else {
+			throw new IllegalStateException("Can't build project user doesn't own");
+		}
 	}
 
 	public CompiledProjectStatus checkStatus(String projectId) {
