@@ -115,7 +115,7 @@ public class ViolaApp implements EntryPoint {
 
 	private void loginSequence() {
 		exportAuthSuccess();
-		Window.open("https://accounts.google.com/o/oauth2/auth?scope=openid&response_type=code&redirect_uri=http://viola.colinalworth.com/oauth2callback&client_id=888496828889-fjt0sjb686vkl3mesrs03tji682rinbg.apps.googleusercontent.com&hl=en&from_login=1&approval_prompt=force", "oauth", "");
+		Window.open("https://accounts.google.com/o/oauth2/auth?scope=openid&response_type=code&redirect_uri=http://viola.colinalworth.com/oauth2callback&client_id=888496828889-cjuie9aotun74v1p9tbrb568rchtjkc9.apps.googleusercontent.com&hl=en&from_login=1", "oauth", "");//&approval_prompt=force
 	}
 
 	private void setSessionId(String sessionId, String username) {

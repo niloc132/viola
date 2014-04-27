@@ -32,8 +32,8 @@ import java.util.concurrent.Executors;
 public class OAuthCallbackVisitor extends Impl implements PreRead {
 	private static final ExecutorService execs = Executors.newFixedThreadPool(2);
 
-	private String clientId = "888496828889-fjt0sjb686vkl3mesrs03tji682rinbg.apps.googleusercontent.com";
-	private String clientSecret = "2SYr22CtT9L1opmMVOzdViso";
+	private String clientId = "888496828889-cjuie9aotun74v1p9tbrb568rchtjkc9.apps.googleusercontent.com";
+	private String clientSecret = "SECRET";
 	private String accessTokenUrl = "https://accounts.google.com/o/oauth2/token";
 	private String issuer = "accounts.google.com";
 
@@ -99,7 +99,7 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 		assert sessionId != null;
 		//write back out a constant/template to say 'yep, loaded, here's what the app should use to get its credentials'
 		//TODO escape this stuff...
-		String str = "<html><body>Authentication successful, finishing login...<script>setTimeout(close, 3000); opener.authSuccess('"+sessionId+"', '"+userName+"')</script></html></body>";
+		String str = "<html><body>Authentication successful, finishing login...<script>setTimeout(close, 500); opener.authSuccess('"+sessionId+"', '"+userName+"')</script></html></body>";
 
 		ByteBuffer resp = new Rfc822HeaderState().$res()
 				.resCode(HttpStatus.$200)
