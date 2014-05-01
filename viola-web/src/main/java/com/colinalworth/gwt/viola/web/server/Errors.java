@@ -37,7 +37,7 @@ public final class Errors {
 			@Override
 			public void onWrite(SelectionKey key) throws Exception {
 				ByteBuffer resp = new Rfc822HeaderState().$res()
-						.resCode(code)
+						.status(code)
 						.headerString(HttpHeaders.Content$2dType, "text/html")
 						.headerString(HttpHeaders.Content$2dLength, String.valueOf(html.length()))
 						.as(ByteBuffer.class);

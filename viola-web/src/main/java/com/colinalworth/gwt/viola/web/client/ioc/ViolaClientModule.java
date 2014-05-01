@@ -67,7 +67,9 @@ public class ViolaClientModule extends AbstractGinModule {
 				queue.fire();
 			}
 		});
-		queue.session().setSessionId(sessionId);
+		if (sessionId != null) {
+			queue.session().setSessionId(sessionId);
+		}
 		return queue.search();
 	}
 
@@ -79,7 +81,9 @@ public class ViolaClientModule extends AbstractGinModule {
 				queue.fire();
 			}
 		});
-		queue.session().setSessionId(sessionId);
+		if (sessionId != null) {
+			queue.session().setSessionId(sessionId);
+		}
 		return queue.job();
 	}
 

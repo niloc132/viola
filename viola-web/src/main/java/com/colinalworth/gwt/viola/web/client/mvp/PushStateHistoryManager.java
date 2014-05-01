@@ -31,12 +31,12 @@ public class PushStateHistoryManager {
 		placeManager.addValueChangeHandler(new ValueChangeHandler<Place>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Place> event) {
-				if (!changingValue) {
+//				if (!changingValue) {
 					String url = factory.route(event.getValue());
 					if (url != null) {
-						History.newItem(url, false);
+						History.newItem(url, !changingValue);
 					}
-				}
+//				}
 			}
 		});
 

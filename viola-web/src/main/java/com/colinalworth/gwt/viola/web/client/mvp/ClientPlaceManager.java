@@ -78,6 +78,7 @@ public class ClientPlaceManager implements PlaceManager {
 				//dont fire an event, just track the current place and re-call go()
 				((Presenter) active).go(this.new ViewWrapper(), place);
 				current = place;
+				ValueChangeEvent.fire(this, place);
 				return true;
 			}
 
