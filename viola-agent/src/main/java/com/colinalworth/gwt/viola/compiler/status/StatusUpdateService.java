@@ -61,7 +61,18 @@ public class StatusUpdateService {
 
 	private synchronized void update(State state) {
 		assert me != null : "Can't update if not yet registered";
-		me = queries.find(me.getId());
+		AgentStatus agentStatus = queries.find(me.getId());
+		if (agentStatus == null) {
+			//can't get a result from db, either we've lost network or it is too busy
+			//either way we'll be shut down remotely if necessary, so stay up and
+			//hope the connection is restored
+
+			//missing this update will result in a hole in the logs or the wrong state,
+			//but the distance between updates is close enough that we shouldn't lose
+			//much
+			return;
+		}
+		me = agentStatus;
 		me.setState(state);
 		me.setIdleTimeMillis(getTimeIdle());
 		me.setLastHeardFrom(new Date());
@@ -78,7 +89,14 @@ public class StatusUpdateService {
 
 	public synchronized boolean shouldShutdown() {
 		assert me != null : "Can't check for shutdown if not yet registered";
-		me = queries.find(me.getId());
+		AgentStatus agentStatus = queries.find(me.getId());
+		if (agentStatus == null) {
+			//can't get a result from db, either we've lost network or it is too busy
+			//either way we'll be shut down remotely if necessary, so stay up and
+			//hope the connection is restored
+			return false;
+		}
+		me = agentStatus;
 		return me.isShutdownRequested();
 	}
 

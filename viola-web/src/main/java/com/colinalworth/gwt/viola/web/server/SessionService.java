@@ -25,6 +25,10 @@ public class SessionService {
 	}
 
 	public String getThreadLocalUserId(String action) {
-		return userService.updateSession(getThreadLocalSessionId(), action).getId();
+		String id = getThreadLocalSessionId();
+		if (id == null) {
+			return null;
+		}
+		return userService.updateSession(id, action).getId();
 	}
 }

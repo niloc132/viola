@@ -21,7 +21,10 @@ import com.colinalworth.gwt.viola.web.shared.mvp.SearchPresenter.SearchView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaceMapper;
 import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaceMapper.PresenterFactory;
 import com.colinalworth.gwt.viola.web.shared.request.ViolaRequestQueue;
+import com.colinalworth.rpq.server.BatchInvoker;
 import com.colinalworth.rpq.server.BatchServiceLocator;
+import com.colinalworth.rpq.shared.impl.BatchRequest;
+import com.colinalworth.rpq.shared.impl.BatchResponse;
 import com.google.inject.Provides;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
@@ -29,6 +32,7 @@ import rxf.server.RequestQueueVisitor;
 import rxf.server.guice.CouchModuleBuilder;
 import rxf.server.guice.RxfModule;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class ViolaWebModule extends RxfModule {
@@ -69,8 +73,17 @@ public class ViolaWebModule extends RxfModule {
 	}
 
 	@Provides
-	RequestQueueVisitor provideRequestQueueVisitor(BatchServiceLocator locator) {
-		return new RequestQueueVisitor(locator);
+	RequestQueueVisitor provideRequestQueueVisitor(BatchServiceLocator locator, final SessionService sessionService) {
+		return new RequestQueueVisitor(new BatchInvoker(locator) {
+			@Override
+			public List<BatchResponse> batchedRequest(List<BatchRequest> requests) {
+				try {
+					return super.batchedRequest(requests);
+				} finally {
+     				sessionService.setSessionId(null);
+				}
+			}
+		});
 	}
 
 }

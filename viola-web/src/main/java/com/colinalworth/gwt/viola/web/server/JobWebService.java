@@ -80,6 +80,9 @@ public class JobWebService {
 
 	public Project createProject() {
 		String owner = sessionService.getThreadLocalUserId("create");
+		if (owner == null) {
+			throw new IllegalStateException("Can't create a project without logging in");
+		}
 
 		SourceProject project = jobService.createProject(owner);
 

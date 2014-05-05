@@ -20,6 +20,7 @@ public interface JobRequest {
 
 	void getProject(String id, AsyncCallback<Project> callback);
 
+	@Throws(IllegalStateException.class)
 	void createProject(AsyncCallback<Project> callback);
 	@Throws(IllegalStateException.class)
 	void saveProject(Project project, AsyncCallback<Project> callback);
