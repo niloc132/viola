@@ -92,48 +92,42 @@ public class Governer {
 		while (true) {
 			//look for agents marked as shutdown or stuck, and power them off
 			List<AgentStatus> killme = service.getAgentsInState(State.STOPPED, State.STUCK);
-			if (killme != null) {
-				for (AgentStatus agent : killme) {
-					System.out.println("Stopping " + agent.getServerData() + " in state " + agent.getState());
-					poweroff(agentManagement, agent);
-				}
+			for (AgentStatus agent : killme) {
+				System.out.println("Stopping " + agent.getServerData() + " in state " + agent.getState());
+				poweroff(agentManagement, agent);
 			}
 
 			// start/stop agents as necessary
 			List<AgentStatus> maxIdleTimeAgents = service.getAgentsIdleMoreThan(maxIdleTime * 1000);
 			List<AgentStatus> idleAgents = service.getAgentsInState(State.IDLE);
-			if (maxIdleTimeAgents != null && idleAgents != null) {
-				if (maxIdleTimeAgents.size() > maxIdleAgents) {
-					for (int index = 0; index < maxIdleTimeAgents.size() - maxIdleAgents; index++) {
-						AgentStatus agent = maxIdleTimeAgents.get(index);
-						System.out.println("Requesting shutdown for " + agent.getServerData());
-						service.requestShutdown(agent);
-					}
-				} else if (idleAgents.size() < minIdleAgents) {
-					// start servers!
-					//TODO do something with these to make sure they start up correctly. Or is it enough to look for starting below?
-					int agentsNeeded = minIdleAgents - idleAgents.size();
-					System.out.println("Running low on agents, starting " + agentsNeeded + " more");
-					List<AgentStatus> started = startServers(agentManagement, agentsNeeded);
+			if (maxIdleTimeAgents.size() > maxIdleAgents) {
+				for (int index = 0; index < maxIdleTimeAgents.size() - maxIdleAgents; index++) {
+					AgentStatus agent = maxIdleTimeAgents.get(index);
+					System.out.println("Requesting shutdown for " + agent.getServerData());
+					service.requestShutdown(agent);
 				}
+			} else if (idleAgents.size() < minIdleAgents) {
+				// start servers!
+				//TODO do something with these to make sure they start up correctly. Or is it enough to look for starting below?
+				int agentsNeeded = minIdleAgents - idleAgents.size();
+				System.out.println("Running low on agents, starting " + agentsNeeded + " more");
+				List<AgentStatus> started = startServers(agentManagement, agentsNeeded);
 			}
 
 			//look for stuck/disconnected agents
 			List<AgentStatus> runningAgents = service.getAgentsInState(State.IDLE, State.WORKING, State.STARTING, State.SHUTTING_DOWN);
-			if (runningAgents != null) {
-				for (AgentStatus agent : runningAgents) {
-					if (lastHeardFrom.containsKey(agent.getId()) &&
-							lastHeardFrom.get(agent.getId()).equals(agent.getLastHeardFrom())) {
-						service.markStuck(agent);
-						System.out.println("Marking " + agent.getServerData() + " as stuck");
-						//TODO look for any non-finished jobs and mark them as stuck as well
+			for (AgentStatus agent : runningAgents) {
+				if (lastHeardFrom.containsKey(agent.getId()) &&
+						lastHeardFrom.get(agent.getId()).equals(agent.getLastHeardFrom())) {
+					service.markStuck(agent);
+					System.out.println("Marking " + agent.getServerData() + " as stuck");
+					//TODO look for any non-finished jobs and mark them as stuck as well
+				} else {
+					//if lastHeardFrom is null, then it stuck while starting, leave it running for manual inspection
+					if (agent.getLastHeardFrom() != null) {
+						lastHeardFrom.put(agent.getId(), agent.getLastHeardFrom());
 					} else {
-						//if lastHeardFrom is null, then it stuck while starting, leave it running for manual inspection
-						if (agent.getLastHeardFrom() != null) {
-							lastHeardFrom.put(agent.getId(), agent.getLastHeardFrom());
-						} else {
-							System.out.println("Possibly stuck while starting: " + agent.getServerData());
-						}
+						System.out.println("Possibly stuck while starting: " + agent.getServerData());
 					}
 				}
 			}
