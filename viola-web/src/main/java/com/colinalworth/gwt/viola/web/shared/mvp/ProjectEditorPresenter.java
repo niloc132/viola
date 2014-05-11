@@ -7,21 +7,23 @@ import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectE
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorView;
 import com.colinalworth.gwt.viola.web.shared.request.JobRequest;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.editor.client.Editor;
+import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import java.util.List;
-
 public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorView, ProjectEditorPlace> {
 
-	public interface ProjectEditorView extends View<ProjectEditorPresenter> {
+
+	public interface ProjectEditorView extends View<ProjectEditorPresenter>, Editor<Project> {
 
 		AcceptsView getCodeEditorSlot();
 		AcceptsView getRunningExampleSlot();
 
-		void setFileList(List<String> fileList);
+		SimpleBeanEditorDriver<Project, ?> getDriver();
+
 		void setActiveFile(String activeFile);
 
 		void showProgress(CompiledProjectStatus status);
@@ -44,14 +46,17 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 	@Inject
 	ExamplePresenter examplePresenter;
 
+	private SimpleBeanEditorDriver<Project, ?> driver;
 	private Object editor;
 
 	private Project current;
 
 	@Override
 	public void go(AcceptsView parent, ProjectEditorPlace place) {
+		driver = getView().getDriver();
+
 		super.go(parent, place);
-		if (current != null && place.getId().equals(current._id)) {
+		if (current != null && place.getId().equals(current.getId())) {
 			//TODO reuse presenters
 			updateWithProject(current);
 			return;
@@ -71,7 +76,7 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 
 	protected void updateWithProject(Project result) {
 		current = result;
-		getView().setFileList(result.files);
+		driver.edit(result);
 		if (getCurrentPlace().getActiveFile() != null && !"".equals(getCurrentPlace().getActiveFile())) {
 			getView().setActiveFile(getCurrentPlace().getActiveFile());
 			javaEditor.go(getView().getCodeEditorSlot(), getCurrentPlace());
@@ -99,6 +104,23 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 	}
 
 	public void save() {
+		Project p = driver.flush();
+		//save the project with its current rev
+		jobRequest.get().saveProject(p, new AsyncCallback<Project>() {
+			@Override
+			public void onFailure(Throwable caught) {
+				Window.alert(caught.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Project result) {
+				updateWithProject(result);
+			}
+		});
+
+		//then save the java file (attach doesn't care about rev incr)
+		//TODO don't make the client care about revs, because that is stupid, and confusing
+
 		if (editor != null) {//TODO track editor better
 			javaEditor.save();
 		}

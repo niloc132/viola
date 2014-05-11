@@ -64,17 +64,14 @@ public class JobWebService {
 	public Project getProject(String id) {
 		SourceProject sourceProject = jobService.find(id);
 		Project p = new Project();
-		p._id = id;
-		p._rev = sourceProject.getRev();
-		p.description = sourceProject.getDescription();
-		p.title = sourceProject.getTitle();
+		p.setId(id);
+		p.setRev(sourceProject.getRev());
+		p.setDescription(sourceProject.getDescription());
+		p.setTitle(sourceProject.getTitle());
 		List<CompiledProject> compiledOutput = jobService.getCompiledOuput(sourceProject);
-		p.latestCompiledId = compiledOutput.isEmpty() ? null : compiledOutput.get(0).getId();
-		p.files = new ArrayList<>();
-		for (String path : sourceProject.getAttachments().keySet()) {
-			p.files.add(path);
-		}
-		Collections.sort(p.files);
+		p.setLatestCompiledId(compiledOutput.isEmpty() ? null : compiledOutput.get(0).getId());
+		p.setFiles(new ArrayList<>(sourceProject.getAttachments().keySet()));
+		Collections.sort(p.getFiles());
 		return p;
 	}
 
@@ -89,14 +86,14 @@ public class JobWebService {
 		return getProject(project.getId());
 	}
 	public Project saveProject(Project project) {
-		SourceProject sourceProject = jobService.find(project._id);
+		SourceProject sourceProject = jobService.find(project.getId());
 		if (sourceProject.getAuthorId().equals(sessionService.getThreadLocalUserId("save"))) {
-			sourceProject.setDescription(project.description);
-			sourceProject.setTitle(project.title);
+			sourceProject.setDescription(project.getDescription());
+			sourceProject.setTitle(project.getTitle());
 
 			jobService.saveProject(sourceProject);
 
-			return getProject(project._id);
+			return getProject(project.getId());
 		}
 		throw new IllegalStateException("Can't save project user doesn't own");
 	}

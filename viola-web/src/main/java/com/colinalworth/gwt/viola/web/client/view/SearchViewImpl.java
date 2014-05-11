@@ -45,7 +45,7 @@ public class SearchViewImpl extends AbstractClientView<SearchPresenter> implemen
 		listview.setCell(new AbstractCell<ProjectSearchResult>("click") {
 			@Override
 			public void render(Context context, ProjectSearchResult value, SafeHtmlBuilder sb) {
-				sb.appendEscaped(value.title);//todo template me
+				sb.appendEscaped(value.getTitle());//todo template me
 			}
 
 			@Override

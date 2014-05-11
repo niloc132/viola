@@ -2,11 +2,16 @@ package com.colinalworth.gwt.viola.web.client.view;
 
 import com.colinalworth.gwt.viola.web.client.mvp.SimpleAcceptsView;
 import com.colinalworth.gwt.viola.web.shared.dto.CompiledProjectStatus;
+import com.colinalworth.gwt.viola.web.shared.dto.Project;
 import com.colinalworth.gwt.viola.web.shared.mvp.AbstractPresenterImpl.AbstractClientView;
 import com.colinalworth.gwt.viola.web.shared.mvp.AcceptsView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorView;
 import com.google.gwt.cell.client.AbstractCell;
+import com.google.gwt.core.shared.GWT;
+import com.google.gwt.editor.client.EditorDelegate;
+import com.google.gwt.editor.client.SimpleBeanEditorDriver;
+import com.google.gwt.editor.client.ValueAwareEditor;
 import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
 import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -38,9 +43,15 @@ import de.barop.gwt.client.ui.HyperlinkPushState;
 import java.util.Arrays;
 import java.util.List;
 
-public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPresenter> implements ProjectEditorView {
+public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPresenter> implements ProjectEditorView, ValueAwareEditor<Project> {
+
+	TextField title = new TextField();
+	TextArea description = new TextArea();
 
 
+	public interface Driver extends SimpleBeanEditorDriver<Project, ProjectEditorViewImpl> {}
+
+	private Driver driver = GWT.create(Driver.class);
 	private BorderLayoutContainer blc;
 	private final TreeStore<String> paths = new TreeStore<>(new ModelKeyProvider<String>() {
 		@Override
@@ -64,8 +75,8 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 		VerticalLayoutContainer container = new VerticalLayoutContainer();
 		projectDetailsPanel.setHeadingText("Project Details");
 		projectDetailsPanel.setWidget(container);
-		container.add(new FieldLabel(new TextField(), "Name"), new VerticalLayoutData(1, -1, new Margins(0, 10, 0, 10)));
-		container.add(new FieldLabel(new TextArea(), "Description"), new VerticalLayoutData(1, -1, new Margins(0, 10, 0, 10)));
+		container.add(new FieldLabel(title, "Name"), new VerticalLayoutData(1, -1, new Margins(0, 10, 0, 10)));
+		container.add(new FieldLabel(description, "Description"), new VerticalLayoutData(1, -1, new Margins(0, 10, 0, 10)));
 
 		ContentPanel filePanel = new ContentPanel();
 		filePanel.setHeadingText("Project Files");
@@ -148,6 +159,8 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 		blc.collapse(LayoutRegion.EAST);
 
 		initWidget(blc);
+
+		driver.initialize(this);
 	}
 
 	@Override
@@ -161,9 +174,29 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 	}
 
 	@Override
-	public void setFileList(List<String> fileList) {
+	public SimpleBeanEditorDriver<Project, ?> getDriver() {
+		return driver;
+	}
+
+	@Override
+	public void setDelegate(EditorDelegate<Project> delegate) {
+		//no-op
+	}
+
+	@Override
+	public void flush() {
+		//no-op
+	}
+
+	@Override
+	public void onPropertyChange(String... paths) {
+		//no-op
+	}
+
+	@Override
+	public void setValue(Project value) {
 		paths.clear();
-		for (String file : fileList) {
+		for (String file : value.getFiles()) {
 			addPath(file);
 		}
 		files.expandAll();

@@ -4,6 +4,14 @@ import java.util.List;
 
 public class Project extends ProjectSearchResult {
 
-	public List<String> files;
+	private List<String> files;
 
+
+	public List<String> getFiles() {
+		return files;
+	}
+
+	public void setFiles(List<String> files) {
+		this.files = files;
+	}
 }

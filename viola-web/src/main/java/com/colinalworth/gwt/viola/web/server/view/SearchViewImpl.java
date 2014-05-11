@@ -37,9 +37,9 @@ public class SearchViewImpl extends AbstractServerView<SearchPresenter> implemen
 			for (ProjectSearchResult result : results) {
 				sb
 						.appendHtmlConstant("<div><a href='")
-						.appendEscaped("/example/" + result.latestCompiledId + "/")
+						.appendEscaped("/example/" + result.getLatestCompiledId() + "/")
 						.appendHtmlConstant("'>")
-						.appendEscaped(result.title)
+						.appendEscaped(result.getTitle())
 						.appendHtmlConstant("</a></div>");
 			}
 		}

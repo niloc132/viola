@@ -23,8 +23,6 @@ import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaceMapper.PresenterFacto
 import com.colinalworth.gwt.viola.web.shared.request.JobRequest;
 import com.colinalworth.gwt.viola.web.shared.request.SearchRequest;
 import com.colinalworth.gwt.viola.web.shared.request.ViolaRequestQueue;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.inject.Provides;
@@ -56,34 +54,16 @@ public class ViolaClientModule extends AbstractGinModule {
 		bind(JavaCodeEditorView.class).to(JavaCodeEditorViewImpl.class);
 
 		bind(String.class).annotatedWith(Session.class).toProvider(SessionProvider.class);
+
+		bind(ViolaRequestQueue.class).toProvider(QueueProvider.class);
 	}
 
-
 	@Provides
-	SearchRequest provideSearchRequest(final ViolaRequestQueue queue, @Session String sessionId) {
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-			@Override
-			public void execute() {
-				queue.fire();
-			}
-		});
-		if (sessionId != null) {
-			queue.session().setSessionId(sessionId);
-		}
+	SearchRequest provideSearchRequest(ViolaRequestQueue queue) {
 		return queue.search();
 	}
-
 	@Provides
-	JobRequest provideJobRequest(final ViolaRequestQueue queue, @Session String sessionId) {
-		Scheduler.get().scheduleDeferred(new ScheduledCommand() {
-			@Override
-			public void execute() {
-				queue.fire();
-			}
-		});
-		if (sessionId != null) {
-			queue.session().setSessionId(sessionId);
-		}
+	JobRequest provideJobRequest(ViolaRequestQueue queue) {
 		return queue.job();
 	}
 

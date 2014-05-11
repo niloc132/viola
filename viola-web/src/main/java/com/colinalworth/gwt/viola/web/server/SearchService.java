@@ -34,14 +34,14 @@ public class SearchService {
 		//wow, not sure this could be worse if i tried
 		for (int i = search.size() - 1; i >= 0; i--) {
 			for (int j = 0; j < i; j++) {
-				if (search.get(i)._id.equals(search.get(j)._id)) {
+				if (search.get(i).getId().equals(search.get(j).getId())) {
 					search.remove(i--);
 				}
 			}
 		}
 		for (int i = 0; i < search.size(); i++) {
-			List<CompiledProject> compiled = jobService.getCompiledOuput(jobService.find(search.get(i)._id));
-			search.get(i).latestCompiledId = compiled == null || compiled.isEmpty() ? null : compiled.get(0).getId();
+			List<CompiledProject> compiled = jobService.getCompiledOuput(jobService.find(search.get(i).getId()));
+			search.get(i).setLatestCompiledId(compiled == null || compiled.isEmpty() ? null : compiled.get(0).getId());
 		}
 		return search;
 	}

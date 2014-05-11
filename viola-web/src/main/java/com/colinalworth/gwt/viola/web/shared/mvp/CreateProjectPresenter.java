@@ -15,10 +15,11 @@ public class CreateProjectPresenter extends AbstractPresenterImpl<CreateProjectV
 
 	}
 	public interface CreateProjectPlace extends Place {
-
+		//no parameters
 	}
 	@Inject
 	Provider<JobRequest> jobRequest;
+
 	@Inject
 	PlaceManager placeManager;
 
@@ -30,17 +31,18 @@ public class CreateProjectPresenter extends AbstractPresenterImpl<CreateProjectV
 			}
 			@Override
 			public void onSuccess(Project result) {
-				result.title = title;
-				result.description = description;
+				result.setTitle(title);
+				result.setDescription(description);
 				jobRequest.get().saveProject(result, new AsyncCallback<Project>() {
 					@Override
 					public void onFailure(Throwable caught) {
+						//TODO replace with general error handler that server can supply per-request
 						Window.alert(caught.getMessage());
 					}
 					@Override
 					public void onSuccess(Project result) {
 						ProjectEditorPlace next = placeManager.create(ProjectEditorPlace.class);
-						next.setId(result._id);
+						next.setId(result.getId());
 
 						placeManager.submit(next);
 					}
