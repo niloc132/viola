@@ -67,26 +67,38 @@ public class ViolaPlaces_ServerImpl extends AbstractPlacesImpl implements ViolaP
 
 	@Override
 	protected String innerRoute(Place place) {
-		if (place == null) {
-			return null;
-		}
 		if (place instanceof SearchPlace) {
-			return "search/?q=" + UriUtils.encode(((SearchPlace) place).getQuery()) + "";
+			String query = ((SearchPlace) place).getQuery();
+			if (query == null) {
+				throw new NullPointerException("SearchPlace.getQuery()");
+			}
+			return "search/?q=" + UriUtils.encode(query) + "";
 		}
 		if (place instanceof ExamplePlace) {
-			return "example/" + UriUtils.encode(((ExamplePlace) place).getId()) + "/";
+			String id = ((ExamplePlace) place).getId();
+			if (id == null) {
+				throw new NullPointerException("ExamplePlace.getId()");
+			}
+			return "example/" + UriUtils.encode(id) + "/";
 		}
 		if (place instanceof CreateProjectPlace) {
 			return "proj/new";
 		}
 		if (place instanceof ProjectEditorPlace) {
 			ProjectEditorPlace projectEditorPlace = (ProjectEditorPlace) place;
-			return "proj/" + UriUtils.encode(projectEditorPlace.getId()) + "/" + (projectEditorPlace.getActiveFile() == null ? "" : UriUtils.encode(projectEditorPlace.getActiveFile()));
+			String id = projectEditorPlace.getId();
+			if (id == null) {
+				throw new NullPointerException("ProjectEditorPlace.getId()");
+			}
+			String activeFile = projectEditorPlace.getActiveFile();
+			if (activeFile == null) {//optional
+				activeFile = "";
+			}
+			return "proj/" + UriUtils.encode(id) + "/" + UriUtils.encode(activeFile);
 		}
 		if (place instanceof HomePlace) {
 			return "";
 		}
-		assert false : "Unsupported place type " + place.getClass();
 		return null;
 	}
 
