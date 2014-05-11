@@ -9,7 +9,7 @@
 	<artifactId>viola-web</artifactId>
 	<properties>
 		<gwt.plugin.version>2.6.0</gwt.plugin.version>
-		<gxt.version>3.1.0-beta</gxt.version>
+		<gxt.version>3.1.0</gxt.version>
 		<gin.version>2.1.2</gin.version>
 	</properties>
 	<dependencies>
@@ -68,7 +68,6 @@
 			<groupId>com.colinalworth</groupId>
 			<artifactId>rpq</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-
 		</dependency>
 
 

@@ -1,23 +1,23 @@
 <module rename-to="viola">
 	<inherits name="com.google.gwt.user.User" />
-  <inherits name="com.sencha.gxt.ui.GXT" />
-<!--
-  <inherits name="com.sencha.gxt.theme.neptune.Theme" />
--->
+	<inherits name="com.sencha.gxt.ui.GXT" />
 
-  <inherits name="com.google.gwt.inject.Inject"/>
-  <inherits name="com.colinalworth.rpq.RPQ"/>
-  <inherits name="de.barop.gwt.PushState" />
-  <set-property name="gwt.logging.popupHandler" value="DISABLED" />
+	<inherits name="com.sencha.gxt.theme.neptune.Theme" />
 
 
-    <source path="client" />
-  <source path="shared" />
+	<inherits name="com.google.gwt.inject.Inject"/>
+	<inherits name="com.colinalworth.rpq.RPQ"/>
+	<inherits name="de.barop.gwt.PushState" />
+	<set-property name="gwt.logging.popupHandler" value="DISABLED" />
 
-  <public path="public" />
 
-  <entry-point class="com.colinalworth.gwt.viola.web.client.ViolaApp" />
-  <collapse-all-properties />
-  <add-linker name="xsiframe"/>
+	<source path="client" />
+	<source path="shared" />
+
+	<public path="public" />
+
+	<entry-point class="com.colinalworth.gwt.viola.web.client.ViolaApp" />
+	<collapse-all-properties />
+	<add-linker name="xsiframe"/>
 
 </module>
