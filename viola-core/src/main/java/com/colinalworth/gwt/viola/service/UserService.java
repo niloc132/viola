@@ -45,6 +45,14 @@ public class UserService {
 		return userQueries.find(tx.id());
 	}
 
+	public User findUserWithId(String userId) {
+		return userQueries.find(userId);
+	}
+
+	public void updateUser(User user) {
+		userQueries.persist(user);
+	}
+
 	public String createSession(User user) {
 		Session s = new Session();
 		s.setLastAction("login");
@@ -68,12 +76,12 @@ public class UserService {
 		//TODO
 	}
 
-//	public User getUserWithSession(String sessionId) {
-//		Session session = sessionQueries.find(sessionId);
-//		if (session == null) {
-//			return null;
-//		}
-//
-//		return userQueries.find(session.getUserId());
-//	}
+	public User getUserWithSession(String sessionId) {
+		Session session = sessionQueries.find(sessionId);
+		if (session == null) {
+			return null;
+		}
+
+		return userQueries.find(session.getUserId());
+	}
 }

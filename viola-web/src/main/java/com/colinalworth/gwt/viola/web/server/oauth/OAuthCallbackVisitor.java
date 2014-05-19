@@ -43,7 +43,9 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 	UserService userService;
 
 	private String sessionId;
-	private String userName;
+	private String userid;
+	private String displayName;
+	private boolean newAccount = false;
 
 	@Override
 	public void onRead(SelectionKey key) throws Exception {
@@ -99,10 +101,10 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 		assert sessionId != null;
 		//write back out a constant/template to say 'yep, loaded, here's what the app should use to get its credentials'
 		//TODO escape this stuff...
-		String str = "<html><body>Authentication successful, finishing login...<script>setTimeout(close, 500); opener.authSuccess('"+sessionId+"', '"+userName+"')</script></html></body>";
+		String str = "<html><body>Authentication successful, finishing login...<script>setTimeout(close, 500); opener.authSuccess('"+sessionId+"', '"+ userid +"', '" + displayName + "', "+newAccount+")</script></html></body>";
 
 		ByteBuffer resp = new Rfc822HeaderState().$res()
-				.resCode(HttpStatus.$200)
+				.status(HttpStatus.$200)
 				.headerString(HttpHeaders.Content$2dType, "text/html")
 				.headerString(HttpHeaders.Content$2dLength, String.valueOf(str.length()))
 				.as(ByteBuffer.class);
@@ -221,6 +223,7 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 					Errors.$500(key);
 					return;
 				}
+				newAccount = true;
 			}
 			//once user has been created, create session
 			String sessionId = userService.createSession(user);
@@ -232,7 +235,8 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 
 			//one session created, respond back with sessionid
 			OAuthCallbackVisitor.this.sessionId = sessionId;
-			OAuthCallbackVisitor.this.userName = user.getDisplayName();
+			OAuthCallbackVisitor.this.userid = user.getId();
+			OAuthCallbackVisitor.this.displayName = user.getDisplayName();
 			key.interestOps(SelectionKey.OP_WRITE).attach(OAuthCallbackVisitor.this);
 		}
 	}

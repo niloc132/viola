@@ -5,7 +5,7 @@ import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 
 public interface ProjectProperties extends PropertyAccess<Project> {
-	@Path("_id")
+	@Path("id")
 	ModelKeyProvider<ProjectSearchResult> key();
 
 

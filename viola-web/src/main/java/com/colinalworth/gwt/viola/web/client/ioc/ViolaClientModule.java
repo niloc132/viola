@@ -2,11 +2,14 @@ package com.colinalworth.gwt.viola.web.client.ioc;
 
 import com.colinalworth.gwt.viola.web.client.impl.ViolaPlaces_Impl;
 import com.colinalworth.gwt.viola.web.client.ioc.Session.SessionProvider;
+import com.colinalworth.gwt.viola.web.client.ioc.UserId.UserIdProvider;
 import com.colinalworth.gwt.viola.web.client.mvp.ClientPlaceManager;
 import com.colinalworth.gwt.viola.web.client.view.CreateProjectViewImpl;
 import com.colinalworth.gwt.viola.web.client.view.ExampleViewImpl;
 import com.colinalworth.gwt.viola.web.client.view.HomeViewImpl;
 import com.colinalworth.gwt.viola.web.client.view.JavaCodeEditorViewImpl;
+import com.colinalworth.gwt.viola.web.client.view.ProfileEditorViewImpl;
+import com.colinalworth.gwt.viola.web.client.view.ProfileViewImpl;
 import com.colinalworth.gwt.viola.web.client.view.ProjectEditorViewImpl;
 import com.colinalworth.gwt.viola.web.client.view.SearchViewImpl;
 import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreateProjectView;
@@ -16,11 +19,14 @@ import com.colinalworth.gwt.viola.web.shared.mvp.JavaCodeEditorPresenter.JavaCod
 import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager;
 import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceBasedPresenterFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceFactory;
+import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorView;
+import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfileView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorView;
 import com.colinalworth.gwt.viola.web.shared.mvp.SearchPresenter.SearchView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaceMapper;
 import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaceMapper.PresenterFactory;
 import com.colinalworth.gwt.viola.web.shared.request.JobRequest;
+import com.colinalworth.gwt.viola.web.shared.request.ProfileRequest;
 import com.colinalworth.gwt.viola.web.shared.request.SearchRequest;
 import com.colinalworth.gwt.viola.web.shared.request.ViolaRequestQueue;
 import com.google.gwt.inject.client.AbstractGinModule;
@@ -51,9 +57,13 @@ public class ViolaClientModule extends AbstractGinModule {
 		bind(ProjectEditorView.class).to(ProjectEditorViewImpl.class);
 		bind(HomeView.class).to(HomeViewImpl.class);
 
+		bind(ProfileView.class).to(ProfileViewImpl.class);
+		bind(ProfileEditorView.class).to(ProfileEditorViewImpl.class);
+
 		bind(JavaCodeEditorView.class).to(JavaCodeEditorViewImpl.class);
 
 		bind(String.class).annotatedWith(Session.class).toProvider(SessionProvider.class);
+		bind(String.class).annotatedWith(UserId.class).toProvider(UserIdProvider.class);
 
 		bind(ViolaRequestQueue.class).toProvider(QueueProvider.class);
 	}
@@ -65,6 +75,10 @@ public class ViolaClientModule extends AbstractGinModule {
 	@Provides
 	JobRequest provideJobRequest(ViolaRequestQueue queue) {
 		return queue.job();
+	}
+	@Provides
+	ProfileRequest provideProfileRequest(ViolaRequestQueue queue) {
+		return queue.profile();
 	}
 
 }

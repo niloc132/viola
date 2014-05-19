@@ -1,19 +1,29 @@
 package com.colinalworth.gwt.viola.entity;
 
 import java.util.EnumSet;
+import java.util.List;
 
 public class User extends CouchEntity {
 	public static enum Permissions {
 		MONITOR_AGENT, STOP_AGENT
 	}
+	public static class Identity {
+		private String data;
+		private String server;
+	}
 
 	private String username;
 
+	private String displayName;
+
+	private String description;
+	private String organization;
+
 	//consider a list here instead
+	private List<Identity> identities;
 	private String identityServer;
 	private String identityData;
 
-	private String displayName;
 
 	private EnumSet<Permissions> permissions = EnumSet.noneOf(Permissions.class);
 
@@ -47,5 +57,21 @@ public class User extends CouchEntity {
 
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getOrganization() {
+		return organization;
+	}
+
+	public void setOrganization(String organization) {
+		this.organization = organization;
 	}
 }

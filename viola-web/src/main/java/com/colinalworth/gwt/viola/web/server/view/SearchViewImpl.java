@@ -30,7 +30,8 @@ public class SearchViewImpl extends AbstractServerView<SearchPresenter> implemen
 	@Override
 	public SafeHtml asSafeHtml() {
 		SafeHtmlBuilder sb = new SafeHtmlBuilder()
-				.appendHtmlConstant("<input value='").appendEscaped(query).appendHtmlConstant("' />")
+				.appendHtmlConstant("<form method='get' action=''>")
+				.appendHtmlConstant("<input name='q' value='").appendEscaped(query).appendHtmlConstant("' />")
 				.appendHtmlConstant("<div>");
 
 		if (results != null) {
@@ -44,6 +45,6 @@ public class SearchViewImpl extends AbstractServerView<SearchPresenter> implemen
 			}
 		}
 
-		return sb.appendHtmlConstant("</div>").toSafeHtml();
+		return sb.appendHtmlConstant("</div></form>").toSafeHtml();
 	}
 }

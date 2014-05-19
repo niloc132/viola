@@ -5,6 +5,8 @@ import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreatePr
 import com.colinalworth.gwt.viola.web.shared.mvp.ExamplePresenter.ExamplePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.HomePresenter.HomePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.Place;
+import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorPlace;
+import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfilePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.SearchPresenter.SearchPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaces;
@@ -17,11 +19,14 @@ import com.google.web.bindery.autobean.vm.AutoBeanFactorySource;
 
 public class ViolaPlaces_ServerImpl extends AbstractPlacesImpl implements ViolaPlaces {
 
+
 	interface ABF extends AutoBeanFactory {
 		AutoBean<ExamplePlace> example();
 		AutoBean<SearchPlace> search();
 		AutoBean<CreateProjectPlace> createProject();
 		AutoBean<ProjectEditorPlace> editProject();
+		AutoBean<ProfileEditorPlace> editProfile();
+		AutoBean<ProfilePlace> viewProfile();
 		AutoBean<HomePlace> home();
 	}
 
@@ -29,12 +34,17 @@ public class ViolaPlaces_ServerImpl extends AbstractPlacesImpl implements ViolaP
 			"(?:search/\\?q=(?:[a-zA-Z0-9%]*))|" +
 			"(?:proj/new)|" +
 			"(?:proj/([a-zA-Z0-9%]+)(?:/([a-zA-Z0-9%./]*))?)|" +
+			"(?:profile/([a-zA-Z0-9%]*)/edit)|" +
+			"(?:profile/([a-zA-Z0-9%]*)/)|" +
 			"(?:)$";
 	RegExp example = RegExp.compile("^example/([a-zA-Z0-9%]*)/$");
 	RegExp search = RegExp.compile("^search/\\?q=([a-zA-Z0-9%]*)$");
 	RegExp createProject = RegExp.compile("^proj/new$");
 	RegExp editProject = RegExp.compile("^proj/([a-zA-Z0-9%]+)(?:/([a-zA-Z0-9%./]*))?$");
+	RegExp editProfile = RegExp.compile("^profile/([a-zA-Z0-9%]+)/edit$");
+	RegExp viewProfile = RegExp.compile("^profile/([a-zA-Z0-9%]*)/$");
 	RegExp home = RegExp.compile("^$");
+
 
 	public ViolaPlaces_ServerImpl() {
 		super(AutoBeanFactorySource.create(ABF.class));
@@ -48,6 +58,16 @@ public class ViolaPlaces_ServerImpl extends AbstractPlacesImpl implements ViolaP
 	@Override
 	public SearchPlace search() {
 		return create(SearchPlace.class);
+	}
+
+	@Override
+	public ProfileEditorPlace editProfile() {
+		return create(ProfileEditorPlace.class);
+	}
+
+	@Override
+	public ProfilePlace viewProfile() {
+		return create(ProfilePlace.class);
 	}
 
 	@Override
@@ -96,6 +116,20 @@ public class ViolaPlaces_ServerImpl extends AbstractPlacesImpl implements ViolaP
 			}
 			return "proj/" + UriUtils.encode(id) + "/" + UriUtils.encode(activeFile);
 		}
+		if (place instanceof ProfileEditorPlace) {
+			String id = ((ProfileEditorPlace) place).getId();
+			if (id == null) {
+				throw new NullPointerException("ProfileEditorPlace.getId()");
+			}
+			return "profile/" + UriUtils.encode(id) + "/edit";
+		}
+		if (place instanceof ProfilePlace) {
+			String id = ((ProfilePlace) place).getId();
+			if (id == null) {
+				throw new NullPointerException("ProfilePlace.getId()");
+			}
+			return "profile/" + UriUtils.encode(id) + "/";
+		}
 		if (place instanceof HomePlace) {
 			return "";
 		}
@@ -129,6 +163,18 @@ public class ViolaPlaces_ServerImpl extends AbstractPlacesImpl implements ViolaP
 			if (res.getGroupCount() > 2) {
 				s.setActiveFile(res.getGroup(2));
 			}
+			return s;
+		}
+		if (editProfile.test(url)) {
+			ProfileEditorPlace s = editProfile();
+			MatchResult res = editProfile.exec(url);
+			s.setId(res.getGroup(1));
+			return s;
+		}
+		if (viewProfile.test(url)) {
+			ProfilePlace s = viewProfile();
+			MatchResult res = viewProfile.exec(url);
+			s.setId(res.getGroup(1));
 			return s;
 		}
 		if (home.test(url)) {

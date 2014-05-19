@@ -4,6 +4,8 @@ import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreatePr
 import com.colinalworth.gwt.viola.web.shared.mvp.ExamplePresenter.ExamplePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.HomePresenter.HomePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceBasedPresenterFactory;
+import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorPlace;
+import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfilePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.SearchPresenter.SearchPlace;
 import com.google.inject.Inject;
@@ -16,6 +18,9 @@ public class ViolaPlaceMapper implements PlaceBasedPresenterFactory {
 		ProjectEditorPresenter projEditor();
 		ExamplePresenter example();
 		HomePresenter home();
+
+		ProfilePresenter viewProfile();
+		ProfileEditorPresenter editProfile();
 	}
 	@Inject
 	Provider<PresenterFactory> presenters;
@@ -32,6 +37,12 @@ public class ViolaPlaceMapper implements PlaceBasedPresenterFactory {
 		}
 		if (place instanceof ProjectEditorPlace) {
 			return presenters.get().projEditor();
+		}
+		if (place instanceof ProfilePlace) {
+			return presenters.get().viewProfile();
+		}
+		if (place instanceof ProfileEditorPlace) {
+			return presenters.get().editProfile();
 		}
 		if (place instanceof HomePlace) {
 			return presenters.get().home();

@@ -1,5 +1,8 @@
 package com.colinalworth.gwt.viola.web.server;
 
+import com.colinalworth.gwt.viola.service.UserService;
+import com.colinalworth.gwt.viola.web.client.ioc.Session;
+import com.colinalworth.gwt.viola.web.client.ioc.UserId;
 import com.colinalworth.gwt.viola.web.server.SearchService.SearchQueries;
 import com.colinalworth.gwt.viola.web.server.oauth.OAuthCallbackVisitor;
 import com.colinalworth.gwt.viola.web.server.rpq.impl.RpqServerModuleBuilder;
@@ -7,6 +10,7 @@ import com.colinalworth.gwt.viola.web.server.view.CreateProjectViewImpl;
 import com.colinalworth.gwt.viola.web.server.view.ExampleViewImpl;
 import com.colinalworth.gwt.viola.web.server.view.HomeViewImpl;
 import com.colinalworth.gwt.viola.web.server.view.JavaCodeEditorViewImpl;
+import com.colinalworth.gwt.viola.web.server.view.ProfileViewImpl;
 import com.colinalworth.gwt.viola.web.server.view.ProjectEditorViewImpl;
 import com.colinalworth.gwt.viola.web.server.view.SearchViewImpl;
 import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreateProjectView;
@@ -16,6 +20,8 @@ import com.colinalworth.gwt.viola.web.shared.mvp.JavaCodeEditorPresenter.JavaCod
 import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager;
 import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceBasedPresenterFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceFactory;
+import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorView;
+import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfileView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorView;
 import com.colinalworth.gwt.viola.web.shared.mvp.SearchPresenter.SearchView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaceMapper;
@@ -65,6 +71,9 @@ public class ViolaWebModule extends RxfModule {
 		bind(ProjectEditorView.class).to(ProjectEditorViewImpl.class);
 		bind(HomeView.class).to(HomeViewImpl.class);
 
+		bind(ProfileView.class).to(ProfileViewImpl.View.class);
+		bind(ProfileEditorView.class).to(ProfileViewImpl.Edit.class);
+
 		bind(JavaCodeEditorView.class).to(JavaCodeEditorViewImpl.class);
 
 		install(new RpqServerModuleBuilder().build(ViolaRequestQueue.class));
@@ -85,5 +94,22 @@ public class ViolaWebModule extends RxfModule {
 			}
 		});
 	}
+
+	//TODO hack to get client/server to play nice
+	@Provides
+	@Session
+	String provideSessionId(SessionService sessionService) {
+		return sessionService.getThreadLocalSessionId();
+	}
+
+	@Provides
+	@UserId
+	String provideUserId(@Session String session, UserService userService) {
+		if (session == null) {
+			return null;
+		}
+		return userService.getUserWithSession(session).getId();
+	}
+
 
 }
