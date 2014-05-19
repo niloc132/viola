@@ -93,7 +93,7 @@ public class ViolaServerApp extends Impl implements PreRead {
 				}
 
 				ByteBuffer resp = request.$res()
-						.resCode(HttpStatus.$200)
+						.status(HttpStatus.$200)
 						.headerString(HttpHeaders.Content$2dType, "text/html")
 						.headerString(HttpHeaders.Content$2dLength, String.valueOf(APP_RESPONSE_WRAPPER_SIZE + response.length()))
 						.as(ByteBuffer.class);

@@ -3,10 +3,12 @@ package com.colinalworth.gwt.viola.web.server;
 import com.google.gwt.safehtml.shared.UriUtils;
 import one.xio.AsioVisitor.Impl;
 import one.xio.HttpHeaders;
+import one.xio.HttpStatus;
 import rxf.server.BlobAntiPatternObject;
 import rxf.server.PreRead;
 import rxf.server.Rfc822HeaderState;
 import rxf.server.Rfc822HeaderState.HttpRequest;
+import rxf.server.Rfc822HeaderState.HttpResponse;
 import rxf.server.gen.CouchDriver;
 import rxf.server.gen.CouchDriver.DocFetch.DocFetchActionBuilder;
 
@@ -59,7 +61,7 @@ public class HttpProxyImpl extends Impl implements PreRead {
 			link += "index.html";
 		}
 		DocFetchActionBuilder to = CouchDriver.DocFetch.$().db("").docId(link).to();
-		final Rfc822HeaderState state = to.state();
+		final HttpResponse state = to.state().$res();
 		state.addHeaderInterest(HttpHeaders.Content$2dType);
 		final Future<ByteBuffer> result = to.fire().future();
 
@@ -87,14 +89,13 @@ public class HttpProxyImpl extends Impl implements PreRead {
 						try {
 							ByteBuffer buffer = result.get();
 							
-							if (!state.pathResCode().startsWith("200")) {
+							if (state.statusEnum() != HttpStatus.$200) {
 								Errors.$404(key, path);
 								return;
 							}
 
 							ByteBuffer headers = req.$res()
-									.resCode(state.pathResCode())
-//									.status(state.protocolStatus())
+									.status(state.statusEnum())
 									.headerString(HttpHeaders.Content$2dType, state.headerString(HttpHeaders.Content$2dType))
 									.headerString(HttpHeaders.Content$2dLength, state.headerString(HttpHeaders.Content$2dLength))
 									.as(ByteBuffer.class);
