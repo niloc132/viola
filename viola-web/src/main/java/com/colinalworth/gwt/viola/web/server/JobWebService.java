@@ -49,9 +49,6 @@ public class JobWebService {
 	}
 
 	public Project delete(String projectId, String filename) {
-		//TODO limit to owner
-
-
 		SourceProject proj = jobService.find(projectId);
 		if (proj.getAuthorId().equals(sessionService.getThreadLocalUserId("delete"))) {
 			CouchTx tx = jobService.deleteSourceFile(proj, filename);
@@ -65,7 +62,6 @@ public class JobWebService {
 		SourceProject sourceProject = jobService.find(id);
 		Project p = new Project();
 		p.setId(id);
-		p.setRev(sourceProject.getRev());
 		p.setDescription(sourceProject.getDescription());
 		p.setTitle(sourceProject.getTitle());
 		List<CompiledProject> compiledOutput = jobService.getCompiledOuput(sourceProject);

@@ -11,7 +11,7 @@ import com.colinalworth.gwt.viola.web.client.view.JavaCodeEditorViewImpl;
 import com.colinalworth.gwt.viola.web.client.view.ProfileEditorViewImpl;
 import com.colinalworth.gwt.viola.web.client.view.ProfileViewImpl;
 import com.colinalworth.gwt.viola.web.client.view.ProjectEditorViewImpl;
-import com.colinalworth.gwt.viola.web.client.view.SearchViewImpl;
+import com.colinalworth.gwt.viola.web.client.view.SearchProjectViewImpl;
 import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreateProjectView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ExamplePresenter.ExampleView;
 import com.colinalworth.gwt.viola.web.shared.mvp.HomePresenter.HomeView;
@@ -22,9 +22,10 @@ import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfileView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorView;
-import com.colinalworth.gwt.viola.web.shared.mvp.SearchPresenter.SearchView;
+import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter.SearchProjectView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaceMapper;
 import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaceMapper.PresenterFactory;
+import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaces;
 import com.colinalworth.gwt.viola.web.shared.request.JobRequest;
 import com.colinalworth.gwt.viola.web.shared.request.ProfileRequest;
 import com.colinalworth.gwt.viola.web.shared.request.SearchRequest;
@@ -51,7 +52,7 @@ public class ViolaClientModule extends AbstractGinModule {
 
 		bind(PlaceBasedPresenterFactory.class).to(ViolaPlaceMapper.class);
 
-		bind(SearchView.class).to(SearchViewImpl.class);
+		bind(SearchProjectView.class).to(SearchProjectViewImpl.class);
 		bind(ExampleView.class).to(ExampleViewImpl.class);
 		bind(CreateProjectView.class).to(CreateProjectViewImpl.class);
 		bind(ProjectEditorView.class).to(ProjectEditorViewImpl.class);

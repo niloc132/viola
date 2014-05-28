@@ -4,7 +4,6 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ProjectSearchResult implements IsSerializable {
 	private String _id;
-	private String _rev;
 
 	private String authorId;
 
@@ -22,14 +21,6 @@ public class ProjectSearchResult implements IsSerializable {
 
 	public void setId(String _id) {
 		this._id = _id;
-	}
-
-	public String getRev() {
-		return _rev;
-	}
-
-	public void setRev(String _rev) {
-		this._rev = _rev;
 	}
 
 	public String getAuthorId() {

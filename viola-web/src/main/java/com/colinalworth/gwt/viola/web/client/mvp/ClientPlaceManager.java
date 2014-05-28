@@ -4,7 +4,7 @@ import com.colinalworth.gwt.viola.web.shared.mvp.AcceptsView;
 import com.colinalworth.gwt.viola.web.shared.mvp.Place;
 import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager;
 import com.colinalworth.gwt.viola.web.shared.mvp.Presenter;
-import com.colinalworth.gwt.viola.web.shared.mvp.SearchPresenter.SearchPlace;
+import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter.SearchProjectPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.View;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -58,7 +58,7 @@ public class ClientPlaceManager implements PlaceManager {
 			//TODO going nowhere?
 //			assert false : "can't go nowhere";
 			//default place
-			place = create(SearchPlace.class);
+			place = create(SearchProjectPlace.class);
 //			return true;
 		}
 

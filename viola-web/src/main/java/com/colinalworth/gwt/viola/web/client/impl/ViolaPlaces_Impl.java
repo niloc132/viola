@@ -7,12 +7,12 @@ import com.colinalworth.gwt.viola.web.shared.mvp.Place;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfilePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorPlace;
-import com.colinalworth.gwt.viola.web.shared.mvp.SearchPresenter.SearchPlace;
+import com.colinalworth.gwt.viola.web.shared.mvp.SearchProfilePresenter.SearchProfilePlace;
+import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter.SearchProjectPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaces;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.regexp.shared.MatchResult;
 import com.google.gwt.regexp.shared.RegExp;
-import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.web.bindery.autobean.shared.AutoBean;
 import com.google.web.bindery.autobean.shared.AutoBeanFactory;
 
@@ -25,11 +25,12 @@ public class ViolaPlaces_Impl extends AbstractPlacesImpl implements ViolaPlaces 
 
 	interface ABF extends AutoBeanFactory {
 		AutoBean<ExamplePlace> example();
-		AutoBean<SearchPlace> search();
+		AutoBean<SearchProjectPlace> searchProject();
 		AutoBean<CreateProjectPlace> createProject();
 		AutoBean<ProjectEditorPlace> editProject();
 		AutoBean<ProfileEditorPlace> editProfile();
 		AutoBean<ProfilePlace> viewProfile();
+		AutoBean<SearchProfilePlace> searchProfile();
 		AutoBean<HomePlace> home();
 	}
 
@@ -39,13 +40,15 @@ public class ViolaPlaces_Impl extends AbstractPlacesImpl implements ViolaPlaces 
 			"(?:proj/([a-zA-Z0-9%]+)(?:/([a-zA-Z0-9%./]*))?)|" +
 			"(?:profile/([a-zA-Z0-9%]*)/edit)|" +
 			"(?:profile/([a-zA-Z0-9%]*)/)|" +
+			"(?:search/profile\\?q=([a-zA-Z0-9%]))" +
 			"(?:)$";
 	RegExp example = RegExp.compile("^example/([a-zA-Z0-9%]*)/$");
-	RegExp search = RegExp.compile("^search/\\?q=([a-zA-Z0-9%]*)$");
+	RegExp searchProject = RegExp.compile("^search/project\\?q=([a-zA-Z0-9%]*)$");
 	RegExp createProject = RegExp.compile("^proj/new$");
-	RegExp editProject = RegExp.compile("^proj/([a-zA-Z0-9%]+)(?:/([a-zA-Z0-9%./]*))?$");
+	RegExp editProject = RegExp.compile("^proj/([a-zA-Z0-9%]+)/(?:([a-zA-Z0-9%./]*))?$");
 	RegExp editProfile = RegExp.compile("^profile/([a-zA-Z0-9%]+)/edit$");
 	RegExp viewProfile = RegExp.compile("^profile/([a-zA-Z0-9%]*)/$");
+	RegExp searchProfile = RegExp.compile("^search/profile\\?q=([a-zA-Z0-9%]*)$");
 	RegExp home = RegExp.compile("^$");
 
 	public ViolaPlaces_Impl() {
@@ -58,8 +61,8 @@ public class ViolaPlaces_Impl extends AbstractPlacesImpl implements ViolaPlaces 
 	}
 
 	@Override
-	public SearchPlace search() {
-		return create(SearchPlace.class);
+	public SearchProjectPlace searchProject() {
+		return create(SearchProjectPlace.class);
 	}
 
 	@Override
@@ -70,6 +73,11 @@ public class ViolaPlaces_Impl extends AbstractPlacesImpl implements ViolaPlaces 
 	@Override
 	public ProfilePlace viewProfile() {
 		return create(ProfilePlace.class);
+	}
+
+	@Override
+	public SearchProfilePlace searchProfile() {
+		return create(SearchProfilePlace.class);
 	}
 
 	@Override
@@ -89,19 +97,13 @@ public class ViolaPlaces_Impl extends AbstractPlacesImpl implements ViolaPlaces 
 
 	@Override
 	protected String innerRoute(Place place) {
-		if (place instanceof SearchPlace) {
-			String query = ((SearchPlace) place).getQuery();
-			if (query == null) {
-				throw new NullPointerException("SearchPlace.getQuery()");
-			}
-			return "search/?q=" + UriUtils.encode(query) + "";
+		if (place instanceof SearchProjectPlace) {
+			String query = ((SearchProjectPlace) place).getQuery();
+			return "search/project?q=" + urlEncodeOrThrow(query, "SearchProjectPlace.getQuery()") + "";
 		}
 		if (place instanceof ExamplePlace) {
 			String id = ((ExamplePlace) place).getId();
-			if (id == null) {
-				throw new NullPointerException("ExamplePlace.getId()");
-			}
-			return "example/" + UriUtils.encode(id) + "/";
+			return "example/" + urlEncodeOrThrow(id, "ExamplePlace.getId()") + "/";
 		}
 		if (place instanceof CreateProjectPlace) {
 			return "proj/new";
@@ -109,28 +111,20 @@ public class ViolaPlaces_Impl extends AbstractPlacesImpl implements ViolaPlaces 
 		if (place instanceof ProjectEditorPlace) {
 			ProjectEditorPlace projectEditorPlace = (ProjectEditorPlace) place;
 			String id = projectEditorPlace.getId();
-			if (id == null) {
-				throw new NullPointerException("ProjectEditorPlace.getId()");
-			}
 			String activeFile = projectEditorPlace.getActiveFile();
-			if (activeFile == null) {//optional
-				activeFile = "";
-			}
-			return "proj/" + UriUtils.encode(id) + "/" + UriUtils.encode(activeFile);
+			return "proj/" + urlEncodeOrThrow(id, "ProjectEditorPlace.getId()") + "/" + urlEncodeOrDefault(activeFile);
 		}
 		if (place instanceof ProfileEditorPlace) {
 			String id = ((ProfileEditorPlace) place).getId();
-			if (id == null) {
-				throw new NullPointerException("ProfileEditorPlace.getId()");
-			}
-			return "profile/" + UriUtils.encode(id) + "/edit";
+			return "profile/" + urlEncodeOrThrow(id, "ProfileEditorPlace.getId()") + "/edit";
 		}
 		if (place instanceof ProfilePlace) {
 			String id = ((ProfilePlace) place).getId();
-			if (id == null) {
-				throw new NullPointerException("ProfilePlace.getId()");
-			}
-			return "profile/" + UriUtils.encode(id) + "/";
+			return "profile/" + urlEncodeOrThrow(id, "ProfilePlace.getId()") + "/";
+		}
+		if (place instanceof SearchProfilePlace) {
+			String query = ((SearchProfilePlace)place).getQuery();
+			return "search/profile?q=" + urlEncodeOrThrow(query, "SearchProfilePlace.getQuery()");
 		}
 		if (place instanceof HomePlace) {
 			return "";
@@ -140,9 +134,9 @@ public class ViolaPlaces_Impl extends AbstractPlacesImpl implements ViolaPlaces 
 
 	@Override
 	protected Place innerRoute(String url) {
-		if (search.test(url)) {
-			SearchPlace s = search();
-			MatchResult res = search.exec(url);
+		if (searchProject.test(url)) {
+			SearchProjectPlace s = searchProject();
+			MatchResult res = searchProject.exec(url);
 			//TODO url decode
 			s.setQuery(res.getGroup(1));
 			return s;
@@ -177,6 +171,12 @@ public class ViolaPlaces_Impl extends AbstractPlacesImpl implements ViolaPlaces 
 			ProfilePlace s = viewProfile();
 			MatchResult res = viewProfile.exec(url);
 			s.setId(res.getGroup(1));
+			return s;
+		}
+		if (searchProfile.test(url)) {
+			SearchProfilePlace s = searchProfile();
+			MatchResult res = searchProfile.exec(url);
+			s.setQuery(res.getGroup(1));
 			return s;
 		}
 		if (home.test(url)) {

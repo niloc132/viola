@@ -1,13 +1,14 @@
 package com.colinalworth.gwt.viola.web.server;
 
 import com.colinalworth.gwt.viola.entity.CompiledProject;
-import com.colinalworth.gwt.viola.service.JobService;
-import rxf.server.CouchService;
-
 import com.colinalworth.gwt.viola.entity.SourceProject;
+import com.colinalworth.gwt.viola.service.JobService;
+import com.colinalworth.gwt.viola.web.shared.dto.ProfileSearchResult;
 import com.colinalworth.gwt.viola.web.shared.dto.ProjectSearchResult;
 import com.google.inject.Inject;
+import rxf.server.CouchService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SearchService {
@@ -26,7 +27,7 @@ public class SearchService {
 	@Inject
 	JobService jobService;
 
-	public List<ProjectSearchResult> search(String query, String lastId, Integer limit) {
+	public List<ProjectSearchResult> searchProjects(String query, String lastId, Integer limit) {
 		if ("".equals(lastId)) {
 			lastId = null;
 		}
@@ -44,5 +45,9 @@ public class SearchService {
 			search.get(i).setLatestCompiledId(compiled == null || compiled.isEmpty() ? null : compiled.get(0).getId());
 		}
 		return search;
+	}
+
+	public List<ProfileSearchResult> searchProfiles(String query, String lastId, Integer limit) {
+		return new ArrayList<>();
 	}
 }

@@ -1,7 +1,7 @@
 package com.colinalworth.gwt.viola.web.client.view;
 
-import com.colinalworth.gwt.viola.web.shared.mvp.SearchPresenter;
-import com.colinalworth.gwt.viola.web.shared.mvp.SearchPresenter.SearchView;
+import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter;
+import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter.SearchProjectView;
 import com.colinalworth.gwt.viola.web.shared.dto.ProjectProperties;
 import com.colinalworth.gwt.viola.web.shared.dto.ProjectSearchResult;
 import com.colinalworth.gwt.viola.web.shared.mvp.AbstractPresenterImpl.AbstractClientView;
@@ -22,7 +22,7 @@ import com.sencha.gxt.widget.core.client.form.TextField;
 
 import java.util.List;
 
-public class SearchViewImpl extends AbstractClientView<SearchPresenter> implements SearchView {
+public class SearchProjectViewImpl extends AbstractClientView<SearchProjectPresenter> implements SearchProjectView {
 	private ListStore<ProjectSearchResult> store;
 	private ListView<ProjectSearchResult, ProjectSearchResult> listview;
 	private TextField query = new TextField();
@@ -30,7 +30,7 @@ public class SearchViewImpl extends AbstractClientView<SearchPresenter> implemen
 	private VerticalLayoutContainer root = new VerticalLayoutContainer();
 
 
-	public SearchViewImpl() {
+	public SearchProjectViewImpl() {
 		query.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {

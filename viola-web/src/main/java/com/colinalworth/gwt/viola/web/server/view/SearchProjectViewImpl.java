@@ -2,14 +2,14 @@ package com.colinalworth.gwt.viola.web.server.view;
 
 import com.colinalworth.gwt.viola.web.shared.dto.ProjectSearchResult;
 import com.colinalworth.gwt.viola.web.shared.mvp.AbstractPresenterImpl.AbstractServerView;
-import com.colinalworth.gwt.viola.web.shared.mvp.SearchPresenter;
-import com.colinalworth.gwt.viola.web.shared.mvp.SearchPresenter.SearchView;
+import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter;
+import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter.SearchProjectView;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 import java.util.List;
 
-public class SearchViewImpl extends AbstractServerView<SearchPresenter> implements SearchView {
+public class SearchProjectViewImpl extends AbstractServerView<SearchProjectPresenter> implements SearchProjectView {
 	private String query;
 	private List<ProjectSearchResult> results;
 	@Override

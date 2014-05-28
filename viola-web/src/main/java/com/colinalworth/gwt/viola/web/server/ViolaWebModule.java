@@ -12,7 +12,7 @@ import com.colinalworth.gwt.viola.web.server.view.HomeViewImpl;
 import com.colinalworth.gwt.viola.web.server.view.JavaCodeEditorViewImpl;
 import com.colinalworth.gwt.viola.web.server.view.ProfileViewImpl;
 import com.colinalworth.gwt.viola.web.server.view.ProjectEditorViewImpl;
-import com.colinalworth.gwt.viola.web.server.view.SearchViewImpl;
+import com.colinalworth.gwt.viola.web.server.view.SearchProjectViewImpl;
 import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreateProjectView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ExamplePresenter.ExampleView;
 import com.colinalworth.gwt.viola.web.shared.mvp.HomePresenter.HomeView;
@@ -23,7 +23,7 @@ import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfileView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorView;
-import com.colinalworth.gwt.viola.web.shared.mvp.SearchPresenter.SearchView;
+import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter.SearchProjectView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaceMapper;
 import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaceMapper.PresenterFactory;
 import com.colinalworth.gwt.viola.web.shared.request.ViolaRequestQueue;
@@ -65,7 +65,7 @@ public class ViolaWebModule extends RxfModule {
 		install(new FactoryModuleBuilder().build(PresenterFactory.class));
 
 
-		bind(SearchView.class).to(SearchViewImpl.class);
+		bind(SearchProjectView.class).to(SearchProjectViewImpl.class);
 		bind(ExampleView.class).to(ExampleViewImpl.class);
 		bind(CreateProjectView.class).to(CreateProjectViewImpl.class);
 		bind(ProjectEditorView.class).to(ProjectEditorViewImpl.class);

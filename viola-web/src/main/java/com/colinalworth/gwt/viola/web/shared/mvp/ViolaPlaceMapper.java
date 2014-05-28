@@ -7,13 +7,13 @@ import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceBasedPresente
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfilePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorPlace;
-import com.colinalworth.gwt.viola.web.shared.mvp.SearchPresenter.SearchPlace;
+import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter.SearchProjectPlace;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
 public class ViolaPlaceMapper implements PlaceBasedPresenterFactory {
 	public interface PresenterFactory {
-		SearchPresenter search();
+		SearchProjectPresenter search();
 		CreateProjectPresenter createProject();
 		ProjectEditorPresenter projEditor();
 		ExamplePresenter example();
@@ -26,7 +26,7 @@ public class ViolaPlaceMapper implements PlaceBasedPresenterFactory {
 	Provider<PresenterFactory> presenters;
 	@Override
 	public Presenter<?> getPresenterInstance(Place place) {
-		if (place instanceof SearchPlace) {
+		if (place instanceof SearchProjectPlace) {
 			return presenters.get().search();
 		}
 		if (place instanceof ExamplePlace) {
