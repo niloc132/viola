@@ -1,6 +1,5 @@
 package com.colinalworth.gwt.viola.web.client.ioc;
 
-import com.colinalworth.gwt.viola.web.client.impl.ViolaPlaces_Impl;
 import com.colinalworth.gwt.viola.web.client.ioc.Session.SessionProvider;
 import com.colinalworth.gwt.viola.web.client.ioc.UserId.UserIdProvider;
 import com.colinalworth.gwt.viola.web.client.mvp.ClientPlaceManager;
@@ -45,7 +44,7 @@ public class ViolaClientModule extends AbstractGinModule {
 		bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);
 
 		//TODO generate me
-		bind(PlaceFactory.class).to(ViolaPlaces_Impl.class);
+		bind(PlaceFactory.class).to(ViolaPlaces.class);
 
 		bind(ClientPlaceManager.class).in(Singleton.class);
 		bind(PlaceManager.class).to(ClientPlaceManager.class).in(Singleton.class);

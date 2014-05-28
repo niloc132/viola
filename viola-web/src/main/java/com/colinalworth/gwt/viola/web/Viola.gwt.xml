@@ -10,6 +10,10 @@
 	<inherits name="de.barop.gwt.PushState" />
 	<set-property name="gwt.logging.popupHandler" value="DISABLED" />
 
+	<generate-with class="com.colinalworth.gwt.viola.web.rebind.PlacesGenerator">
+		<when-type-assignable class="com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceFactory" />
+	</generate-with>
+
 
 	<source path="client" />
 	<source path="shared" />
