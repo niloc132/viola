@@ -1,27 +1,28 @@
-package com.colinalworth.gwt.viola.web.server;
+package com.colinalworth.gwt.viola.web.client;
 
 import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreateProjectPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaces;
-import com.colinalworth.gwt.viola.web.vm.PlaceFactoryModuleBuilder;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import com.google.gwt.core.shared.GWT;
+import com.google.gwt.junit.client.GWTTestCase;
 import org.junit.Test;
 
+public class ViolaPlacesClientTest extends GWTTestCase {
+	@Override
+	public String getModuleName() {
+		return "com.colinalworth.gwt.viola.web.Viola";
+	}
 
-public class ViolaPlacesServerTest {
 	@Test
 	public void testRouteToString() throws Exception {
-		Injector i = Guice.createInjector(new PlaceFactoryModuleBuilder().build(ViolaPlaces.class));
-		ViolaPlaces places = i.getInstance(ViolaPlaces.class);
+		ViolaPlaces places = GWT.create(ViolaPlaces.class);
 
 
 	}
 
 	@Test
 	public void testRouteToPlace() throws Exception {
-		Injector i = Guice.createInjector(new PlaceFactoryModuleBuilder().build(ViolaPlaces.class));
-		ViolaPlaces places = i.getInstance(ViolaPlaces.class);
+		ViolaPlaces places = GWT.create(ViolaPlaces.class);
 
 		CreateProjectPlace createProjectPlace = (CreateProjectPlace) places.route("proj/new");
 

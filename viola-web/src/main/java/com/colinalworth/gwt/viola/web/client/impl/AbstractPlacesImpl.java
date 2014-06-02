@@ -2,7 +2,7 @@ package com.colinalworth.gwt.viola.web.client.impl;
 
 import com.colinalworth.gwt.viola.web.shared.mvp.Place;
 import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceFactory;
-import com.google.gwt.http.client.URL;
+import com.colinalworth.gwt.viola.web.shared.util.URL;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.web.bindery.autobean.shared.AutoBeanFactory;
 import com.google.web.bindery.autobean.shared.AutoBeanUtils;
@@ -62,21 +62,26 @@ public abstract class AbstractPlacesImpl implements PlaceFactory {
 		}
 		return UriUtils.encode(String.valueOf(param));
 	}
-	protected String urlEncodePairOrSkip(String key, Object value) {
+	protected boolean urlEncodePairOrSkip(StringBuilder sb, String key, Object value, boolean seenQuery) {
 		if (value == null) {
-			return "";
+			return false;
 		}
-		return UriUtils.encode(key) + "=" + UriUtils.encode(String.valueOf(value)) + "&";
+		sb.append(seenQuery ? "&" : "?").append(UriUtils.encode(key)).append("=").append(UriUtils.encode(String.valueOf(value)));
+		return true;
 	}
 
 	/** @see com.google.gwt.user.client.Window.Location#buildListParamMap(String) */
-	protected Map<String, List<String>> buildListParamMap(String queryString) {
+	protected Map<String, List<String>> buildListParamMap(String url) {
+		String[] parts = url.split("\\?", 2);
+		if (parts.length != 2) {
+			return Collections.emptyMap();
+		}
+		String queryString = parts[1];
 		Map<String, List<String>> out = new HashMap<String, List<String>>();
 
 		if (queryString != null && queryString.length() > 1) {
-			String qs = queryString.substring(1);
 
-			for (String kvPair : qs.split("&")) {
+			for (String kvPair : queryString.split("&")) {
 				String[] kv = kvPair.split("=", 2);
 				if (kv[0].length() == 0) {
 					continue;

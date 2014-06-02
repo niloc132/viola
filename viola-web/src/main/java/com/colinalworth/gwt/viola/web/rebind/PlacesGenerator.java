@@ -32,9 +32,10 @@ import com.google.web.bindery.autobean.shared.AutoBeanFactory;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 public class PlacesGenerator extends Generator {
 
@@ -67,12 +68,18 @@ public class PlacesGenerator extends Generator {
 		SourceWriter sw = factory.createSourceWriter(context, pw);
 
 		List<MethodModel> models = new ArrayList<>();
-		for(JMethod m : toGenerate.getOverridableMethods()) {
+		for(JMethod m : toGenerate.getMethods()) {
 			if (m.isAnnotationPresent(Route.class)) {
 				//collect data enough to build route methods
 				Route route = m.getAnnotation(Route.class);
+				if (route == null) {
+					logger.log(Type.ERROR, "Method " + m.getName() + " does not have a @Route annotation");
+					throw new UnableToCompleteException();
+				}
 				JClassType returnType = m.getReturnType().isInterface();
-				models.add(buildMethod(logger, route.value(), returnType, m.getName()));
+				String placeString = route.path();
+
+				models.add(buildMethod(logger.branch(Type.TRACE, "Parsing @Route(" + placeString + ") " + returnType.getName() + " " + m.getName() + "()"), route, returnType, m.getName()));
 
 				//implement place factory method
 				sw.println(m.getReadableDeclaration(false, false, false, false, true) + " {");
@@ -80,6 +87,7 @@ public class PlacesGenerator extends Generator {
 				sw.println("}");
 			}
 		}
+		Collections.sort(models);
 
 		// implement fields from models/regex
 		for (MethodModel model : models) {
@@ -107,9 +115,66 @@ public class PlacesGenerator extends Generator {
 		sw.println("}");
 
 
-		writerInnerRouteOut(logger.branch(Type.INFO, "Writing String innerRoute(Place)"), sw, models);
+		writeInnerRouteOut(logger.branch(Type.TRACE, "Writing String innerRoute(Place)"), sw, models);
 
+		writeInnerRouteIn(logger.branch(Type.TRACE, "Writing Place innerRoute(String)"), sw, models);
 
+		sw.commit(logger);
+		return factory.getCreatedClassName();
+	}
+
+	private void writeInnerRouteOut(TreeLogger logger, SourceWriter sw, List<MethodModel> models) throws UnableToCompleteException {
+		sw.println("protected String innerRoute(%1$s place) {", Name.getSourceNameForClass(Place.class));
+		sw.indent();
+		for (MethodModel model : models) {
+			TreeLogger l = logger.branch(Type.TRACE, "Writing branch for " + model.getName());
+			sw.println("if (place instanceof %1$s) {", model.getPlaceType().getQualifiedSourceName());
+			//...
+			sw.indent();
+			sw.println("%1$s p = (%1$s) place;", model.getPlaceType().getQualifiedSourceName());
+			sw.println("%1$s sb = new %1$s();", StringBuilder.class.getName());
+//			sw.print("return \"\"");
+
+			for (PathComponent pathComponent : model.getPathComponents()) {
+//				sw.print(" + ");
+				if (pathComponent instanceof PathConstant) {
+					sw.println("sb.append(\"%1$s/\");", ((PathConstant) pathComponent).getValue());
+				} else {
+					assert pathComponent instanceof PathVariable;
+					PathVariable var = (PathVariable) pathComponent;
+					String getterExpression = getGetterMethod(l, model.getPlaceType(), var.getVarName());
+					if (var.isOptional()) {
+						sw.println("sb.append(urlEncodeOrDefault(p.%1$s)).append(\"/\");", getterExpression);
+					} else {
+						sw.println("sb.append(urlEncodeOrThrow(p.%1$s, \"%2$s\")).append(\"/\");", getterExpression, escape(model.getPlaceType().getQualifiedSourceName() + "." + getterExpression));
+					}
+				}
+			}
+
+			sw.println();
+			sw.println("boolean seenQuery = false;");
+			for (QueryVariable var : model.getQueryComponents()) {
+				String getterExpression = getGetterMethod(l, model.getPlaceType(), var.getVarName());
+				if (var.isOptional()) {
+					sw.println("seenQuery = urlEncodePairOrSkip(sb, \"%1$s\", p.%2$s, seenQuery);", escape(var.getKey()), getterExpression);
+				} else {
+					sw.println("sb.append(seenQuery ? \"&\" : \"?\");");
+					sw.println("sb.append(\"%1$s=\").append(urlEncodeOrThrow(p.%2$s, \"%3$s\"));", escape(UriUtils.encode(var.getKey())), getterExpression, escape(model.getPlaceType().getQualifiedSourceName() + "." + getterExpression));
+					sw.println("seenQuery = true;");
+				}
+			}
+
+			sw.println("return sb.toString();");
+			sw.outdent();
+
+			sw.println("}");
+		}
+		sw.println("return null;");
+		sw.outdent();
+		sw.println("}");
+	}
+
+	private void writeInnerRouteIn(TreeLogger logger, SourceWriter sw, List<MethodModel> models) {
 		sw.println("protected %1$s innerRoute(String url) {", Name.getSourceNameForClass(Place.class));
 		sw.indent();
 		for (MethodModel model : models) {
@@ -122,65 +187,20 @@ public class PlacesGenerator extends Generator {
 			for (PathComponent pathComponent : model.getPathComponents()) {
 				if (pathComponent instanceof PathVariable) {
 					PathVariable var = (PathVariable) pathComponent;
-					sw.println("s.%1$s(res.getGroup(%2$d));", getSetterMethod(model.getPlaceType(), var.getVarName()), (Integer)index++);
+					sw.println("s.%1$s(res.getGroup(%2$d));", getSetterMethod(model.getPlaceType(), var.getVarName()), index++);
 				}
 			}
 
-			//TODO assign querystring
+			sw.println("%1$s<String, %2$s<String>> map = buildListParamMap(url);", Map.class.getName(), List.class.getName());
+			for (QueryVariable queryVariable : model.getQueryComponents()) {
+				sw.println("if (map.containsKey(\"%1$s\")) {", escape(queryVariable.getKey()));
+				sw.indentln("s.%1$s(map.get(\"%2$s\").get(0));", getSetterMethod(model.getPlaceType(), queryVariable.getVarName()), escape(queryVariable.getKey()));
+				sw.println("}");
+			}
 
 			sw.println("return s;");
 
 			sw.outdent();
-			sw.println("}");
-		}
-		sw.println("return null;");
-		sw.outdent();
-		sw.println("}");
-
-		sw.commit(logger);
-		return factory.getCreatedClassName();
-	}
-
-	private void writerInnerRouteOut(TreeLogger logger, SourceWriter sw, List<MethodModel> models) throws UnableToCompleteException {
-		sw.println("protected String innerRoute(%1$s place) {", Name.getSourceNameForClass(Place.class));
-		sw.indent();
-		for (MethodModel model : models) {
-			TreeLogger l = logger.branch(Type.INFO, "Writing branch for " + model.getName());
-			sw.println("if (place instanceof %1$s) {", model.getPlaceType().getQualifiedSourceName());
-			//...
-			sw.indent();
-			sw.println("%1$s p = (%1$s) place;", model.getPlaceType().getQualifiedSourceName());
-			sw.print("return \"\"");
-
-			for (PathComponent pathComponent : model.getPathComponents()) {
-				sw.print(" + ");
-				if (pathComponent instanceof PathConstant) {
-					sw.print("\"%1$s/\"", ((PathConstant) pathComponent).getValue());
-				} else {
-					assert pathComponent instanceof PathVariable;
-					PathVariable var = (PathVariable) pathComponent;
-					String getterExpression = getGetterMethod(l, model.getPlaceType(), var.getVarName());
-					if (var.isOptional()) {
-						sw.print("urlEncodeOrDefault(p.%1$s)", getterExpression);
-					} else {
-						sw.print("urlEncodeOrThrow(p.%1$s, \"%2$s\")", getterExpression, escape(model.getPlaceType().getQualifiedSourceName() + "." + getterExpression));
-					}
-				}
-			}
-			sw.println(" + \"?\"");
-			for (QueryVariable var : model.getQueryComponents()) {
-				sw.print(" + ");
-				String getterExpression = getGetterMethod(l, model.getPlaceType(), var.getVarName());
-				if (var.isOptional()) {
-					sw.print("urlEncodePairOrSkip(\"%1$s\", p.%2$s)", escape(var.getKey()), getterExpression);
-				} else {
-					sw.print("\"%1$s=\" + urlEncodeOrThrow(p.%2$s)", escape(UriUtils.encode(var.getKey())), getterExpression);
-				}
-			}
-
-			sw.println(";");
-			sw.outdent();
-
 			sw.println("}");
 		}
 		sw.println("return null;");
@@ -226,91 +246,83 @@ public class PlacesGenerator extends Generator {
 		return null;
 	}
 
-	private MethodModel buildMethod(TreeLogger logger, String placeString, JClassType type, String name) throws UnableToCompleteException {
-		// * everything is a literal except for {[a-zA-Z][a-zA-Z0-9]\\??}s
-		// * from those literals, split on ?
-		// ** before that marker, disallow / except in trailing param
-		// ** after that marker, split on &, allow pairs out of order
-
-
-//		Pattern vars = Pattern.compile("\\{([a-zA-Z][a-zA-Z0-9_]*)(\\??)\\}");
-
+	private MethodModel buildMethod(TreeLogger logger, Route route, JClassType type, String name) throws UnableToCompleteException {
 		MethodModel method = new MethodModel();
 		method.setName(name);
 		method.setPlaceType(type);
+		method.setPriority(route.priority());
 		try {
-			method.setContents(new PlaceStringParser(new StringReader(placeString + "\n")).url());
+			method.setContents(new PlaceStringParser(new StringReader(route.path() + "\n")).url());
 		} catch (ParseException e) {
-			logger.log(Type.ERROR, "Unable to parse string", e);
+			logger.log(Type.ERROR, "Unable to parse string " + route.path(), e);
 			throw new UnableToCompleteException();
 		}
-//		List<String> fragments = new ArrayList<>();
-//		Matcher m = vars.matcher(placeString);
-//		int lastIndex = 0;
-//		while (m.matches()) {
-//			if (lastIndex != m.start()) {
-//				fragments.add(placeString.substring(lastIndex, m.start()));
-//			} else {
-//				unsure that we need this check, but we need to have empty strings
-//				fragments.add("");
-//			}
-//
-//			lastIndex = m.start();
-//			String varName = m.group(1);
-//			String optional = m.groupCount() > 2 ? m.group(2) : null;
-//			method.getArgs().add(new ArgModel(varName, "?".equals(optional)));
-//		}
-//		assert fragments.size() == method.getArgs().size();
-//		if (lastIndex < placeString.length()) {
-//			fragments.add(placeString.substring(lastIndex));
-//		}
 
+		//TODO sanity check that url and querystring parts don't stomp on each other
 
 		//build path regex
 		StringBuilder regex = new StringBuilder("^");
-		for (PathComponent pathComponent : method.getPathComponents()) {
+		boolean first = true;
+		List<PathComponent> pathComponents = method.getPathComponents();
+		for (int i = 0; i < pathComponents.size(); i++) {
+			PathComponent pathComponent = pathComponents.get(i);
+
 			assert pathComponent != null;
 			if (pathComponent instanceof PathVariable) {
 				PathVariable variable = (PathVariable) pathComponent;
-				regex.append("(?:([a-zA-Z0-9_.%]+)/)");//TODO better matcher
+				regex.append("(?:");
+				if (!first) {
+					regex.append("/");
+				}
+				regex.append("([a-zA-Z0-9_.%");
+				if (i + 1 == pathComponents.size()) {
+					regex.append("/");
+				}
+				regex.append("]+))");
 				if (variable.isOptional()) {
 					regex.append("?");
 				}
 			} else {
 				assert pathComponent instanceof PathConstant : pathComponent.getClass();
-				regex.append(Pattern.quote(((PathConstant) pathComponent).getValue() + "/"));
+				if (!first) {
+					regex.append("/");
+				}
+				regex.append(quote(((PathConstant) pathComponent).getValue()));
 			}
+			first = false;
 		}
 
-		StringBuilder query = new StringBuilder("(?:\\?");
+		regex.append("/");
+		if (!method.isRequiresTrailingSlash()) {
+			regex.append("?");//final last slash is optional
+		}
+
 		boolean queryRequired = false;
 		ArrayList<QueryVariable> queryVariables = new ArrayList<>(method.getQueryComponents());
-		for (int i = 0; i < queryVariables.size(); i++) {
-			QueryVariable variable = queryVariables.get(i);
-			assert variable != null;
-			if (i != 0) {
-				query.append("|");
-			}
+		for (QueryVariable variable : queryVariables) {
 			queryRequired |= !variable.isOptional();
-			query.append(Pattern.quote(variable.getKey() + "=")).append("(?:([a-zA-Z0-9_.%]+)/)");
 		}
 
 		//build query regex
-
-		method.setPathRegexp(regex.append("$").toString());
-
-
-//		Pattern p = Pattern.compile("^(?:[^?{]|(?:\\{[a-zA-Z][a-zA-Z0-9]*\\??\\}))+(?:\\?)?$");
+		if (queryRequired) {
+			regex.append("\\?.*");
+		} else {
+			regex.append("(?:\\?.*)?");
+		}
+		method.setPathRegexp(regex.toString());
 
 		return method;
 	}
 
-	public static class MethodModel {
-		//		private int index;
+
+	private static String quote(String string) {
+		return string.replaceAll("([-\\/\\\\^$*+?.()|\\[\\]{}])", "\\\\$0");
+	}
+
+	public static class MethodModel implements Comparable<MethodModel> {
+		private int priority;
 		private String pathRegexp;
 		private PlaceStringModel contents;
-//		private List<ArgModel> args = new ArrayList<>();
-//		private Map<String, ArgModel> queryArgs = new HashMap<>();
 		private String name;
 		private JClassType placeType;
 
@@ -348,49 +360,22 @@ public class PlacesGenerator extends Generator {
 		public void setPlaceType(JClassType placeType) {
 			this.placeType = placeType;
 		}
+
+		public boolean isRequiresTrailingSlash() {
+			return contents.isRequiresTrailingSlash();
+		}
+
+		public int getPriority() {
+			return priority;
+		}
+
+		public void setPriority(int priority) {
+			this.priority = priority;
+		}
+
+		@Override
+		public int compareTo(MethodModel o) {
+			return priority - o.priority;
+		}
 	}
-//	public static class ArgModel {
-//		private String name;
-//		private boolean optional;
-//		private boolean queryString;
-//		private boolean canContainSlashes;
-//
-//
-//		public ArgModel(String name, boolean optional) {
-//			this.name = name;
-//			this.optional = optional;
-//		}
-//
-//		public String getName() {
-//			return name;
-//		}
-//
-//		public void setName(String name) {
-//			this.name = name;
-//		}
-//
-//		public boolean isOptional() {
-//			return optional;
-//		}
-//
-//		public void setOptional(boolean optional) {
-//			this.optional = optional;
-//		}
-//
-//		public boolean isQueryString() {
-//			return queryString;
-//		}
-//
-//		public void setQueryString(boolean queryString) {
-//			this.queryString = queryString;
-//		}
-//
-//		public boolean isCanContainSlashes() {
-//			return canContainSlashes;
-//		}
-//
-//		public void setCanContainSlashes(boolean canContainSlashes) {
-//			this.canContainSlashes = canContainSlashes;
-//		}
-//	}
 }

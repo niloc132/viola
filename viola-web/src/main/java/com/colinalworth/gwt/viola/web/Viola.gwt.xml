@@ -13,12 +13,12 @@
 	<generate-with class="com.colinalworth.gwt.viola.web.rebind.PlacesGenerator">
 		<when-type-assignable class="com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceFactory" />
 	</generate-with>
+	<super-source path="super" />
 
 
 	<source path="client" />
 	<source path="shared" />
 
-	<public path="public" />
 
 	<entry-point class="com.colinalworth.gwt.viola.web.client.ViolaApp" />
 	<collapse-all-properties />

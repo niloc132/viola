@@ -43,7 +43,6 @@ public class ViolaClientModule extends AbstractGinModule {
 
 		bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);
 
-		//TODO generate me
 		bind(PlaceFactory.class).to(ViolaPlaces.class);
 
 		bind(ClientPlaceManager.class).in(Singleton.class);

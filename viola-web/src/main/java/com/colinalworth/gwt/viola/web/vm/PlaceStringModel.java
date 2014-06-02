@@ -64,7 +64,7 @@ public class PlaceStringModel {
 	}
 
 	private List<PathComponent> path = new ArrayList<>();
-
+	private boolean requiresTrailingSlash = false;
 	private Set<QueryVariable> query = new HashSet<>();
 
 	public List<PathComponent> getPath() {
@@ -73,5 +73,13 @@ public class PlaceStringModel {
 
 	public Set<QueryVariable> getQuery() {
 		return query;
+	}
+
+	public boolean isRequiresTrailingSlash() {
+		return requiresTrailingSlash;
+	}
+
+	public void setRequiresTrailingSlash(boolean requiresTrailingSlash) {
+		this.requiresTrailingSlash = requiresTrailingSlash;
 	}
 }

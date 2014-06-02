@@ -10,7 +10,7 @@ public class HomeViewImpl extends AbstractClientView<HomePresenter> implements H
 	public HomeViewImpl() {
 		FlowLayoutContainer lc = new FlowLayoutContainer();
 		lc.add(new HyperlinkPushState("Create a new project", "proj/new"));
-		lc.add(new HyperlinkPushState("Search for a project", "search/?q=foo"));
+		lc.add(new HyperlinkPushState("Search for a project", "search/project/?q=foo"));
 //		lc.add(new HyperlinkPushState("Open existing project", "proj/4307c733f10126bbd2396ef99e784c69"));
 
 		initWidget(lc);

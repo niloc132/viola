@@ -33,16 +33,21 @@ TOKEN:
 PlaceStringModel url():
 { model = new PlaceStringModel(); }
 {
-  (pathComponent())* (querystring())? <EOL>
+  (path())? (<SLASH> { model.setRequiresTrailingSlash(true); } )? (querystring())? <EOL>
   { return model; }
 }
+
+void path():
+{}
+{  pathComponent() ( LOOKAHEAD(2) <SLASH> pathComponent() )* }
 
 void pathComponent():
 { PlaceStringModel.PathComponent path; }
 {
-  ( (<IDENTIFIER>) { path = new PlaceStringModel.PathConstant(token.image); }
+  (
+    (<IDENTIFIER>) { path = new PlaceStringModel.PathConstant(token.image); }
   | path = pathVariable()
-  ) <SLASH>
+  )
 
   { model.getPath().add(path); }
 }
@@ -54,8 +59,8 @@ PlaceStringModel.PathVariable pathVariable():
 }
 
 void querystring():
-{}
-{ <QUESTION_MARK> (pair() (<AMPERSAND> pair())*)? /*(<AMPERSAND>)?*/ }
+{ PlaceStringModel.QueryVariable var; }
+{ <QUESTION_MARK> (var = pair() { model.getQuery().add(var); } (<AMPERSAND> var = pair() { model.getQuery().add(var); } )*)? /*(<AMPERSAND>)?*/ }
 
 PlaceStringModel.QueryVariable pair():
 { String key; Var var;}

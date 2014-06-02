@@ -28,7 +28,7 @@ public class PlaceStringParserTest {
 		assert model != null;
 		model = parser("search/profile/?q={query?}");
 		assert model != null;
-		model = parser("?param={value}");
+		model = parser("?param={path}");
 		assert model != null;
 	}
 	
@@ -77,7 +77,7 @@ public class PlaceStringParserTest {
 
 	@Test
 	public void testFailedExpressions() {
-		assertParseFailure("foo", "missing trailing slash");//TODO remove this requirement
+//		assertParseFailure("foo", "missing trailing slash");//TODO remove this requirement
 		assertParseFailure("foo{expr}/", "mixed path literal and expression 1");
 		assertParseFailure("{expr}expr/", "mixed path literal and expression 2");
 		assertParseFailure("?a=b", "non-parameterized query");
