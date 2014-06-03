@@ -1,5 +1,6 @@
 package com.colinalworth.gwt.viola.web.shared.mvp;
 
+import com.colinalworth.gwt.places.shared.Place;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.ui.Widget;

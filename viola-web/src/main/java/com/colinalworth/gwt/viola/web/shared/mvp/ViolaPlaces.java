@@ -1,9 +1,9 @@
 package com.colinalworth.gwt.viola.web.shared.mvp;
 
+import com.colinalworth.gwt.places.shared.PlaceManager.PlaceFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreateProjectPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ExamplePresenter.ExamplePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.HomePresenter.HomePlace;
-import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfilePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorPlace;
@@ -12,27 +12,27 @@ import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter.SearchPr
 
 public interface ViolaPlaces extends PlaceFactory {
 
-	@Route("example/{id}/")
+	@Route(path = "example/{id}/", priority = 1)
 	ExamplePlace example();
 
-	@Route("search/project/?q={query}")
+	@Route(path = "search/project/?q={query}", priority = 1)
 	SearchProjectPlace searchProject();
 
-	@Route("proj/new/")
+	@Route(path = "proj/new", priority = 1)
 	CreateProjectPlace createProject();
 
-	@Route("proj/{id}/{activeFile?}/")
+	@Route(path = "proj/{id}/{activeFile?}", priority = 2)
 	ProjectEditorPlace editProject();
 
-	@Route("profile/{id}/edit/")
+	@Route(path = "profile/{id}/edit/", priority = 1)
 	ProfileEditorPlace editProfile();
 
-	@Route("profile/{id}/")
+	@Route(path = "profile/{id}/", priority = 2)
 	ProfilePlace viewProfile();
 
-	@Route("search/profile/?q={query}")
+	@Route(path = "search/profile/?q={query}", priority = 1)
 	SearchProfilePlace searchProfile();
 
-	@Route("")
+	@Route(path = "", priority = 10)
 	HomePlace home();
 }

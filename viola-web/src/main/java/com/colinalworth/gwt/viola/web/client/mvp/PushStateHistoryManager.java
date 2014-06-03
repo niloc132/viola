@@ -1,8 +1,8 @@
 package com.colinalworth.gwt.viola.web.client.mvp;
 
-import com.colinalworth.gwt.viola.web.shared.mvp.Place;
-import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager;
-import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceFactory;
+import com.colinalworth.gwt.places.shared.Place;
+import com.colinalworth.gwt.places.shared.PlaceManager;
+import com.colinalworth.gwt.places.shared.PlaceManager.PlaceFactory;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;

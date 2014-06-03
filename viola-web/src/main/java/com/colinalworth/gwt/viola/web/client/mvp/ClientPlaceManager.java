@@ -1,8 +1,9 @@
 package com.colinalworth.gwt.viola.web.client.mvp;
 
+import com.colinalworth.gwt.places.shared.Place;
+import com.colinalworth.gwt.places.shared.PlaceManager;
 import com.colinalworth.gwt.viola.web.shared.mvp.AcceptsView;
-import com.colinalworth.gwt.viola.web.shared.mvp.Place;
-import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager;
+import com.colinalworth.gwt.viola.web.shared.mvp.PlaceBasedPresenterFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.Presenter;
 import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter.SearchProjectPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.View;

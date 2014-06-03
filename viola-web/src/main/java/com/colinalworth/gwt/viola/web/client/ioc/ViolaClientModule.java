@@ -1,6 +1,7 @@
 package com.colinalworth.gwt.viola.web.client.ioc;
 
-import com.colinalworth.gwt.viola.web.client.impl.ViolaPlaces_Impl;
+import com.colinalworth.gwt.places.shared.PlaceManager;
+import com.colinalworth.gwt.places.shared.PlaceManager.PlaceFactory;
 import com.colinalworth.gwt.viola.web.client.ioc.Session.SessionProvider;
 import com.colinalworth.gwt.viola.web.client.ioc.UserId.UserIdProvider;
 import com.colinalworth.gwt.viola.web.client.mvp.ClientPlaceManager;
@@ -16,9 +17,7 @@ import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreatePr
 import com.colinalworth.gwt.viola.web.shared.mvp.ExamplePresenter.ExampleView;
 import com.colinalworth.gwt.viola.web.shared.mvp.HomePresenter.HomeView;
 import com.colinalworth.gwt.viola.web.shared.mvp.JavaCodeEditorPresenter.JavaCodeEditorView;
-import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager;
-import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceBasedPresenterFactory;
-import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceFactory;
+import com.colinalworth.gwt.viola.web.shared.mvp.PlaceBasedPresenterFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfileView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorView;
@@ -44,8 +43,7 @@ public class ViolaClientModule extends AbstractGinModule {
 
 		bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);
 
-		//TODO generate me
-		bind(PlaceFactory.class).to(ViolaPlaces_Impl.class);
+		bind(PlaceFactory.class).to(ViolaPlaces.class);
 
 		bind(ClientPlaceManager.class).in(Singleton.class);
 		bind(PlaceManager.class).to(ClientPlaceManager.class).in(Singleton.class);

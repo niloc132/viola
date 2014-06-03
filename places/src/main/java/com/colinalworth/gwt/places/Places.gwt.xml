@@ -1,0 +1,10 @@
+<module>
+	<generate-with class="com.colinalworth.gwt.places.rebind.PlacesGenerator">
+		<when-type-assignable class="com.colinalworth.gwt.places.shared.PlaceManager.PlaceFactory" />
+	</generate-with>
+
+	<super-source path="super" />
+
+	<source path="client" />
+	<source path="shared" />
+</module>

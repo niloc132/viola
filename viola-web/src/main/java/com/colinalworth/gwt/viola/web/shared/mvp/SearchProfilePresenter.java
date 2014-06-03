@@ -1,5 +1,7 @@
 package com.colinalworth.gwt.viola.web.shared.mvp;
 
+import com.colinalworth.gwt.places.shared.Place;
+import com.colinalworth.gwt.places.shared.PlaceManager;
 import com.colinalworth.gwt.viola.web.shared.dto.ProfileSearchResult;
 import com.colinalworth.gwt.viola.web.shared.dto.ProjectSearchResult;
 import com.colinalworth.gwt.viola.web.shared.mvp.ExamplePresenter.ExamplePlace;

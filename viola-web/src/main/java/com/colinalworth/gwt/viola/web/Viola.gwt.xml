@@ -8,13 +8,14 @@
 	<inherits name="com.google.gwt.inject.Inject"/>
 	<inherits name="com.colinalworth.rpq.RPQ"/>
 	<inherits name="de.barop.gwt.PushState" />
+	<inherits name="com.colinalworth.gwt.places.Places"/>
+
 	<set-property name="gwt.logging.popupHandler" value="DISABLED" />
 
 
 	<source path="client" />
 	<source path="shared" />
 
-	<public path="public" />
 
 	<entry-point class="com.colinalworth.gwt.viola.web.client.ViolaApp" />
 	<collapse-all-properties />
