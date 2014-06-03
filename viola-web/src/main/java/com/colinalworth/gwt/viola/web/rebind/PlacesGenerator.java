@@ -4,6 +4,7 @@ import com.colinalworth.gwt.viola.web.client.impl.AbstractPlacesImpl;
 import com.colinalworth.gwt.viola.web.shared.mvp.Place;
 import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceFactory.Route;
+import com.colinalworth.gwt.viola.web.shared.util.URL;
 import com.colinalworth.gwt.viola.web.vm.ParseException;
 import com.colinalworth.gwt.viola.web.vm.PlaceStringModel;
 import com.colinalworth.gwt.viola.web.vm.PlaceStringModel.PathComponent;
@@ -177,6 +178,7 @@ public class PlacesGenerator extends Generator {
 	private void writeInnerRouteIn(TreeLogger logger, SourceWriter sw, List<MethodModel> models) {
 		sw.println("protected %1$s innerRoute(String url) {", Name.getSourceNameForClass(Place.class));
 		sw.indent();
+		sw.println("String value;");
 		for (MethodModel model : models) {
 			sw.println("if (%1$s.test(url)) {", model.getName());
 			sw.indent();
@@ -187,7 +189,11 @@ public class PlacesGenerator extends Generator {
 			for (PathComponent pathComponent : model.getPathComponents()) {
 				if (pathComponent instanceof PathVariable) {
 					PathVariable var = (PathVariable) pathComponent;
-					sw.println("s.%1$s(res.getGroup(%2$d));", getSetterMethod(model.getPlaceType(), var.getVarName()), index++);
+					sw.println("value = res.getGroup(%1$d);", index++);
+					sw.println("if (value != null) {");
+					sw.indentln("value = %1$s.decodePathSegment(value);", URL.class.getName());
+					sw.println("}");
+					sw.println("s.%1$s(value);", getSetterMethod(model.getPlaceType(), var.getVarName()));
 				}
 			}
 

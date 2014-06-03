@@ -3,6 +3,7 @@ package com.colinalworth.gwt.viola.web.vm;
 import com.colinalworth.gwt.viola.web.client.impl.AbstractPlacesImpl;
 import com.colinalworth.gwt.viola.web.shared.mvp.Place;
 import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceFactory;
+import com.colinalworth.gwt.viola.web.shared.util.URL;
 import com.colinalworth.gwt.viola.web.vm.PlaceStringModel.PathComponent;
 import com.colinalworth.gwt.viola.web.vm.PlaceStringModel.PathConstant;
 import com.colinalworth.gwt.viola.web.vm.PlaceStringModel.PathVariable;
@@ -133,7 +134,11 @@ public class PlaceFactoryModuleBuilder {
 		@Override
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			if (method.getDeclaringClass() == PlaceFactory.class || method.getDeclaringClass() == Object.class) {
-				return method.invoke(this, args);
+				try {
+					return method.invoke(this, args);
+				} catch (InvocationTargetException ex) {
+					throw ex.getCause();
+				}
 			}
 			//else its an autobeanfactory-ish method, forward to create
 			assert args.length == 0;
@@ -160,6 +165,9 @@ public class PlaceFactoryModuleBuilder {
 							}
 							String varName = ((PathVariable) pathComponent).getVarName();
 							String value = match.group(index++);
+							if (value != null) {
+								value = URL.decodePathSegment(value);
+							}
 							setValue(m, s, varName, value);
 						}
 					}
