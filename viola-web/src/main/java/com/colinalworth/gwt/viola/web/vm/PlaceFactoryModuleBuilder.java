@@ -171,11 +171,12 @@ public class PlaceFactoryModuleBuilder {
 							setValue(m, s, varName, value);
 						}
 					}
-
-					Map<String, List<String>> map = buildListParamMap(url);
-					for (QueryVariable queryVariable : m.getQueryComponents()) {
-						if (map.containsKey(queryVariable.getKey())) {
-							setValue(m, s, queryVariable.getVarName(), map.get(queryVariable.getKey()).get(0));
+					if (!m.getQueryComponents().isEmpty()) {
+						Map<String, List<String>> map = buildListParamMap(url);
+						for (QueryVariable queryVariable : m.getQueryComponents()) {
+							if (map.containsKey(queryVariable.getKey())) {
+								setValue(m, s, queryVariable.getVarName(), map.get(queryVariable.getKey()).get(0));
+							}
 						}
 					}
 

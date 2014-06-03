@@ -197,11 +197,13 @@ public class PlacesGenerator extends Generator {
 				}
 			}
 
-			sw.println("%1$s<String, %2$s<String>> map = buildListParamMap(url);", Map.class.getName(), List.class.getName());
-			for (QueryVariable queryVariable : model.getQueryComponents()) {
-				sw.println("if (map.containsKey(\"%1$s\")) {", escape(queryVariable.getKey()));
-				sw.indentln("s.%1$s(map.get(\"%2$s\").get(0));", getSetterMethod(model.getPlaceType(), queryVariable.getVarName()), escape(queryVariable.getKey()));
-				sw.println("}");
+			if (!model.getQueryComponents().isEmpty()) {
+				sw.println("%1$s<String, %2$s<String>> map = buildListParamMap(url);", Map.class.getName(), List.class.getName());
+				for (QueryVariable queryVariable : model.getQueryComponents()) {
+					sw.println("if (map.containsKey(\"%1$s\")) {", escape(queryVariable.getKey()));
+					sw.indentln("s.%1$s(map.get(\"%2$s\").get(0));", getSetterMethod(model.getPlaceType(), queryVariable.getVarName()), escape(queryVariable.getKey()));
+					sw.println("}");
+				}
 			}
 
 			sw.println("return s;");
