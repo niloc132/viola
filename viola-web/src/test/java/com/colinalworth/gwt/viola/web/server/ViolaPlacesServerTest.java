@@ -4,7 +4,7 @@ import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreatePr
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter.SearchProjectPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaces;
-import com.colinalworth.gwt.viola.web.vm.PlaceFactoryModuleBuilder;
+import com.colinalworth.gwt.places.vm.PlaceFactoryModuleBuilder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.Test;

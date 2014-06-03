@@ -1,5 +1,7 @@
 package com.colinalworth.gwt.viola.web.server;
 
+import com.colinalworth.gwt.places.shared.PlaceManager;
+import com.colinalworth.gwt.places.vm.PlaceFactoryModuleBuilder;
 import com.colinalworth.gwt.viola.service.UserService;
 import com.colinalworth.gwt.viola.web.client.ioc.Session;
 import com.colinalworth.gwt.viola.web.client.ioc.UserId;
@@ -17,8 +19,7 @@ import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreatePr
 import com.colinalworth.gwt.viola.web.shared.mvp.ExamplePresenter.ExampleView;
 import com.colinalworth.gwt.viola.web.shared.mvp.HomePresenter.HomeView;
 import com.colinalworth.gwt.viola.web.shared.mvp.JavaCodeEditorPresenter.JavaCodeEditorView;
-import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager;
-import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceBasedPresenterFactory;
+import com.colinalworth.gwt.viola.web.shared.mvp.PlaceBasedPresenterFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfileView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorView;
@@ -27,7 +28,6 @@ import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaceMapper;
 import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaceMapper.PresenterFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaces;
 import com.colinalworth.gwt.viola.web.shared.request.ViolaRequestQueue;
-import com.colinalworth.gwt.viola.web.vm.PlaceFactoryModuleBuilder;
 import com.colinalworth.rpq.server.BatchInvoker;
 import com.colinalworth.rpq.server.BatchServiceLocator;
 import com.colinalworth.rpq.shared.impl.BatchRequest;

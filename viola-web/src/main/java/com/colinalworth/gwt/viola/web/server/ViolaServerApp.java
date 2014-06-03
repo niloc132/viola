@@ -1,9 +1,9 @@
 package com.colinalworth.gwt.viola.web.server;
 
+import com.colinalworth.gwt.places.shared.Place;
+import com.colinalworth.gwt.places.shared.PlaceManager.PlaceFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.AcceptsView;
-import com.colinalworth.gwt.viola.web.shared.mvp.Place;
-import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceBasedPresenterFactory;
-import com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceFactory;
+import com.colinalworth.gwt.viola.web.shared.mvp.PlaceBasedPresenterFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.Presenter;
 import com.colinalworth.gwt.viola.web.shared.mvp.View;
 import com.google.inject.Inject;

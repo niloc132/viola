@@ -8,12 +8,9 @@
 	<inherits name="com.google.gwt.inject.Inject"/>
 	<inherits name="com.colinalworth.rpq.RPQ"/>
 	<inherits name="de.barop.gwt.PushState" />
-	<set-property name="gwt.logging.popupHandler" value="DISABLED" />
+	<inherits name="com.colinalworth.gwt.places.Places"/>
 
-	<generate-with class="com.colinalworth.gwt.viola.web.rebind.PlacesGenerator">
-		<when-type-assignable class="com.colinalworth.gwt.viola.web.shared.mvp.PlaceManager.PlaceFactory" />
-	</generate-with>
-	<super-source path="super" />
+	<set-property name="gwt.logging.popupHandler" value="DISABLED" />
 
 
 	<source path="client" />
