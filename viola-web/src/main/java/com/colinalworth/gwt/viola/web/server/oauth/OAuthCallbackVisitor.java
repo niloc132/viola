@@ -101,7 +101,7 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 		assert sessionId != null;
 		//write back out a constant/template to say 'yep, loaded, here's what the app should use to get its credentials'
 		//TODO escape this stuff...
-		String str = "<html><body>Authentication successful, finishing login...<script>setTimeout(close, 500); opener.authSuccess('"+sessionId+"', '"+ userid +"', '" + displayName + "', "+newAccount+")</script></html></body>";
+		String str = "<html><body>Authentication successful, finishing login...<script>setTimeout(close, 500); opener.authSuccess('" + sessionId + "', '"+ userid + "', " + newAccount + ")</script></html></body>";
 
 		ByteBuffer resp = new Rfc822HeaderState().$res()
 				.status(HttpStatus.$200)

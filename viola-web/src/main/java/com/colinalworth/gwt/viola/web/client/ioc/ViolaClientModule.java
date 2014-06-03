@@ -28,20 +28,23 @@ import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaces;
 import com.colinalworth.gwt.viola.web.shared.request.JobRequest;
 import com.colinalworth.gwt.viola.web.shared.request.ProfileRequest;
 import com.colinalworth.gwt.viola.web.shared.request.SearchRequest;
+import com.colinalworth.gwt.viola.web.shared.request.SessionRequest;
 import com.colinalworth.gwt.viola.web.shared.request.ViolaRequestQueue;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
-import com.google.web.bindery.event.shared.SimpleEventBus;
 
 public class ViolaClientModule extends AbstractGinModule {
 	@Override
 	protected void configure() {
 		install(new GinFactoryModuleBuilder().build(PresenterFactory.class));
 
-		bind(EventBus.class).to(SimpleEventBus.class).in(Singleton.class);
+		bind(SimpleEventBus.class).in(Singleton.class);
+		bind(EventBus.class).to(SimpleEventBus.class);
+		bind(com.google.gwt.event.shared.EventBus.class).to(SimpleEventBus.class);
 
 		bind(PlaceFactory.class).to(ViolaPlaces.class);
 
@@ -78,6 +81,10 @@ public class ViolaClientModule extends AbstractGinModule {
 	@Provides
 	ProfileRequest provideProfileRequest(ViolaRequestQueue queue) {
 		return queue.profile();
+	}
+	@Provides
+	SessionRequest provideSessionRequest(ViolaRequestQueue queue) {
+		return queue.session();
 	}
 
 }

@@ -1,21 +1,28 @@
 package com.colinalworth.gwt.viola.web.client;
 
+import com.colinalworth.gwt.viola.web.client.events.ProfileUpdateEvent;
+import com.colinalworth.gwt.viola.web.client.events.ProfileUpdateEvent.ProfileUpdateHandler;
 import com.colinalworth.gwt.viola.web.client.ioc.Session.SessionProvider;
 import com.colinalworth.gwt.viola.web.client.ioc.UserId.UserIdProvider;
 import com.colinalworth.gwt.viola.web.client.ioc.ViolaGinjector;
 import com.colinalworth.gwt.viola.web.client.mvp.ClientPlaceManager;
 import com.colinalworth.gwt.viola.web.client.mvp.PushStateHistoryManager;
+import com.colinalworth.gwt.viola.web.shared.dto.UserProfile;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorPlace;
+import com.colinalworth.gwt.viola.web.shared.request.ProfileRequest;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.web.bindery.event.shared.EventBus;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.SimpleContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
@@ -46,6 +53,12 @@ public class ViolaApp implements EntryPoint {
 	@Inject
 	UserIdProvider userIdManager;
 
+	@Inject
+	Provider<ProfileRequest> profileRequestProvider;
+
+	@Inject
+	EventBus eventBus;
+
 	private String userId;//hacky way to track, but this class hopefully won't grow much futher
 
 
@@ -64,6 +77,16 @@ public class ViolaApp implements EntryPoint {
 			public void setWidget(IsWidget w) {
 				container.setWidget(w);
 				container.forceLayout();
+			}
+		});
+
+		eventBus.addHandler(ProfileUpdateEvent.TYPE, new ProfileUpdateHandler() {
+			@Override
+			public void onProfileUpdate(ProfileUpdateEvent event) {
+				String displayName = event.getUserProfile().getDisplayName();
+				userbtn.setText((displayName == null || displayName.isEmpty()) ? event.getUserProfile().getId() : displayName);
+				userbtn.show();
+				((ToolBar) userbtn.getParent()).forceLayout();
 			}
 		});
 
@@ -106,7 +129,7 @@ public class ViolaApp implements EntryPoint {
 		userbtn.getMenu().add(new MenuItem("Log out", new SelectionHandler<MenuItem>() {
 			@Override
 			public void onSelection(SelectionEvent<MenuItem> event) {
-				setSessionId(null, null, null, false);
+				setSessionId(null, null, false);
 			}
 		}));
 		userbtn.hide();
@@ -123,17 +146,16 @@ public class ViolaApp implements EntryPoint {
 		Window.open("https://accounts.google.com/o/oauth2/auth?scope=openid&response_type=code&redirect_uri=http://viola.colinalworth.com/oauth2callback&client_id=888496828889-cjuie9aotun74v1p9tbrb568rchtjkc9.apps.googleusercontent.com&hl=en&from_login=1", "oauth", "");//&approval_prompt=force
 	}
 
-	private void setSessionId(String sessionId, String userId, String displayName, boolean newUser) {
+	private void setSessionId(String sessionId, String userId, boolean newUser) {
 		sessionManager.setCurrentSessionId(sessionId);
 		userIdManager.setCurrentUserId(userId);
 		if (sessionId == null) {
 			loginbtn.show();
 			userbtn.hide();
+			((ToolBar) loginbtn.getParent()).forceLayout();
 			ViolaApp.this.userId = null;
 		} else {
 			loginbtn.hide();
-			userbtn.setText((displayName == null || displayName.isEmpty()) ? userId : displayName);
-			userbtn.show();
 
 			if (newUser) {
 				ProfileEditorPlace updateProfile = placeManager.create(ProfileEditorPlace.class);
@@ -141,15 +163,26 @@ public class ViolaApp implements EntryPoint {
 				placeManager.submit(updateProfile);
 			}
 			ViolaApp.this.userId = userId;
+			profileRequestProvider.get().getProfile(userId, new AsyncCallback<UserProfile>() {
+				@Override
+				public void onFailure(Throwable caught) {
+					//error message...?
+				}
+
+				@Override
+				public void onSuccess(UserProfile result) {
+					eventBus.fireEvent(new ProfileUpdateEvent(result));
+				}
+			});
 		}
-		((ToolBar) loginbtn.getParent()).forceLayout();
 	}
 
 	private native void exportAuthSuccess() /*-{
 		var that = this;
 		if (!$wnd.authSuccess) {
-			$wnd.authSuccess = $entry(function(sessionId, userId, displayName, newUser) {
-				that.@com.colinalworth.gwt.viola.web.client.ViolaApp::setSessionId(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)(sessionId, userId, displayName, newUser);
+			$wnd.authSuccess = $entry(function(sessionId, userId, newUser) {
+				that.@com.colinalworth.gwt.viola.web.client.ViolaApp::setSessionId(Ljava/lang/String;Ljava/lang/String;Z)(sessionId, userId, newUser);
+				$wnd.authSuccess = null;
 			});
 		}
 	}-*/;

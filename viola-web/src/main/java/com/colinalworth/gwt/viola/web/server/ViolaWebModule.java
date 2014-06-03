@@ -32,6 +32,8 @@ import com.colinalworth.rpq.server.BatchInvoker;
 import com.colinalworth.rpq.server.BatchServiceLocator;
 import com.colinalworth.rpq.shared.impl.BatchRequest;
 import com.colinalworth.rpq.shared.impl.BatchResponse;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.inject.Provides;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
@@ -65,6 +67,11 @@ public class ViolaWebModule extends RxfModule {
 		bind(PlaceManager.class).to(ServerPlaceManager.class);
 		install(new FactoryModuleBuilder().build(PresenterFactory.class));
 
+		//not singleton, we want this garbage collected, since nothing fun will happen
+		//consider binding a dummy instead of a real impl
+//		bind(SimpleEventBus.class);
+		bind(EventBus.class).to(SimpleEventBus.class);
+		bind(com.google.web.bindery.event.shared.EventBus.class).to(SimpleEventBus.class);
 
 		bind(SearchProjectView.class).to(SearchProjectViewImpl.class);
 		bind(ExampleView.class).to(ExampleViewImpl.class);
