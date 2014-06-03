@@ -28,7 +28,7 @@ public class ViolaServerApp extends Impl implements PreRead {
 			"    <script language='javascript' src='/static/viola/viola.nocache.js'></script>\n" +
 			"</head>\n" +
 			"<body>\n" +
-			"<noscript>").getBytes();
+			"<noscript><h1>Viola: a fiddle for GWT</h1>").getBytes();
 	private static final byte[] APP_RESPONSE_TAIL = ("\n" +
 			"</noscript>\n" +
 			"</body>\n" +
