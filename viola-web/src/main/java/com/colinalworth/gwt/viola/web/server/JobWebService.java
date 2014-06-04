@@ -6,6 +6,7 @@ import com.colinalworth.gwt.viola.service.JobService;
 import com.colinalworth.gwt.viola.service.UserService;
 import com.colinalworth.gwt.viola.web.shared.dto.CompileLimitException;
 import com.colinalworth.gwt.viola.web.shared.dto.CompiledProjectStatus;
+import com.colinalworth.gwt.viola.web.shared.dto.MustBeLoggedInException;
 import com.colinalworth.gwt.viola.web.shared.dto.Project;
 import com.colinalworth.gwt.viola.web.shared.dto.ProjectSearchResult;
 import com.google.inject.Inject;
@@ -34,7 +35,7 @@ public class JobWebService {
 		return jobService.getSourceAsString(jobService.find(projectId), path);
 	}
 
-	public Project attach(String projectId, String filename, String contents) {
+	public Project attach(String projectId, String filename, String contents) throws MustBeLoggedInException {
 		//TODO limit to owner
 		SourceProject proj = jobService.find(projectId);
 		if (proj.getAuthorId().equals(sessionService.getThreadLocalUserId("attach"))) {
@@ -46,17 +47,17 @@ public class JobWebService {
 			}
 			return getProject(tx.id());
 		}
-		throw new IllegalStateException("Can't change files of project you don't own");
+		throw new MustBeLoggedInException("Can't change files of project you don't own");
 	}
 
-	public Project delete(String projectId, String filename) {
+	public Project delete(String projectId, String filename) throws MustBeLoggedInException {
 		SourceProject proj = jobService.find(projectId);
 		if (proj.getAuthorId().equals(sessionService.getThreadLocalUserId("delete"))) {
 			CouchTx tx = jobService.deleteSourceFile(proj, filename);
 			return getProject(tx.id());
 		}
 
-		throw new IllegalStateException("Can't delete a project you don't own");
+		throw new MustBeLoggedInException("Can't delete a project you don't own");
 	}
 
 	public Project getProject(String id) {
@@ -72,17 +73,17 @@ public class JobWebService {
 		return p;
 	}
 
-	public Project createProject() {
+	public Project createProject() throws MustBeLoggedInException{
 		String owner = sessionService.getThreadLocalUserId("create");
 		if (owner == null) {
-			throw new IllegalStateException("Can't create a project without logging in");
+			throw new MustBeLoggedInException("Can't create a project without logging in");
 		}
 
 		SourceProject project = jobService.createProject(owner);
 
 		return getProject(project.getId());
 	}
-	public Project saveProject(Project project) {
+	public Project saveProject(Project project) throws MustBeLoggedInException{
 		SourceProject sourceProject = jobService.find(project.getId());
 		if (sourceProject.getAuthorId().equals(sessionService.getThreadLocalUserId("save"))) {
 			sourceProject.setDescription(project.getDescription());
@@ -92,10 +93,10 @@ public class JobWebService {
 
 			return getProject(project.getId());
 		}
-		throw new IllegalStateException("Can't save project user doesn't own");
+		throw new MustBeLoggedInException("Can't save project user doesn't own");
 	}
 
-	public void build(String projectId) throws CompileLimitException {
+	public void build(String projectId) throws CompileLimitException, MustBeLoggedInException {
 		SourceProject project = jobService.find(projectId);
 		String userId = sessionService.getThreadLocalUserId("compile");
 		if (project.getAuthorId().equals(userId)) {
@@ -113,7 +114,7 @@ public class JobWebService {
 
 			jobService.submitJob(project);
 		} else {
-			throw new IllegalStateException("Can't build project user doesn't own");
+			throw new MustBeLoggedInException("Can't build project user doesn't own");
 		}
 	}
 
