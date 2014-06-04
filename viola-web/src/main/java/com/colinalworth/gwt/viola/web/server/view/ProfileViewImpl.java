@@ -64,5 +64,10 @@ public class ProfileViewImpl {
 		public void setPresenter(ProfileEditorPresenter presenter) {
 			//no-op, server can't interact
 		}
+
+		@Override
+		public void setCompiledTodayCount(int result) {
+			//no-op, server will never render individual details
+		}
 	}
 }

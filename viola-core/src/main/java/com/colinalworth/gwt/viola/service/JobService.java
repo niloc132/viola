@@ -22,8 +22,11 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 @Singleton
 public class JobService {
@@ -31,16 +34,25 @@ public class JobService {
 	}
 	public interface CompiledProjectQueries extends CouchService<CompiledProject> {
 		@View(map = "function(doc){" +
-				"emit(doc.status, doc);" +
+					"emit(doc.status, doc);" +
 				"}")
-		@Limit(5)
-		List<CompiledProject> getProjectsWithStatus(@Key CompiledProject.Status status);
+//		@Limit(5)
+		List<CompiledProject> getProjectsWithStatus(@Limit int limit, @Keys Status... status);
 
 		@View(map = "function(doc) {" +
-				"emit(doc.sourceId, doc);" +
+					"emit(doc.sourceId, doc);" +
 				"}")
 		@Descending(true)
 		List<CompiledProject> getCompiledForSource(@Key String id);
+
+		@View(map = "function(doc) {" +
+					"emit([doc.submittedBy, doc.submittedAt], doc);" +
+				"}",
+		reduce = "_count")
+//		@Descending(false)
+		int compiledByUserInRange(@StartKey String[] userIdAndStartDate, @EndKey String[] userAndEndDate, @Limit int limit);
+
+
 	}
 	public interface LogQueries extends CouchService<CompilerLog> {
 
@@ -121,6 +133,8 @@ public class JobService {
 		CompiledProject compiled = new CompiledProject();
 		compiled.setStatus(Status.QUEUED);
 		compiled.setSourceId(project.getId());
+		compiled.setSubmittedBy(project.getAuthorId());
+		compiled.setSubmittedAt(new Date());
 		String id = compiledQueries.persist(compiled).id();
 //		project.setCompiledId(id);
 	}
@@ -147,7 +161,7 @@ public class JobService {
 	 * @return a project that needs to be compiled, ready for use on the specified agent
 	 */
 	public CompiledProject unqueue(String agentId) {
-		List<CompiledProject> possibleJobs = compiledQueries.getProjectsWithStatus(Status.QUEUED);
+		List<CompiledProject> possibleJobs = compiledQueries.getProjectsWithStatus(5, Status.QUEUED);
 		for (CompiledProject proj : possibleJobs) {
 			CompiledProject updated = setJobStatus(proj, Status.ACCEPTED);
 			if (updated != null) {
@@ -234,5 +248,29 @@ public class JobService {
 
 	public CouchTx deleteSourceFile(SourceProject proj, String path) {
 		return sourceQueries.attachments(proj).deleteAttachment(path);
+	}
+
+	public int getCompileCountTodayForUser(String userId) {
+		Calendar today = Calendar.getInstance();
+		Calendar yesterday = Calendar.getInstance();
+		yesterday.add(Calendar.DATE, -1);
+
+		String[] start = {userId, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).format(yesterday.getTime())};
+		String[] end = {userId, new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).format(today.getTime())};
+
+		return compiledQueries.compiledByUserInRange(start, end, 100);
+	}
+
+	public boolean isCurrentlyCompiling(String userId) {
+		//TODO this is terrible, find a less terrible approach
+		List<CompiledProject> projects = compiledQueries.getProjectsWithStatus(100, Status.QUEUED, Status.ACCEPTED, Status.PRECOMPILING, Status.COMPILING, Status.LINKING);
+
+		for (CompiledProject project : projects) {
+			if (project.getSubmittedBy().equals(userId)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

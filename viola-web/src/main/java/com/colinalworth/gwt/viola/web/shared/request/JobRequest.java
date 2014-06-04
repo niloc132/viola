@@ -1,5 +1,6 @@
 package com.colinalworth.gwt.viola.web.shared.request;
 
+import com.colinalworth.gwt.viola.web.shared.dto.CompileLimitException;
 import com.colinalworth.gwt.viola.web.shared.dto.CompiledProjectStatus;
 import com.colinalworth.gwt.viola.web.shared.dto.Project;
 import com.colinalworth.gwt.viola.web.shared.dto.ProjectSearchResult;
@@ -25,8 +26,9 @@ public interface JobRequest {
 	@Throws(IllegalStateException.class)
 	void saveProject(Project project, AsyncCallback<Project> callback);
 
-	@Throws(IllegalStateException.class)
+	@Throws({IllegalStateException.class, CompileLimitException.class})
 	void build(String projectId, AsyncCallback<Void> callback);
+
 	void checkStatus(String projectId, AsyncCallback<CompiledProjectStatus> callback);
 
 	void getCompiledId(String id, AsyncCallback<String> asyncCallback);

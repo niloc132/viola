@@ -19,6 +19,9 @@ public class CompiledProject extends CouchEntityWithAttachments {
 
 	private String agentId;
 
+	private String submittedBy;
+	private Date submittedAt;
+
 	private Date compiled;
 
 	private String sourceId;
@@ -55,4 +58,19 @@ public class CompiledProject extends CouchEntityWithAttachments {
 		this.sourceId = sourceId;
 	}
 
+	public String getSubmittedBy() {
+		return submittedBy;
+	}
+
+	public void setSubmittedBy(String submittedBy) {
+		this.submittedBy = submittedBy;
+	}
+
+	public Date getSubmittedAt() {
+		return submittedAt;
+	}
+
+	public void setSubmittedAt(Date submittedAt) {
+		this.submittedAt = submittedAt;
+	}
 }

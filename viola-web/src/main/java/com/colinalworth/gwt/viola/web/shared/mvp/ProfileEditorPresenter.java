@@ -18,6 +18,8 @@ public class ProfileEditorPresenter extends AbstractPresenterImpl<ProfileEditorV
 
 	public interface ProfileEditorView extends View<ProfileEditorPresenter> {
 		SimpleBeanEditorDriver<UserProfile, ?> getDriver();
+
+		void setCompiledTodayCount(int result);
 	}
 	public interface ProfileEditorPlace extends Place {
 		String getId();
@@ -43,7 +45,8 @@ public class ProfileEditorPresenter extends AbstractPresenterImpl<ProfileEditorV
 
 		driver = getView().getDriver();
 
-		profileServiceProvider.get().getProfile(userIdProvider.get(), new AsyncCallback<UserProfile>() {
+		ProfileRequest request = profileServiceProvider.get();
+		request.getProfile(userIdProvider.get(), new AsyncCallback<UserProfile>() {
 			@Override
 			public void onFailure(Throwable caught) {
 
@@ -52,6 +55,17 @@ public class ProfileEditorPresenter extends AbstractPresenterImpl<ProfileEditorV
 			@Override
 			public void onSuccess(UserProfile result) {
 				driver.edit(result);
+			}
+		});
+		request.getCompileCountToday(new AsyncCallback<Integer>() {
+			@Override
+			public void onFailure(Throwable caught) {
+
+			}
+
+			@Override
+			public void onSuccess(Integer result) {
+				getView().setCompiledTodayCount(result);
 			}
 		});
 	}

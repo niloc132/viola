@@ -4,6 +4,7 @@ import com.colinalworth.gwt.viola.entity.CompiledProject;
 import com.colinalworth.gwt.viola.entity.SourceProject;
 import com.colinalworth.gwt.viola.service.JobService;
 import com.colinalworth.gwt.viola.service.UserService;
+import com.colinalworth.gwt.viola.web.shared.dto.CompileLimitException;
 import com.colinalworth.gwt.viola.web.shared.dto.CompiledProjectStatus;
 import com.colinalworth.gwt.viola.web.shared.dto.Project;
 import com.colinalworth.gwt.viola.web.shared.dto.ProjectSearchResult;
@@ -94,9 +95,22 @@ public class JobWebService {
 		throw new IllegalStateException("Can't save project user doesn't own");
 	}
 
-	public void build(String projectId) {
+	public void build(String projectId) throws CompileLimitException {
 		SourceProject project = jobService.find(projectId);
-		if (project.getAuthorId().equals(sessionService.getThreadLocalUserId("compile"))) {
+		String userId = sessionService.getThreadLocalUserId("compile");
+		if (project.getAuthorId().equals(userId)) {
+			//user owns the project
+
+			//user is not presently compiling anything
+			if (jobService.isCurrentlyCompiling(userId)){
+				throw new CompileLimitException();
+			}
+
+			//user is within their quota
+			if (jobService.getCompileCountTodayForUser(userId) > 20) {
+				throw new CompileLimitException();
+			}
+
 			jobService.submitJob(project);
 		} else {
 			throw new IllegalStateException("Can't build project user doesn't own");

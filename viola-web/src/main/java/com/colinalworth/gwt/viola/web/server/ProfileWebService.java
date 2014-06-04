@@ -1,6 +1,7 @@
 package com.colinalworth.gwt.viola.web.server;
 
 import com.colinalworth.gwt.viola.entity.User;
+import com.colinalworth.gwt.viola.service.JobService;
 import com.colinalworth.gwt.viola.service.UserService;
 import com.colinalworth.gwt.viola.web.shared.dto.UserProfile;
 import com.google.inject.Inject;
@@ -9,6 +10,11 @@ public class ProfileWebService {
 
 	@Inject
 	UserService userService;
+
+	@Inject
+	JobService jobService;
+	@Inject
+	SessionService sessionService;
 
 	public UserProfile getProfile(String id) {
 		User u = userService.findUserWithId(id);
@@ -32,5 +38,13 @@ public class ProfileWebService {
 		userService.updateUser(u);
 
 		return getProfile(profile.getId());
+	}
+
+	public Integer getCompileCountToday() {
+		String userId = sessionService.getThreadLocalUserId("getCompileCountToday");
+		if (userId == null) {
+			return -1;
+		}
+		return jobService.getCompileCountTodayForUser(userId);
 	}
 }

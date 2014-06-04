@@ -13,6 +13,7 @@ import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.form.FieldLabel;
+import com.sencha.gxt.widget.core.client.form.IntegerField;
 import com.sencha.gxt.widget.core.client.form.TextArea;
 import com.sencha.gxt.widget.core.client.form.TextField;
 
@@ -27,6 +28,9 @@ public class ProfileEditorViewImpl extends AbstractClientView<ProfileEditorPrese
 	TextField organization = new TextField();
 	TextArea description = new TextArea();
 
+	@Ignore
+	IntegerField compiledTodayCount = new IntegerField();
+
 
 	public ProfileEditorViewImpl() {
 		ContentPanel panel = new ContentPanel();
@@ -38,6 +42,8 @@ public class ProfileEditorViewImpl extends AbstractClientView<ProfileEditorPrese
 		container.add(new FieldLabel(displayName, "display name"));
 		container.add(new FieldLabel(organization, "organization"));
 		container.add(new FieldLabel(description, "about me"));
+		compiledTodayCount.setReadOnly(true);
+		container.add(new FieldLabel(compiledTodayCount, "times compiled today"));
 
 		panel.setWidget(container);
 
@@ -57,5 +63,10 @@ public class ProfileEditorViewImpl extends AbstractClientView<ProfileEditorPrese
 	@Override
 	public SimpleBeanEditorDriver<UserProfile, ?> getDriver() {
 		return driver;
+	}
+
+	@Override
+	public void setCompiledTodayCount(int result) {
+		compiledTodayCount.setValue(result);
 	}
 }
