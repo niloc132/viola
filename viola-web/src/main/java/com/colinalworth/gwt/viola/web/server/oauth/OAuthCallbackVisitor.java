@@ -17,6 +17,7 @@ import org.apache.commons.io.IOUtils;
 import rxf.server.PreRead;
 import rxf.server.Rfc822HeaderState;
 import rxf.server.Rfc822HeaderState.HttpRequest;
+import rxf.server.driver.RxfBootstrap;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,6 +30,8 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static one.xio.HttpHeaders.Host;
+
 public class OAuthCallbackVisitor extends Impl implements PreRead {
 	private static final ExecutorService execs = Executors.newFixedThreadPool(2);
 
@@ -37,7 +40,7 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 	private String accessTokenUrl = "https://accounts.google.com/o/oauth2/token";
 	private String issuer = "accounts.google.com";
 
-	private String serverUrl = "http://viola.colinalworth.com";
+	private String serverUrl = RxfBootstrap.getVar("url", "http://viola.colinalworth.com");
 
 	@Inject
 	UserService userService;
@@ -49,20 +52,24 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 
 	@Override
 	public void onRead(SelectionKey key) throws Exception {
-		HttpRequest req = null;
+		ByteBuffer cursor = null;
 		if (key.attachment() instanceof Object[]) {
 			for (Object a : (Object[]) key.attachment()) {
-				if (a instanceof HttpRequest) {
-					req = (HttpRequest) a;
+				if (a instanceof ByteBuffer) {
+					cursor = (ByteBuffer) a;
 					break;
 				}
 			}
 		}
 
-		if (req == null) {
+		if (cursor == null) {
 			Errors.$500(key);
 			return;
 		}
+
+		final HttpRequest req =
+				(HttpRequest) new Rfc822HeaderState().addHeaderInterest(Host).$req().apply(cursor);
+
 
 		String[] pathParts = req.path().split("\\?");
 		if (pathParts.length != 2) {
@@ -129,7 +136,8 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 		public void run() {
 			HttpURLConnection c = null;
 			try {
-				String data = "redirect_uri=" + serverUrl + "/oauth2callback&grant_type=authorization_code&client_id=" + clientId + "&client_secret=" + clientSecret + "&code=" + code;
+				String redirectUri = serverUrl + "/oauth2callback";
+				String data = "redirect_uri=" + redirectUri + "&grant_type=authorization_code&client_id=" + clientId + "&client_secret=" + clientSecret + "&code=" + code;
 				//github:
 				//https://github.com/login/oauth/access_token
 				//client_id

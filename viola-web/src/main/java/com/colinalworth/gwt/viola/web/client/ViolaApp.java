@@ -1,5 +1,6 @@
 package com.colinalworth.gwt.viola.web.client;
 
+import com.colinalworth.gwt.places.shared.util.URL;
 import com.colinalworth.gwt.viola.web.client.events.ProfileUpdateEvent;
 import com.colinalworth.gwt.viola.web.client.events.ProfileUpdateEvent.ProfileUpdateHandler;
 import com.colinalworth.gwt.viola.web.client.ioc.Session.SessionProvider;
@@ -143,7 +144,10 @@ public class ViolaApp implements EntryPoint {
 
 	private void loginSequence() {
 		exportAuthSuccess();
-		Window.open("https://accounts.google.com/o/oauth2/auth?scope=openid&response_type=code&redirect_uri=http://viola.colinalworth.com/oauth2callback&client_id=888496828889-cjuie9aotun74v1p9tbrb568rchtjkc9.apps.googleusercontent.com&hl=en&from_login=1", "oauth", "");//&approval_prompt=force
+		String redirect = URL.encodeQueryString(Window.Location.getProtocol() + "//" + Window.Location.getHost() + "/oauth2callback");
+		String clientId = URL.encodeQueryString("888496828889-cjuie9aotun74v1p9tbrb568rchtjkc9.apps.googleusercontent.com");
+		String state = URL.encodeQueryString("foobarbaz");//TODO real state
+		Window.open("https://accounts.google.com/o/oauth2/auth?scope=openid&response_type=code&redirect_uri=" + redirect + "&client_id=" + clientId + "&state=" + state + "&hl=en&from_login=1", "oauth", "");
 	}
 
 	private void setSessionId(String sessionId, String userId, boolean newUser) {

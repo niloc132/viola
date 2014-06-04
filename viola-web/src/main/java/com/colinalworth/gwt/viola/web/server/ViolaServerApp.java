@@ -20,21 +20,49 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
+/**
+ * This is the heart of the server side of the place-&gt;html bits of the app for RelaxFactory - it runs the presenter
+ * with the server implementation of the view, and takes the html output from the view to build the output html file.
+ *
+ */
 public class ViolaServerApp extends Impl implements PreRead {
-	private static final byte[] APP_RESPONSE_HEAD = ("<!doctype html>\n" +
-			"<html>\n" +
-			"<head>\n" +
-			"    <link rel=\"stylesheet\" type=\"text/css\" href=\"/static/viola/reset.css\" />\n" +
-			"    <script language='javascript' src='/static/viola/viola.nocache.js'></script>\n" +
-			"</head>\n" +
-			"<body>\n" +
-			"<noscript><h1>Viola: a fiddle for GWT</h1>").getBytes();
-	private static final byte[] APP_RESPONSE_TAIL = ("\n" +
-			"</noscript>\n" +
-			"</body>\n" +
-			"</html>").getBytes();
+//	private static final byte[] APP_RESPONSE_HEAD = ("<!doctype html>\n" +
+//			"<html>\n" +
+//			"<head>\n" +
+//			"    <link rel=\"stylesheet\" type=\"text/css\" href=\"/static/viola/reset.css\" />\n" +
+//			"    <script language='javascript' src='/static/viola/viola.nocache.js'></script>\n" +
+//			"</head>\n" +
+//			"<body>\n" +
+//			"<noscript><div><a href='/'>Viola: a fiddle for GWT</a></div>").getBytes();
+//	private static final byte[] APP_RESPONSE_TAIL = ("\n" +
+//			"</noscript>\n" +
+//			"</body>\n" +
+//			"</html>").getBytes();
 
-	private static final int APP_RESPONSE_WRAPPER_SIZE = APP_RESPONSE_HEAD.length + APP_RESPONSE_TAIL.length;
+
+	private static final byte[][] APP_RESPONSE_TEMPLATE = {
+			("<!doctype html>\n" +
+					"<html>\n" +
+					"<head>\n" +
+					//TODO meta content goes here
+					"    <title>").getBytes(),
+			//insert page title here, html encoded
+			("</title>\n" +
+					"    <link rel=\"stylesheet\" type=\"text/css\" href=\"/static/viola/reset.css\" />\n" +
+					"</head>\n" +
+					"<body>\n" +
+					"<noscript><div><a href='/'>Viola: a fiddle for GWT</a></div>").getBytes(),
+			//insert rendered html here
+			("</noscript>\n" +
+					"<script language='javascript' src='/static/viola/viola.nocache.js'></script>\n" +
+					"<script language='javascript'>\n").getBytes(),
+			//insert valid js here
+			("\n</script>\n" +
+					"</body>\n" +
+					"</html>").getBytes()
+	};
+
+	private static final int APP_RESPONSE_WRAPPER_SIZE = APP_RESPONSE_TEMPLATE[0].length + APP_RESPONSE_TEMPLATE[1].length + APP_RESPONSE_TEMPLATE[2].length + APP_RESPONSE_TEMPLATE[3].length;
 	@Inject
 	PlaceFactory placeFactory;
 	@Inject
@@ -92,17 +120,24 @@ public class ViolaServerApp extends Impl implements PreRead {
 					return;
 				}
 
+				String title = "Viola: a fiddle for GWT";
+				int length = APP_RESPONSE_WRAPPER_SIZE + response.length() + title.length();
 				ByteBuffer resp = request.$res()
 						.status(HttpStatus.$200)
 						.headerString(HttpHeaders.Content$2dType, "text/html")
-						.headerString(HttpHeaders.Content$2dLength, String.valueOf(APP_RESPONSE_WRAPPER_SIZE + response.length()))
+						.headerString(HttpHeaders.Content$2dLength, String.valueOf(length))
 						.as(ByteBuffer.class);
-				int needed = resp.rewind().limit() + APP_RESPONSE_WRAPPER_SIZE + response.length();
-				final ByteBuffer payload = (ByteBuffer) ByteBuffer.allocate(needed)
-						.put(resp)
-						.put(APP_RESPONSE_HEAD)
-						.put(HttpMethod.UTF8.encode(response))
-						.put(APP_RESPONSE_TAIL).rewind();
+				int needed = resp.rewind().limit() + length;
+				final ByteBuffer payload = (ByteBuffer) ByteBuffer.allocate(needed);
+				payload.put(resp);
+				payload.put(APP_RESPONSE_TEMPLATE[0]);
+
+				payload.put(title.getBytes());
+				payload.put(APP_RESPONSE_TEMPLATE[1]);
+				payload.put(HttpMethod.UTF8.encode(response));
+				payload.put(APP_RESPONSE_TEMPLATE[2]);
+//				payload.put("".getBytes());
+				payload.put(APP_RESPONSE_TEMPLATE[3]).rewind();
 
 				//ok, data in hand, lets get ready to write
 				key.attach(new Impl(){
