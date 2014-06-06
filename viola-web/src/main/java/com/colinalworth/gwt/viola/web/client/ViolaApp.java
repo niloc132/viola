@@ -10,6 +10,7 @@ import com.colinalworth.gwt.viola.web.client.mvp.ClientPlaceManager;
 import com.colinalworth.gwt.viola.web.client.mvp.PushStateHistoryManager;
 import com.colinalworth.gwt.viola.web.shared.dto.UserProfile;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorPlace;
+import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfilePlace;
 import com.colinalworth.gwt.viola.web.shared.request.ProfileRequest;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.shared.GWT;
@@ -123,7 +124,9 @@ public class ViolaApp implements EntryPoint {
 		userbtn.getMenu().add(new MenuItem("My Projects", new SelectionHandler<MenuItem>() {
 			@Override
 			public void onSelection(SelectionEvent<MenuItem> event) {
-				Window.alert("not implemented");
+				ProfilePlace profilePlace = placeManager.create(ProfilePlace.class);
+				profilePlace.setId(userId);
+				placeManager.submit(profilePlace);
 			}
 		}));
 		userbtn.getMenu().add(new SeparatorMenuItem());

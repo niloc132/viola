@@ -6,6 +6,7 @@ import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter;
 import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter.SearchProjectView;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.UriUtils;
 
 import java.util.List;
 
@@ -35,13 +36,15 @@ public class SearchProjectViewImpl extends AbstractServerView<SearchProjectPrese
 				.appendHtmlConstant("<div>");
 
 		if (results != null) {
-			for (ProjectSearchResult result : results) {
-				sb
-						.appendHtmlConstant("<div><a href='")
-						.appendEscaped("/example/" + result.getLatestCompiledId() + "/")
-						.appendHtmlConstant("'>")
-						.appendEscaped(result.getTitle())
-						.appendHtmlConstant("</a></div>");
+			for (ProjectSearchResult project : results) {
+				if (project.getLatestCompiledId() == null) {
+					continue;
+				}
+				sb.appendHtmlConstant("<div><a href='/example/" + UriUtils.encode(project.getLatestCompiledId()) + "/'>")
+						.appendEscaped(project.getTitle())
+						.appendHtmlConstant("</a>")
+						.appendEscaped(project.getDescription())
+						.appendHtmlConstant("</div>");
 			}
 		}
 

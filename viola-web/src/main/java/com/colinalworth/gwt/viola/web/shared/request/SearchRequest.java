@@ -10,5 +10,7 @@ public interface SearchRequest {
 
 	void searchProjects(String query, String lastId, Integer limit, AsyncCallback<List<ProjectSearchResult>> callback);
 
+	void listProjectsByUser(String userId, String lastId, Integer limit, AsyncCallback<List<ProjectSearchResult>> callback);
+
 	void searchProfiles(String query, String lastId, Integer limit, AsyncCallback<List<ProfileSearchResult>> callback);
 }
