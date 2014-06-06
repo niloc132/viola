@@ -11,7 +11,6 @@ import one.xio.AsioVisitor.Impl;
 import one.xio.HttpHeaders;
 import one.xio.HttpMethod;
 import one.xio.HttpStatus;
-import rxf.server.BlobAntiPatternObject;
 import rxf.server.PreRead;
 import rxf.server.Rfc822HeaderState;
 import rxf.server.Rfc822HeaderState.HttpRequest;
@@ -19,6 +18,8 @@ import rxf.server.Rfc822HeaderState.HttpRequest;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * This is the heart of the server side of the place-&gt;html bits of the app for RelaxFactory - it runs the presenter
@@ -26,18 +27,7 @@ import java.nio.channels.SocketChannel;
  *
  */
 public class ViolaServerApp extends Impl implements PreRead {
-//	private static final byte[] APP_RESPONSE_HEAD = ("<!doctype html>\n" +
-//			"<html>\n" +
-//			"<head>\n" +
-//			"    <link rel=\"stylesheet\" type=\"text/css\" href=\"/static/viola/reset.css\" />\n" +
-//			"    <script language='javascript' src='/static/viola/viola.nocache.js'></script>\n" +
-//			"</head>\n" +
-//			"<body>\n" +
-//			"<noscript><div><a href='/'>Viola: a fiddle for GWT</a></div>").getBytes();
-//	private static final byte[] APP_RESPONSE_TAIL = ("\n" +
-//			"</noscript>\n" +
-//			"</body>\n" +
-//			"</html>").getBytes();
+	public static ExecutorService WEBAPP_THREADS = Executors.newCachedThreadPool();
 
 
 	private static final byte[][] APP_RESPONSE_TEMPLATE = {
@@ -102,7 +92,7 @@ public class ViolaServerApp extends Impl implements PreRead {
 		}
 
 		//push the rest of this off into a submitted task, signal ready for write when done, write contents
-		BlobAntiPatternObject.EXECUTOR_SERVICE.submit(new Runnable() {
+		WEBAPP_THREADS.submit(new Runnable() {
 			public void run() {
 				final View<?>[] viewWrapper = new View[1];
 				presenter.go(new AcceptsView() {

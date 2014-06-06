@@ -4,7 +4,6 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import one.xio.AsioVisitor.Impl;
 import one.xio.HttpHeaders;
 import one.xio.HttpStatus;
-import rxf.server.BlobAntiPatternObject;
 import rxf.server.PreRead;
 import rxf.server.Rfc822HeaderState;
 import rxf.server.Rfc822HeaderState.HttpRequest;
@@ -83,7 +82,7 @@ public class HttpProxyImpl extends Impl implements PreRead {
 				}
 				//if not, wait until it is ready, then try again
 				key.interestOps(0);
-				BlobAntiPatternObject.EXECUTOR_SERVICE.submit(new Runnable() {
+				ViolaServerApp.WEBAPP_THREADS.submit(new Runnable() {
 					@Override
 					public void run() {
 						try {
