@@ -39,7 +39,6 @@ public class ProfileViewImpl {
 		UserProfile profile = driver.getObject();
 		SafeHtmlBuilder sb = new SafeHtmlBuilder()
 				.appendHtmlConstant("<div>")
-				.appendHtmlConstant("<h1>User Profile</h1>")
 				.appendHtmlConstant("<h2>User Profile</h2>")
 				.appendHtmlConstant("<label>").appendEscaped(notNull(profile.getUsername())).appendHtmlConstant("</label>")
 				.appendHtmlConstant("<label>").appendEscaped(notNull(profile.getDisplayName())).appendHtmlConstant("</label>")

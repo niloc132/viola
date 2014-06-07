@@ -1,5 +1,7 @@
 package com.colinalworth.gwt.viola.web.client.view;
 
+import com.colinalworth.gwt.viola.web.client.styles.SearchResultsListViewAppearance;
+import com.colinalworth.gwt.viola.web.client.styles.ViolaBundle;
 import com.colinalworth.gwt.viola.web.shared.dto.ProjectProperties;
 import com.colinalworth.gwt.viola.web.shared.dto.ProjectSearchResult;
 import com.colinalworth.gwt.viola.web.shared.dto.UserProfile;
@@ -69,12 +71,14 @@ public class ProfileViewImpl extends AbstractClientView<ProfilePresenter>
 		outer.add(container, new VerticalLayoutData(1, -1));
 
 		ProjectProperties props = GWT.create(ProjectProperties.class);
-		projects = new ListStore<ProjectSearchResult>(props.key());
-		ListView<ProjectSearchResult, ProjectSearchResult> listview = new ListView<ProjectSearchResult, ProjectSearchResult>(projects, new IdentityValueProvider<ProjectSearchResult>());
+		projects = new ListStore<>(props.key());
+		ListView<ProjectSearchResult, ProjectSearchResult> listview = new ListView<ProjectSearchResult, ProjectSearchResult>(projects, new IdentityValueProvider<ProjectSearchResult>(), new SearchResultsListViewAppearance<ProjectSearchResult>());
+		ViolaBundle.INSTANCE.searchResults().ensureInjected();
 		listview.setCell(new AbstractCell<ProjectSearchResult>("click") {
+			ProjectSearchResultTemplate template = GWT.create(ProjectSearchResultTemplate.class);
 			@Override
 			public void render(Context context, ProjectSearchResult value, SafeHtmlBuilder sb) {
-				sb.appendEscaped(value.getTitle());//todo template me
+				sb.append(template.renderProject(value, ViolaBundle.INSTANCE.searchResults()));
 			}
 
 			@Override

@@ -1,0 +1,22 @@
+@external item, over, selected;
+.item {
+    float:left;
+}
+.over {
+    background-color: #e2eff8;
+}
+.selected {}
+.wrap {
+    cursor: pointer ;
+    margin: 1em;
+    width: 100px;
+    height: 100px;
+    overflow: hidden;
+    word-wrap: break-word;
+}
+.title {
+    font-weight: bold;
+}
+.description {
+
+}
