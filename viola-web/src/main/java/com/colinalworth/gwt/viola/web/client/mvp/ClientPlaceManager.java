@@ -15,8 +15,12 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
+import com.google.web.bindery.autobean.shared.AutoBeanUtils;
+
+import java.util.logging.Logger;
 
 public class ClientPlaceManager implements PlaceManager {
+	private static Logger logger = Logger.getLogger(ClientPlaceManager.class.getName());
 
 	private class ViewWrapper implements AcceptsView {
 		@Override
@@ -63,18 +67,22 @@ public class ClientPlaceManager implements PlaceManager {
 //			return true;
 		}
 
-		if (place.equals(current)) {
+		if (equals(place, current)) {
 			//already there, don't do anything
+			logger.finest("Already at current location, no need to do anything: " + placeFactory.route(place));
 			return false;
 		}
+
+		//sanity check the place, make sure it is valid (or throws an exception because it has nulls it shouldn't have)
+		placeFactory.route(place);
 
 		Presenter presenter = presenters.getPresenterInstance(place);
 
 
 		if (active != null) {
 			if (active.equals(presenter)) {
-				//already have the right instance, re-trigger our presense
-				//this allows .equals to say 'dont make a new one'
+				//already have the right instance, re-trigger our presence
+				//this allows .equals to say "don't make a new one"
 
 				//dont fire an event, just track the current place and re-call go()
 				((Presenter) active).go(this.new ViewWrapper(), place);
@@ -90,9 +98,11 @@ public class ClientPlaceManager implements PlaceManager {
 				if (msg != null && !Window.confirm(msg)) {
 					return false;
 				}
+				logger.finest("Stopping " + active);
 				active.stop();
 			} else {
 				// else cancel existing
+				logger.finest("Canceling " + active);
 				active.cancel();
 			}
 		}
@@ -103,6 +113,13 @@ public class ClientPlaceManager implements PlaceManager {
 		current = place;
 		ValueChangeEvent.fire(this, place);
 		return true;
+	}
+
+	private boolean equals(Place place1, Place place2) {
+		if (place1 == null) {
+			return place2 == null;
+		}
+		return place2 != null && AutoBeanUtils.deepEquals(AutoBeanUtils.getAutoBean(place1), AutoBeanUtils.getAutoBean(place2));
 	}
 
 	@Override

@@ -13,7 +13,8 @@ import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileE
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfilePlace;
 import com.colinalworth.gwt.viola.web.shared.request.ProfileRequest;
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.shared.GWT;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.Window;
@@ -37,6 +38,9 @@ import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
 import com.sencha.gxt.widget.core.client.toolbar.FillToolItem;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import de.barop.gwt.client.ui.HyperlinkPushState;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ViolaApp implements EntryPoint {
 	private SimpleContainer container = new SimpleContainer();
@@ -66,35 +70,47 @@ public class ViolaApp implements EntryPoint {
 
 	@Override
 	public void onModuleLoad() {
-		Viewport vp = new Viewport();
-
-		vp.setWidget(mainApp());
-
-		ViolaGinjector ginjector = GWT.create(ViolaGinjector.class);
-
-		//TODO let gin create this so it can be injected elsewhere
-		ginjector.inject(this);
-		placeManager.setContainer(new AcceptsOneWidget() {
+		GWT.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+			Logger logger = Logger.getLogger("Uncaught Exception");
 			@Override
-			public void setWidget(IsWidget w) {
-				container.setWidget(w);
-				container.forceLayout();
+			public void onUncaughtException(Throwable throwable) {
+				logger.log(Level.SEVERE, "Uncaught Exception", throwable);
 			}
 		});
 
-		eventBus.addHandler(ProfileUpdateEvent.TYPE, new ProfileUpdateHandler() {
-			@Override
-			public void onProfileUpdate(ProfileUpdateEvent event) {
-				String displayName = event.getUserProfile().getDisplayName();
-				userbtn.setText((displayName == null || displayName.isEmpty()) ? event.getUserProfile().getId() : displayName);
-				userbtn.show();
-				((ToolBar) userbtn.getParent()).forceLayout();
-			}
-		});
+		try {
+			Viewport vp = new Viewport();
 
-		navigation.handleCurrent();
+			vp.setWidget(mainApp());
 
-		RootPanel.get().add(vp);
+			ViolaGinjector ginjector = GWT.create(ViolaGinjector.class);
+
+			//TODO let gin create this so it can be injected elsewhere
+			ginjector.inject(this);
+			placeManager.setContainer(new AcceptsOneWidget() {
+				@Override
+				public void setWidget(IsWidget w) {
+					container.setWidget(w);
+					container.forceLayout();
+				}
+			});
+
+			eventBus.addHandler(ProfileUpdateEvent.TYPE, new ProfileUpdateHandler() {
+				@Override
+				public void onProfileUpdate(ProfileUpdateEvent event) {
+					String displayName = event.getUserProfile().getDisplayName();
+					userbtn.setText((displayName == null || displayName.isEmpty()) ? event.getUserProfile().getId() : displayName);
+					userbtn.show();
+					((ToolBar) userbtn.getParent()).forceLayout();
+				}
+			});
+
+			navigation.handleCurrent();
+
+			RootPanel.get().add(vp);
+		} catch (Exception ex) {
+			GWT.reportUncaughtException(ex);
+		}
 	}
 
 	private IsWidget mainApp() {

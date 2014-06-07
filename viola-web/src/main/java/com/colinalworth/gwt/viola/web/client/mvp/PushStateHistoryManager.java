@@ -19,9 +19,7 @@ public class PushStateHistoryManager {
 		History.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
-				changingValue = true;
 				boolean valid = placeManager.submit(factory.route(event.getValue()));
-				changingValue = false;
 				if (!valid) {
 					History.back();
 				}
@@ -31,15 +29,12 @@ public class PushStateHistoryManager {
 		placeManager.addValueChangeHandler(new ValueChangeHandler<Place>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Place> event) {
-//				if (!changingValue) {
-					String url = factory.route(event.getValue());
-					if (url != null) {
-						History.newItem(url, !changingValue);
-					}
-//				}
+				String url = factory.route(event.getValue());
+				if (url != null) {
+					History.newItem(url, false);
+				}
 			}
 		});
-
 	}
 
 	public void handleCurrent() {
