@@ -39,7 +39,6 @@ public class ViolaServerApp extends Impl implements PreRead {
 					"    <title>").getBytes(),
 			//insert page title here, html encoded
 			("</title>\n" +
-					"    <link rel=\"stylesheet\" type=\"text/css\" href=\"/static/viola/reset.css\" />\n" +
 					"</head>\n" +
 					"<body>\n" +
 					"<noscript><div><a href='/'>Viola: a fiddle for GWT</a>" +

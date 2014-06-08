@@ -7,3 +7,19 @@
         -webkit-appearance: none;
     }
 }
+
+
+@external plain;
+.plain {
+    overflow:auto;
+}
+.plain p {
+    margin: 0 8px 16px 8px;
+}
+.plain ul {
+    padding-left: 20px;
+    margin-bottom: 16px;
+}
+.plain li {
+    list-style-type: disc;
+}
