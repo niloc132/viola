@@ -35,6 +35,7 @@ import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.assistedinject.GinFactoryModuleBuilder;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.google.web.bindery.event.shared.EventBus;
 
 public class ViolaClientModule extends AbstractGinModule {
@@ -86,5 +87,10 @@ public class ViolaClientModule extends AbstractGinModule {
 	SessionRequest provideSessionRequest(ViolaRequestQueue queue) {
 		return queue.session();
 	}
+	@Provides
+	@Named("compiledServer")
+	native String provideCompiledServerUrl() /*-{
+		return $wnd.staticContentServer || "";
+	}-*/;
 
 }

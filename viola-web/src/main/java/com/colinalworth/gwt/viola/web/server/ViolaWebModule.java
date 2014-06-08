@@ -38,6 +38,7 @@ import com.google.inject.Provides;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
 import rxf.server.RequestQueueVisitor;
+import rxf.server.driver.RxfBootstrap;
 import rxf.server.guice.CouchModuleBuilder;
 import rxf.server.guice.RxfModule;
 
@@ -47,7 +48,7 @@ import java.util.regex.Pattern;
 public class ViolaWebModule extends RxfModule {
 	@Override
 	protected void configureHttpVisitors() {
-		get("/source/([a-fA-F0-9]+/[^?]*)").with(new HttpProxyImpl(Pattern.compile("/source/([a-fA-F0-9]+/[^?]*)"), "/vsourceproject/", ""));
+//		get("/source/([a-fA-F0-9]+/[^?]*)").with(new HttpProxyImpl(Pattern.compile("/source/([a-fA-F0-9]+/[^?]*)"), "/vsourceproject/", ""));
 		get("/compiled/([a-fA-F0-9]+/[^?]*)").with(new HttpProxyImpl(Pattern.compile("/compiled/([a-fA-F0-9]+/[^?]*)"), "/vcompiledproject/", ""));
 
 		post(".*/rpq").with(RequestQueueVisitor.class);
@@ -61,6 +62,8 @@ public class ViolaWebModule extends RxfModule {
 
 		bindConstant().annotatedWith(Names.named("hostname")).to("0.0.0.0");
 		bindConstant().annotatedWith(Names.named("port")).to(8000);
+
+		bindConstant().annotatedWith(Names.named("compiledServer")).to(RxfBootstrap.getVar("static.url", RxfBootstrap.getVar("url", "http://viola.colinalworth.com")));
 
 		install(new PlaceFactoryModuleBuilder().build(ViolaPlaces.class));
 		bind(PlaceBasedPresenterFactory.class).to(ViolaPlaceMapper.class);

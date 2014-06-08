@@ -7,6 +7,7 @@ import com.colinalworth.gwt.viola.web.shared.mvp.PlaceBasedPresenterFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.Presenter;
 import com.colinalworth.gwt.viola.web.shared.mvp.View;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import one.xio.AsioVisitor.Impl;
 import one.xio.HttpHeaders;
 import one.xio.HttpMethod;
@@ -53,10 +54,17 @@ public class ViolaServerApp extends Impl implements PreRead {
 	};
 
 	private static final int APP_RESPONSE_WRAPPER_SIZE = APP_RESPONSE_TEMPLATE[0].length + APP_RESPONSE_TEMPLATE[1].length + APP_RESPONSE_TEMPLATE[2].length + APP_RESPONSE_TEMPLATE[3].length;
+
 	@Inject
 	PlaceFactory placeFactory;
+
 	@Inject
 	PlaceBasedPresenterFactory presenterFactory;
+
+	@Inject
+	@Named("compiledServer")
+	String compiledServer;
+
 	@Override
 	public void onRead(final SelectionKey key) throws Exception {
 		HttpRequest req1 = null;
@@ -111,7 +119,8 @@ public class ViolaServerApp extends Impl implements PreRead {
 				}
 
 				String title = "Viola: a fiddle for GWT";
-				int length = APP_RESPONSE_WRAPPER_SIZE + response.length() + title.length();
+				String script = "window.staticContentServer = '" + compiledServer + "';";
+				int length = APP_RESPONSE_WRAPPER_SIZE + response.length() + title.length() + script.length();
 				ByteBuffer resp = request.$res()
 						.status(HttpStatus.$200)
 						.headerString(HttpHeaders.Content$2dType, "text/html")
@@ -126,7 +135,7 @@ public class ViolaServerApp extends Impl implements PreRead {
 				payload.put(APP_RESPONSE_TEMPLATE[1]);
 				payload.put(HttpMethod.UTF8.encode(response));
 				payload.put(APP_RESPONSE_TEMPLATE[2]);
-//				payload.put("".getBytes());
+				payload.put(script.getBytes());
 				payload.put(APP_RESPONSE_TEMPLATE[3]).rewind();
 
 				//ok, data in hand, lets get ready to write
