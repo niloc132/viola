@@ -15,8 +15,6 @@ public class HomeViewImpl extends AbstractClientView<HomePresenter> implements H
 				"nearly non-existent. Assume (at least for now) that all posts are public, and assume that " +
 				"this site is prone to xss or other security issues."));
 		lc.add(new HyperlinkPushState("Create a new project", "proj/new"));
-		lc.add(new HyperlinkPushState("Search for a project", "search/project/?q=foo"));
-//		lc.add(new HyperlinkPushState("Open existing project", "proj/4307c733f10126bbd2396ef99e784c69"));
 
 		initWidget(lc);
 	}

@@ -10,5 +10,7 @@ public interface ViolaBundle extends ClientBundle {
 
 	public interface ProjSearchResults extends Styles, CssResource {}
 
+	CssResource app();
+
 	ProjSearchResults searchResults();
 }

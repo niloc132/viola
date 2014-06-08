@@ -8,15 +8,19 @@ import com.colinalworth.gwt.viola.web.client.ioc.UserId.UserIdProvider;
 import com.colinalworth.gwt.viola.web.client.ioc.ViolaGinjector;
 import com.colinalworth.gwt.viola.web.client.mvp.ClientPlaceManager;
 import com.colinalworth.gwt.viola.web.client.mvp.PushStateHistoryManager;
+import com.colinalworth.gwt.viola.web.client.styles.ViolaBundle;
 import com.colinalworth.gwt.viola.web.shared.dto.UserProfile;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfilePlace;
+import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter.SearchProjectPlace;
 import com.colinalworth.gwt.viola.web.shared.request.ProfileRequest;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -32,6 +36,7 @@ import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.Verti
 import com.sencha.gxt.widget.core.client.container.Viewport;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
+import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.menu.Menu;
 import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
@@ -79,6 +84,8 @@ public class ViolaApp implements EntryPoint {
 		});
 
 		try {
+			ViolaBundle.INSTANCE.app().ensureInjected();
+
 			Viewport vp = new Viewport();
 
 			vp.setWidget(mainApp());
@@ -119,6 +126,23 @@ public class ViolaApp implements EntryPoint {
 		toolBar.add(new HyperlinkPushState("Viola: a fiddle for GWT", ""));
 
 		toolBar.add(new FillToolItem());
+
+		TextField search = new TextField();
+		search.setEmptyText("Project Search...");
+//		search.getElement().child("input").setAttribute("type", "search");//breaks with chrome clear btn
+		search.addValueChangeHandler(new ValueChangeHandler<String>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<String> stringValueChangeEvent) {
+				String value = stringValueChangeEvent.getValue();
+				if (value == null || value.equals("")) {
+					return;
+				}
+				SearchProjectPlace next = placeManager.create(SearchProjectPlace.class);
+				next.setQuery(value);
+				placeManager.submit(next);
+			}
+		});
+		toolBar.add(search);
 
 		loginbtn = new TextButton("Login", new SelectHandler() {
 			@Override

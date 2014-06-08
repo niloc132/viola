@@ -9,9 +9,13 @@ import com.colinalworth.gwt.viola.web.shared.dto.ProjectSearchResult;
 import com.colinalworth.gwt.viola.web.shared.mvp.AbstractPresenterImpl.AbstractClientView;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -33,10 +37,23 @@ public class SearchProjectViewImpl extends AbstractClientView<SearchProjectPrese
 
 
 	public SearchProjectViewImpl() {
+//		query.getElement().child("input").setAttribute("type", "search");//breaks with chrome clear btn
 		query.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
 				getPresenter().search(event.getValue());//TODO cooldown
+			}
+		});
+		query.addAttachHandler(new Handler() {
+			@Override
+			public void onAttachOrDetach(AttachEvent attachEvent) {
+				Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+					@Override
+					public void execute() {
+						query.selectAll();
+						query.focus();
+					}
+				});
 			}
 		});
 

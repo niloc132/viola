@@ -42,7 +42,9 @@ public class ViolaServerApp extends Impl implements PreRead {
 					"    <link rel=\"stylesheet\" type=\"text/css\" href=\"/static/viola/reset.css\" />\n" +
 					"</head>\n" +
 					"<body>\n" +
-					"<noscript><div><a href='/'>Viola: a fiddle for GWT</a></div>").getBytes(),
+					"<noscript><div><a href='/'>Viola: a fiddle for GWT</a>" +
+					"<form method='get' action='/search/project/' style='display:block;float:right;'><input name='q' type='search' placeholder='Project Search...' /></form>" +
+					"</div>").getBytes(),
 			//insert rendered html here
 			("</noscript>\n" +
 					"<script language='javascript' src='/static/viola/viola.nocache.js'></script>\n" +
