@@ -16,13 +16,12 @@ public class HomePresenter extends AbstractPresenterImpl<HomeView, HomePlace> {
 			"<li>Full text search (currently prefix search)</li>" +
 			"<li>List metadata on example pages (author, title, description)</li>" +
 			"<li>Show log while compiling</li>" +
-			"<li>Make sources public</li>" +
 //			"<li></li>" +
 			"</ul></p>" +
 			"<p>Longer term changes:" +
 			"<ul>" +
 			"<li>Support multiple versions of GWT and libraries</li>" +
-			"<li>Dramatically improve IDE feedback</li>" +
+			"<li>Dramatically improve IDE</li>" +
 			"<li>Support downloading project sources in standard formats (maven, eclipse, intellij)</li>" +
 //			"<li></li>" +
 			"</ul></p></div>");

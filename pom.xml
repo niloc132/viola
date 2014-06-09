@@ -15,6 +15,20 @@
 		<guice.version>3.0</guice.version>
 		<rxf.version>0.9.7.3</rxf.version>
 	</properties>
+	<scm>
+		<connection>scm:git:ssh://git@github.com:niloc132/viola.git</connection>
+		<developerConnection>scm:git:https://github.com/niloc132/viola.git</developerConnection>
+		<url>https://github.com/niloc132/viola</url>
+	</scm>
+
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+			<comments>A business-friendly OSS license</comments>
+		</license>
+	</licenses>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
