@@ -260,7 +260,7 @@ public class PlacesGenerator extends Generator {
 		method.setPlaceType(type);
 		method.setPriority(route.priority());
 		try {
-			method.setContents(new PlaceStringParser(new StringReader(route.path() + "\n")).url());
+			method.setContents(new PlaceStringParser(new StringReader(route.path())).url());
 		} catch (ParseException e) {
 			logger.log(Type.ERROR, "Unable to parse string " + route.path(), e);
 			throw new UnableToCompleteException();

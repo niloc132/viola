@@ -70,7 +70,7 @@ public class PlaceFactoryModuleBuilder {
 			model.setPriority(route.priority());
 
 			try {
-				model.setContents(new PlaceStringParser(new StringReader(route.path() + "\n")).url());
+				model.setContents(new PlaceStringParser(new StringReader(route.path())).url());
 			} catch (ParseException e) {
 				throw new RuntimeException("Unable to parse string " + route.path(), e);
 			}

@@ -93,6 +93,6 @@ public class PlaceStringParserTest {
 	}
 
 	private PlaceStringModel parser(String str) throws ParseException {
-		return new PlaceStringParser(new StringReader(str + "\n")).url();
+		return new PlaceStringParser(new StringReader(str)).url();
 	}
 }

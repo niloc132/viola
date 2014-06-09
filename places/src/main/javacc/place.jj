@@ -17,23 +17,27 @@ public class PlaceStringParser {
 }
 PARSER_END(PlaceStringParser)
 
-TOKEN:
+< DEFAULT > TOKEN:
 {
   <SLASH: "/">
-| <QUESTION_MARK: "?">
+| <BEGIN_QUERY: "?">
 | <AMPERSAND: "&">
 | <EQUALS: "=">
-| <L_BRACE: "{" >
-| <R_BRACE: "}" >
-| <IDENTIFIER: (["A"-"Z","a"-"z"] (["A"-"Z","a"-"z","0"-"9"])*) >
-//| <URL_STRING: (["A"-"Z","a"-"z","0"-"9"])+ >
-| <EOL: "\n"> //TODO replace with actual end token
+| <L_BRACE: "{" > : IDENTIFIER_EXPECTED
+| <URL_STRING: (["A"-"Z","a"-"z","0"-"9"])+ >
+}
+
+< IDENTIFIER_EXPECTED > TOKEN:
+{
+  <IDENTIFIER: (["A"-"Z","a"-"z"] (["A"-"Z","a"-"z","0"-"9"])*) >
+| <OPTIONAL_PARAM: "?">
+| <R_BRACE: "}"> : DEFAULT
 }
 
 PlaceStringModel url():
 { model = new PlaceStringModel(); }
 {
-  (path())? (<SLASH> { model.setRequiresTrailingSlash(true); } )? (querystring())? <EOL>
+  (path())? (<SLASH> { model.setRequiresTrailingSlash(true); } )? (querystring())? <EOF>
   { return model; }
 }
 
@@ -45,7 +49,7 @@ void pathComponent():
 { PlaceStringModel.PathComponent path; }
 {
   (
-    (<IDENTIFIER>) { path = new PlaceStringModel.PathConstant(token.image); }
+    (<URL_STRING>) { path = new PlaceStringModel.PathConstant(token.image); }
   | path = pathVariable()
   )
 
@@ -60,11 +64,11 @@ PlaceStringModel.PathVariable pathVariable():
 
 void querystring():
 { PlaceStringModel.QueryVariable var; }
-{ <QUESTION_MARK> (var = pair() { model.getQuery().add(var); } (<AMPERSAND> var = pair() { model.getQuery().add(var); } )*)? /*(<AMPERSAND>)?*/ }
+{ <BEGIN_QUERY> (var = pair() { model.getQuery().add(var); } (<AMPERSAND> var = pair() { model.getQuery().add(var); } )*)? /*(<AMPERSAND>)?*/ }
 
 PlaceStringModel.QueryVariable pair():
 { String key; Var var;}
-{ <IDENTIFIER> { key = token.image; } <EQUALS> var = queryVariable()
+{ <URL_STRING> { key = token.image; } <EQUALS> var = queryVariable()
   { return new PlaceStringModel.QueryVariable(key, var.name, var.optional); }
 }
 
@@ -76,6 +80,6 @@ Var queryVariable():
 
 Var variable():
 { Var var = new Var(); }
-{ <L_BRACE> <IDENTIFIER> { var.name = token.image; } (<QUESTION_MARK> { var.optional = true; })? <R_BRACE>
+{ <L_BRACE> <IDENTIFIER> { var.name = token.image; } (<OPTIONAL_PARAM> { var.optional = true; })? <R_BRACE>
   { return var; }
 }
