@@ -114,6 +114,10 @@ public class CouchCompiler {
 
 		ClassLoader old = Thread.currentThread().getContextClassLoader();
 		File jobDir = null;
+
+		SerializableTreeLogger logger = new SerializableTreeLogger();
+		logger.setMaxDetail(TreeLogger.INFO);
+
 		try {
 			jobDir = File.createTempFile("rxf-job-", "-" + source.getId());
 
@@ -139,8 +143,6 @@ public class CouchCompiler {
 			ClassLoader jobClassLoader = new URLClassLoader(new URL[]{ sourceDir.toURI().toURL() }, old);
 			Thread.currentThread().setContextClassLoader(jobClassLoader);
 
-			SerializableTreeLogger logger = new SerializableTreeLogger();
-			logger.setMaxDetail(TreeLogger.INFO);
 
 			CompilerOptions options = (CompilerOptions) makeOptions(source, warDir, workDir, deployDir);
 
@@ -171,7 +173,6 @@ public class CouchCompiler {
 			//attach results to document
 			proj = jobs.attachOutputDir(proj, new File(warDir, module.getName()));
 
-			System.out.println(logger.getJsonObject());
 
 			proj = jobs.setJobStatus(proj, Status.COMPLETE);
 
@@ -180,6 +181,7 @@ public class CouchCompiler {
 			proj = jobs.setJobStatus(proj, Status.FAILED);
 			//TODO report error/s
 		} finally {
+			System.out.println(logger.getJsonObject());
 			//remove classloader
 			Thread.currentThread().setContextClassLoader(old);
 
