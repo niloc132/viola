@@ -4,6 +4,7 @@ import com.colinalworth.gwt.viola.compiler.status.StatusUpdateService;
 import com.colinalworth.gwt.viola.compiler.status.StatusUpdateService.StatusUpdateQueries;
 import com.colinalworth.gwt.viola.ioc.ViolaModule;
 import com.colinalworth.gwt.viola.service.AgentStatusService.CompiledProjectQueries;
+import com.google.gwt.dev.ThreadedPermutationWorkerFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -25,7 +26,8 @@ public class CompilerServer {
 		BlobAntiPatternObject.EXECUTOR_SERVICE = Executors.newScheduledThreadPool(10);
 		//		BlobAntiPatternObject.DEBUG_SENDJSON = true;
 
-
+		// avoid forking, thread instead to keep it in the same jvm
+		System.setProperty("gwt.jjs.permutationWorkerFactory", ThreadedPermutationWorkerFactory.class.getName());
 
 		Injector i = Guice.createInjector(new ViolaModule(), new AbstractModule() {
 
