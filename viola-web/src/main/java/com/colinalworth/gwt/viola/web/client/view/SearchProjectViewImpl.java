@@ -63,7 +63,7 @@ public class SearchProjectViewImpl extends AbstractClientView<SearchProjectPrese
 		listview = new ListView<ProjectSearchResult, ProjectSearchResult>(store, new IdentityValueProvider<ProjectSearchResult>(), new SearchResultsListViewAppearance<ProjectSearchResult>());
 		ViolaBundle.INSTANCE.searchResults().ensureInjected();
 		listview.setCell(new AbstractCell<ProjectSearchResult>("click") {
-			ProjectSearchResultTemplate template = com.google.gwt.core.client.GWT.create(ProjectSearchResultTemplate.class);
+			ProjectSearchResultTemplate template = GWT.create(ProjectSearchResultTemplate.class);
 			@Override
 			public void render(Context context, ProjectSearchResult value, SafeHtmlBuilder sb) {
 				sb.append(template.renderProject(value, ViolaBundle.INSTANCE.searchResults()));

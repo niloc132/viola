@@ -103,42 +103,50 @@ public class ViolaServerApp extends Impl implements PreRead {
 		//push the rest of this off into a submitted task, signal ready for write when done, write contents
 		WEBAPP_THREADS.submit(new Runnable() {
 			public void run() {
-				final View<?>[] viewWrapper = new View[1];
-				presenter.go(new AcceptsView() {
-					@Override
-					public void setView(View view) {
-						viewWrapper[0] = view;
-					}
-				}, place);
+				final ByteBuffer payload;
+				try {
+					final View<?>[] viewWrapper = new View[1];
+					presenter.go(new AcceptsView() {
+						@Override
+						public void setView(View view) {
+							viewWrapper[0] = view;
+						}
+					}, place);
 
-				final String response = viewWrapper[0] == null ? null :
-						viewWrapper[0].asSafeHtml() == null ? null :
-								viewWrapper[0].asSafeHtml().asString();
-				if (response == null) {
-					// assume that if it returns null that it already sent back a response
+					final String response = viewWrapper[0] == null ? null :
+							viewWrapper[0].asSafeHtml() == null ? null :
+									viewWrapper[0].asSafeHtml().asString();
+					if (response == null) {
+						// assume that if it returns null that it already sent back a response
+						return;
+					}
+
+					String title = "Viola: a fiddle for GWT";
+					String script = "window.staticContentServer = '" + compiledServer + "';";
+					int length = APP_RESPONSE_WRAPPER_SIZE + response.length() + title.length() + script.length();
+					ByteBuffer resp = request.$res()
+							.status(HttpStatus.$200)
+							.headerString(HttpHeaders.Content$2dType, "text/html")
+							.headerString(HttpHeaders.Content$2dLength, String.valueOf(length))
+							.as(ByteBuffer.class);
+					int needed = resp.rewind().limit() + length;
+
+					payload = (ByteBuffer) ByteBuffer.allocate(needed);
+					payload.put(resp);
+					payload.put(APP_RESPONSE_TEMPLATE[0]);
+
+					payload.put(title.getBytes());
+					payload.put(APP_RESPONSE_TEMPLATE[1]);
+					payload.put(HttpMethod.UTF8.encode(response));
+					payload.put(APP_RESPONSE_TEMPLATE[2]);
+					payload.put(script.getBytes());
+					payload.put(APP_RESPONSE_TEMPLATE[3]).rewind();
+
+				} catch (Exception ex) {
+					ex.printStackTrace();
+					Errors.$500(key);
 					return;
 				}
-
-				String title = "Viola: a fiddle for GWT";
-				String script = "window.staticContentServer = '" + compiledServer + "';";
-				int length = APP_RESPONSE_WRAPPER_SIZE + response.length() + title.length() + script.length();
-				ByteBuffer resp = request.$res()
-						.status(HttpStatus.$200)
-						.headerString(HttpHeaders.Content$2dType, "text/html")
-						.headerString(HttpHeaders.Content$2dLength, String.valueOf(length))
-						.as(ByteBuffer.class);
-				int needed = resp.rewind().limit() + length;
-				final ByteBuffer payload = (ByteBuffer) ByteBuffer.allocate(needed);
-				payload.put(resp);
-				payload.put(APP_RESPONSE_TEMPLATE[0]);
-
-				payload.put(title.getBytes());
-				payload.put(APP_RESPONSE_TEMPLATE[1]);
-				payload.put(HttpMethod.UTF8.encode(response));
-				payload.put(APP_RESPONSE_TEMPLATE[2]);
-				payload.put(script.getBytes());
-				payload.put(APP_RESPONSE_TEMPLATE[3]).rewind();
-
 				//ok, data in hand, lets get ready to write
 				key.attach(new Impl(){
 					@Override

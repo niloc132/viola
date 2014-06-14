@@ -37,14 +37,22 @@ public class SearchProjectViewImpl extends AbstractServerView<SearchProjectPrese
 
 		if (results != null) {
 			for (ProjectSearchResult project : results) {
-				if (project.getLatestCompiledId() == null) {
+				if (project.getLatestCompiledId() == null || (project.getTitle() == null && project.getDescription() == null)) {
 					continue;
 				}
-				sb.appendHtmlConstant("<div><a href='/example/" + UriUtils.encode(project.getLatestCompiledId()) + "/'>")
-						.appendEscaped(project.getTitle())
-						.appendHtmlConstant("</a>")
-						.appendEscaped(project.getDescription())
-						.appendHtmlConstant("</div>");
+				sb.appendHtmlConstant("<div><a href='/example/" + UriUtils.encode(project.getLatestCompiledId()) + "/'>");
+				if (project.getTitle() == null) {
+					sb.appendEscaped(project.getDescription());
+					sb.appendHtmlConstant("</a>");
+				} else {
+
+					sb.appendEscaped(project.getTitle());
+					sb.appendHtmlConstant("</a>");
+					if (project.getDescription() != null) {
+						sb.appendEscaped(project.getDescription());
+					}
+				}
+				sb.appendHtmlConstant("</div>");
 			}
 		}
 
