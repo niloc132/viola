@@ -181,6 +181,7 @@ public class CouchCompiler {
 			proj = jobs.setJobStatus(proj, Status.FAILED);
 			//TODO report error/s
 		} finally {
+			jobs.saveLogs(proj, logger.getJsonObject());
 			System.out.println(logger.getJsonObject());
 			//remove classloader
 			Thread.currentThread().setContextClassLoader(old);

@@ -55,7 +55,10 @@ public class JobService {
 
 	}
 	public interface LogQueries extends CouchService<CompilerLog> {
-
+		@View(map="function(doc) {" +
+				"emit(doc.compiledProjectId, doc);" +
+				"}")
+		List<CompilerLog> findFromCompiled(String id);
 	}
 
 	@Inject SourceProjectQueries sourceQueries;
@@ -221,7 +224,13 @@ public class JobService {
 		JsonObject root = new JsonObject();
 		root.addProperty("compiledProjectId", proj.getId());
 		root.add("node", log);
-		//TODO
+		CompilerLog bean = CouchMetaDriver.gson().fromJson(root, CompilerLog.class);
+		logQueries.persist(bean);
+	}
+
+	public CompilerLog getLogs(CompiledProject project) {
+		List<CompilerLog> logs = logQueries.findFromCompiled(project.getId());
+		return logs == null || logs.isEmpty() ? null : logs.get(0);
 	}
 
 	public SourceProject getSourceProject(CompiledProject proj) {
