@@ -7,6 +7,7 @@ import com.colinalworth.gwt.viola.entity.SourceProject;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import rxf.server.Attachment;
 import rxf.server.CouchService;
 import rxf.server.CouchService.Attachments;
 import rxf.server.driver.CouchMetaDriver;
@@ -27,6 +28,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 
 @Singleton
 public class JobService {
@@ -119,6 +121,23 @@ public class JobService {
 				"}","project/client/SampleEntryPoint.java", "application/java");
 
 		return project;
+	}
+
+	public SourceProject cloneProjectToUser(SourceProject original, String userId) {
+		SourceProject clone = new SourceProject();
+		clone.setAuthorId(userId);
+		clone.setDescription(original.getDescription());
+		clone.setModule(original.getModule());
+		clone.setPrivate(original.isPrivate());
+		clone.setTitle(original.getTitle());
+
+		clone = saveProject(clone);
+		Attachments oldAttachments = sourceQueries.attachments(original);
+		Attachments attachments = sourceQueries.attachments(clone);
+		for (Entry<String, Attachment> o : original.getAttachments().entrySet()) {
+			attachments.addAttachment(oldAttachments.getAttachment(o.getKey()), o.getKey(), o.getValue().getContentType());
+		}
+		return sourceQueries.find(clone.getId());
 	}
 
 	public SourceProject saveProject(SourceProject project) {

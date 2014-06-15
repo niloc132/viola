@@ -4,15 +4,10 @@ import com.colinalworth.gwt.viola.web.shared.dto.CompileLimitException;
 import com.colinalworth.gwt.viola.web.shared.dto.CompiledProjectStatus;
 import com.colinalworth.gwt.viola.web.shared.dto.MustBeLoggedInException;
 import com.colinalworth.gwt.viola.web.shared.dto.Project;
-import com.colinalworth.gwt.viola.web.shared.dto.ProjectSearchResult;
 import com.colinalworth.rpq.client.AsyncService.Throws;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-import java.util.List;
-
 public interface JobRequest {
-	void getMyJobs(AsyncCallback<List<ProjectSearchResult>> callback);
-
 	void getAttachment(String projectId, String path, AsyncCallback<String> callback);
 
 	@Throws(MustBeLoggedInException.class)
@@ -24,6 +19,10 @@ public interface JobRequest {
 
 	@Throws(MustBeLoggedInException.class)
 	void createProject(AsyncCallback<Project> callback);
+
+	@Throws(MustBeLoggedInException.class)
+	void cloneProject(Project other, AsyncCallback<Project> callback);
+
 	@Throws(MustBeLoggedInException.class)
 	void saveProject(Project project, AsyncCallback<Project> callback);
 

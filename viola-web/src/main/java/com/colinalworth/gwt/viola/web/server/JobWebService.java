@@ -8,7 +8,6 @@ import com.colinalworth.gwt.viola.web.shared.dto.CompileLimitException;
 import com.colinalworth.gwt.viola.web.shared.dto.CompiledProjectStatus;
 import com.colinalworth.gwt.viola.web.shared.dto.MustBeLoggedInException;
 import com.colinalworth.gwt.viola.web.shared.dto.Project;
-import com.colinalworth.gwt.viola.web.shared.dto.ProjectSearchResult;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import rxf.shared.CouchTx;
@@ -26,10 +25,6 @@ public class JobWebService {
 	SessionService sessionService;
 	@Inject
 	UserService userService;
-
-	public List<ProjectSearchResult> getMyJobs() {
-		return null;
-	}
 
 	public String getAttachment(String projectId, String path) {
 		return jobService.getSourceAsString(jobService.find(projectId), path);
@@ -73,7 +68,7 @@ public class JobWebService {
 		return p;
 	}
 
-	public Project createProject() throws MustBeLoggedInException{
+	public Project createProject() throws MustBeLoggedInException {
 		String owner = sessionService.getThreadLocalUserId("create");
 		if (owner == null) {
 			throw new MustBeLoggedInException("Can't create a project without logging in");
@@ -83,7 +78,18 @@ public class JobWebService {
 
 		return getProject(project.getId());
 	}
-	public Project saveProject(Project project) throws MustBeLoggedInException{
+	public Project cloneProject(Project other) throws MustBeLoggedInException {
+		String owner = sessionService.getThreadLocalUserId("clone");
+		if (owner == null) {
+			throw new MustBeLoggedInException("Can't clone a project without logging in");
+		}
+
+		SourceProject clone = jobService.cloneProjectToUser(jobService.find(other.getId()), owner);
+
+		return getProject(clone.getId());
+	}
+
+	public Project saveProject(Project project) throws MustBeLoggedInException {
 		SourceProject sourceProject = jobService.find(project.getId());
 		if (sourceProject.getAuthorId().equals(sessionService.getThreadLocalUserId("save"))) {
 			sourceProject.setDescription(project.getDescription());
