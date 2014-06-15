@@ -78,13 +78,13 @@ public class JobWebService {
 
 		return getProject(project.getId());
 	}
-	public Project cloneProject(Project other) throws MustBeLoggedInException {
+	public Project cloneProject(String otherId) throws MustBeLoggedInException {
 		String owner = sessionService.getThreadLocalUserId("clone");
 		if (owner == null) {
 			throw new MustBeLoggedInException("Can't clone a project without logging in");
 		}
 
-		SourceProject clone = jobService.cloneProjectToUser(jobService.find(other.getId()), owner);
+		SourceProject clone = jobService.cloneProjectToUser(jobService.find(otherId), owner);
 
 		return getProject(clone.getId());
 	}

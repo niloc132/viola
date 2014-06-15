@@ -14,10 +14,11 @@ import com.google.inject.Provider;
 
 public class CreateProjectPresenter extends AbstractPresenterImpl<CreateProjectView, CreateProjectPlace> {
 	public interface CreateProjectView extends View<CreateProjectPresenter> {
-
+		void startWith(String title, String description);
 	}
 	public interface CreateProjectPlace extends Place {
-		//no parameters
+		String getCopy();
+		void setCopy(String id);
 	}
 	@Inject
 	Provider<JobRequest> jobRequest;
@@ -25,12 +26,33 @@ public class CreateProjectPresenter extends AbstractPresenterImpl<CreateProjectV
 	@Inject
 	PlaceManager placeManager;
 
+	@Override
+	public void go(final AcceptsView parent, final CreateProjectPlace place) {
+		if (place.getCopy() == null) {
+			super.go(parent, place);
+		} else {
+			jobRequest.get().getProject(place.getCopy(), new AsyncCallback<Project>() {
+				@Override
+				public void onFailure(Throwable throwable) {
+					//TODO
+				}
+
+				@Override
+				public void onSuccess(Project project) {
+					CreateProjectPresenter.super.go(parent, place);
+					getView().startWith(project.getTitle(), project.getDescription());
+				}
+			});
+		}
+	}
+
 	public void createWithNameAndDescription(final String title, final String description) {
-		jobRequest.get().createProject(new AsyncCallback<Project>() {
+		AsyncCallback<Project> callback = new AsyncCallback<Project>() {
 			@Override
 			public void onFailure(Throwable caught) {
 				Window.alert(caught.getMessage());
 			}
+
 			@Override
 			public void onSuccess(Project result) {
 				result.setTitle(title);
@@ -41,6 +63,7 @@ public class CreateProjectPresenter extends AbstractPresenterImpl<CreateProjectV
 						//TODO replace with general error handler that server can supply per-request
 						Window.alert(caught.getMessage());
 					}
+
 					@Override
 					public void onSuccess(Project result) {
 						ProjectEditorPlace next = placeManager.create(ProjectEditorPlace.class);
@@ -50,6 +73,11 @@ public class CreateProjectPresenter extends AbstractPresenterImpl<CreateProjectV
 					}
 				});
 			}
-		});
+		};
+		if (getCurrentPlace().getCopy() != null) {
+			jobRequest.get().cloneProject(getCurrentPlace().getCopy(), callback);
+		} else {
+			jobRequest.get().createProject(callback);
+		}
 	}
 }

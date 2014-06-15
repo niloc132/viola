@@ -9,6 +9,11 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 public class CreateProjectViewImpl extends AbstractServerView<CreateProjectPresenter> implements CreateProjectView {
 	@Override
 	public SafeHtml asSafeHtml() {
-		return SafeHtmlUtils.fromString("Create a new project here");
+		return SafeHtmlUtils.fromString("Create a new project here. Please enable JavaScript to create/edit a project.");
+	}
+
+	@Override
+	public void startWith(String title, String description) {
+		//no-op, can't create a project without JS
 	}
 }

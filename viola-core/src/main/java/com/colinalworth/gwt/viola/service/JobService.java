@@ -130,8 +130,9 @@ public class JobService {
 		clone.setModule(original.getModule());
 		clone.setPrivate(original.isPrivate());
 		clone.setTitle(original.getTitle());
+		clone.setLastUpdated(new Date());
 
-		clone = saveProject(clone);
+		clone = sourceQueries.find(sourceQueries.persist(clone).id());
 		Attachments oldAttachments = sourceQueries.attachments(original);
 		Attachments attachments = sourceQueries.attachments(clone);
 		for (Entry<String, Attachment> o : original.getAttachments().entrySet()) {

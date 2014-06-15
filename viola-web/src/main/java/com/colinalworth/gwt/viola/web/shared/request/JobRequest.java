@@ -21,7 +21,7 @@ public interface JobRequest {
 	void createProject(AsyncCallback<Project> callback);
 
 	@Throws(MustBeLoggedInException.class)
-	void cloneProject(Project other, AsyncCallback<Project> callback);
+	void cloneProject(String other, AsyncCallback<Project> callback);
 
 	@Throws(MustBeLoggedInException.class)
 	void saveProject(Project project, AsyncCallback<Project> callback);

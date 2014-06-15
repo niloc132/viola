@@ -18,7 +18,7 @@ public interface ViolaPlaces extends PlaceFactory {
 	@Route(path = "search/project/?q={query}", priority = 1)
 	SearchProjectPlace searchProject();
 
-	@Route(path = "proj/new", priority = 1)
+	@Route(path = "proj/new?from={copy?}", priority = 1)
 	CreateProjectPlace createProject();
 
 	@Route(path = "proj/{id}/{activeFile?}", priority = 2)
