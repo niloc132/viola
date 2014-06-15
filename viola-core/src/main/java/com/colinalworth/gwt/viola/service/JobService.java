@@ -220,12 +220,8 @@ public class JobService {
 		return new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
 	}
 
-	public void saveLogs(CompiledProject proj, JsonObject log) {
-		JsonObject root = new JsonObject();
-		root.addProperty("compiledProjectId", proj.getId());
-		root.add("node", log);
-		CompilerLog bean = CouchMetaDriver.gson().fromJson(root, CompilerLog.class);
-		logQueries.persist(bean);
+	public void saveLog(CompilerLog log) {
+		logQueries.persist(log);
 	}
 
 	public CompilerLog getLogs(CompiledProject project) {

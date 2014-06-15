@@ -3,6 +3,7 @@ package com.colinalworth.gwt.viola.compiler;
 import com.colinalworth.gwt.viola.compiler.status.StatusUpdateService;
 import com.colinalworth.gwt.viola.entity.CompiledProject;
 import com.colinalworth.gwt.viola.entity.CompiledProject.Status;
+import com.colinalworth.gwt.viola.entity.CompilerLog;
 import com.colinalworth.gwt.viola.entity.SourceProject;
 import com.colinalworth.gwt.viola.service.JobService;
 import com.google.gwt.core.ext.TreeLogger;
@@ -181,8 +182,10 @@ public class CouchCompiler {
 			proj = jobs.setJobStatus(proj, Status.FAILED);
 			//TODO report error/s
 		} finally {
-			jobs.saveLogs(proj, logger.getJsonObject());
-			System.out.println(logger.getJsonObject());
+			CompilerLog log = new CompilerLog(proj.getId(), logger.getModel());
+			jobs.saveLog(log);
+//			System.out.println(CouchMetaDriver.gson().toJson(logger.getModel()));
+
 			//remove classloader
 			Thread.currentThread().setContextClassLoader(old);
 

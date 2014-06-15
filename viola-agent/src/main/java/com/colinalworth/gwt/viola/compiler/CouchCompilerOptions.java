@@ -170,7 +170,7 @@ public class CouchCompilerOptions implements CompilerOptions {
 	}
 
 	public Type getLogLevel() {
-		return null;
+		return Type.INFO;
 	}
 
 	public void setLogLevel(Type logLevel) {
@@ -218,7 +218,7 @@ public class CouchCompilerOptions implements CompilerOptions {
 	}
 
 	public int getMaxPermsPerPrecompile() {
-		return 0;
+		return -1;
 	}
 
 	public void setMaxPermsPerPrecompile(int maxPerms) {

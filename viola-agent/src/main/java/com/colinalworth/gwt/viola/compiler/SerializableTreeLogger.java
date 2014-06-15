@@ -1,36 +1,33 @@
 package com.colinalworth.gwt.viola.compiler;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.colinalworth.gwt.viola.entity.CompilerLog.LogDetail;
+import com.colinalworth.gwt.viola.entity.CompilerLog.LogLevel;
+import com.colinalworth.gwt.viola.entity.CompilerLog.LogNode;
 import com.google.gwt.dev.util.log.AbstractTreeLogger;
 
 public class SerializableTreeLogger extends AbstractTreeLogger {
-//	private List<JsonObject> possibleBranches = new ArrayList<JsonObject>();
 	private final Object mutex = new Object();
-	
+
 	private final SerializableTreeLogger parent;
-	
-	private final JsonObject me = new JsonObject();
-	
+
+	private final LogNode me = new LogNode();
+
 	public SerializableTreeLogger() {
 		this(null);
 	}
 	private SerializableTreeLogger(SerializableTreeLogger parent) {
 		this.parent = parent;
-		me.add("children", new JsonArray());
-		me.add("log", new JsonArray());
 	}
-	
-	public JsonObject getJsonObject() {
+
+	public LogNode getModel() {
 		return me;
 	}
 
 	private void addToParent() {
 		//TODO get the order right?
 		if (parent != null) {
-			System.out.println(getJsonObject());
-			parent.me.get("children").getAsJsonArray().add(me);
-			parent.addToParent();
+			assert !parent.me.getChildren().contains(me);
+			parent.me.getChildren().add(me);
 		}
 	}
 
@@ -39,24 +36,24 @@ public class SerializableTreeLogger extends AbstractTreeLogger {
 		return new SerializableTreeLogger(this);
 	}
 
-	  @Override
-	  protected void doCommitBranch(AbstractTreeLogger childBeingCommitted,
-			  Type type, String msg, Throwable caught, HelpInfo helpInfo) {
-		  addToParent();
-		  doLog(childBeingCommitted.getBranchedIndex(), type, msg, caught, helpInfo);
-	  }
+	@Override
+	protected void doCommitBranch(AbstractTreeLogger childBeingCommitted, Type type, String msg, Throwable caught, HelpInfo helpInfo) {
+		assert childBeingCommitted instanceof SerializableTreeLogger : "well that's not very useful now is it";
+		SerializableTreeLogger child = (SerializableTreeLogger) childBeingCommitted;
+
+		child.addToParent();
+		child.me.setEntry(new LogDetail(LogLevel.valueOf(type.getLabel()), msg));
+	}
 
 	@Override
-	protected void doLog(int indexOfLogEntryWithinParentLogger, Type type,
-			String msg, Throwable caught, HelpInfo helpInfo) {
+	protected void doLog(int indexOfLogEntryWithinParentLogger, Type type, String msg, Throwable caught, HelpInfo helpInfo) {
 		synchronized (mutex) {
-			JsonObject detail = new JsonObject();
-			detail.addProperty("type", type.getLabel());
-			detail.addProperty("message", msg);
-			
+			LogDetail detail = new LogDetail(LogLevel.valueOf(type.getLabel()), msg);
+
 			//TODO deal with caught
 			//TODO deal with helpInfo
-			me.get("log").getAsJsonArray().add(detail);
+			//log message being added directly, no branch
+			me.getChildren().add(new LogNode(detail));
 		}
 	}
 
