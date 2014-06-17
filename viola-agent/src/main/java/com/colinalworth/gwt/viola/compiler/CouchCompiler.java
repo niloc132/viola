@@ -23,7 +23,6 @@ import com.google.gwt.dev.jjs.PermutationResult;
 import com.google.gwt.dev.util.FileBackedObject;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -47,7 +46,6 @@ public class CouchCompiler {
 	private ScheduledExecutorService pool = Executors.newScheduledThreadPool(2);
 
 	@Inject JobService jobs;
-	@Inject @Named("gwtCompilerClasspath") URL[] gwtCompilerClasspath;
 
 	@Inject StatusUpdateService status;
 	private Thread shutdownHook = new Thread(){
@@ -230,10 +228,6 @@ public class CouchCompiler {
 
 	private ModuleDef makeModule(final SourceProject source, CompilerContext ctx, TreeLogger logger) throws UnableToCompleteException {
 		return ModuleDefLoader.loadFromClassPath(logger, ctx, source.getModule());
-	}
-
-	private URL[] getCompilerClasspathElements() {
-		return gwtCompilerClasspath;
 	}
 
 	private void shutdownAndAwaitTermination(int timeoutInSeconds) {

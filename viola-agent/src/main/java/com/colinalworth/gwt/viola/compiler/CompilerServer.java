@@ -8,14 +8,10 @@ import com.google.gwt.dev.ThreadedPermutationWorkerFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.name.Names;
 import one.xio.HttpMethod;
 import rxf.server.guice.CouchModuleBuilder;
-import rxf.server.guice.RxfModule;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 public class CompilerServer {
 
@@ -30,25 +26,14 @@ public class CompilerServer {
 		System.setProperty("gwt.jjs.permutationWorkerFactory", ThreadedPermutationWorkerFactory.class.getName());
 
 		Injector i = Guice.createInjector(new ViolaModule(), new AbstractModule() {
-
 			@Override
 			protected void configure() {
-				try {
-					bind(URL[].class).annotatedWith(Names.named("gwtCompilerClasspath")).toInstance(new URL[]{
-							new URL("file:///home/colin/.m2/repository/com/google/gwt/gwt-dev/2.6.0/gwt-dev-2.6.0.jar"),
-							new URL("file:///home/colin/.m2/repository/com/google/gwt/gwt-user/2.6.0/gwt-user-2.6.0.jar"),
-							new URL("file:///home/colin/workspaces42/rebased/viola/target/classes/")
-					});
-
-					install(new CouchModuleBuilder("v")
-							.withService(StatusUpdateQueries.class)
-							.withService(CompiledProjectQueries.class)
-							.build());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				install(new CouchModuleBuilder("v")
+						.withService(StatusUpdateQueries.class)
+						.withService(CompiledProjectQueries.class)
+						.build());
 			}
-		}, new RxfModule());
+		});
 
 		new Thread() {
 			public void run() {

@@ -12,14 +12,10 @@ import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
-import com.google.inject.name.Names;
 import one.xio.HttpMethod;
 import rxf.server.guice.CouchModuleBuilder;
-import rxf.server.guice.RxfModule;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,23 +28,12 @@ public class Governer {
 	public static void main(final String[] args) throws InterruptedException {
 
 		Injector i = Guice.createInjector(new ViolaModule(), new AbstractModule() {
-
 			@Override
 			protected void configure() {
-				try {
-					bind(URL[].class).annotatedWith(Names.named("gwtCompilerClasspath")).toInstance(new URL[]{
-							new URL("file:///home/colin/.m2/repository/com/google/gwt/gwt-dev/2.6.0/gwt-dev-2.6.0.jar"),
-							new URL("file:///home/colin/.m2/repository/com/google/gwt/gwt-user/2.6.0/gwt-user-2.6.0.jar"),
-							new URL("file:///home/colin/workspaces42/rebased/viola/target/classes/")
-					});
-
-					install(new CouchModuleBuilder("v")
-							.withService(StatusUpdateService.StatusUpdateQueries.class)
-							.withService(CompiledProjectQueries.class)
-							.build());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				install(new CouchModuleBuilder("v")
+						.withService(StatusUpdateService.StatusUpdateQueries.class)
+						.withService(CompiledProjectQueries.class)
+						.build());
 				MapBinder<String, AgentManager> managers = MapBinder.newMapBinder(binder(), String.class, AgentManager.class);
 				for (String arg : args) {
 					String[] parts = arg.split(":", 2);
@@ -59,7 +44,7 @@ public class Governer {
 					}
 				}
 			}
-		}, new RxfModule());
+		});
 
 		new Thread() {
 			public void run() {
