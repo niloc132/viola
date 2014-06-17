@@ -11,7 +11,7 @@
 		<java.version>1.7</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<gwt.version>2.6.0</gwt.version>
+		<gwt.version>2.6.1</gwt.version>
 		<guice.version>3.0</guice.version>
 		<rxf.version>0.9.7.3</rxf.version>
 	</properties>
@@ -51,6 +51,12 @@
 			<dependency>
 				<groupId>com.google.gwt</groupId>
 				<artifactId>gwt-user</artifactId>
+				<version>${gwt.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.gwt</groupId>
+				<artifactId>gwt-servlet</artifactId>
 				<version>${gwt.version}</version>
 			</dependency>
 
