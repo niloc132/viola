@@ -13,7 +13,7 @@ import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
-import rxf.server.RelaxFactoryServer;
+import one.xio.HttpMethod;
 import rxf.server.guice.CouchModuleBuilder;
 import rxf.server.guice.RxfModule;
 
@@ -30,15 +30,11 @@ import java.util.Map;
 public class Governer {
 
 	public static void main(final String[] args) throws InterruptedException {
-		//		BlobAntiPatternObject.DEBUG_SENDJSON = true;
 
 		Injector i = Guice.createInjector(new ViolaModule(), new AbstractModule() {
 
 			@Override
 			protected void configure() {
-				bindConstant().annotatedWith(Names.named("hostname")).to("0.0.0.0");
-				bindConstant().annotatedWith(Names.named("port")).to(9002);
-
 				try {
 					bind(URL[].class).annotatedWith(Names.named("gwtCompilerClasspath")).toInstance(new URL[]{
 							new URL("file:///home/colin/.m2/repository/com/google/gwt/gwt-dev/2.6.0/gwt-dev-2.6.0.jar"),
@@ -65,21 +61,17 @@ public class Governer {
 			}
 		}, new RxfModule());
 
-		final RelaxFactoryServer server = i.getInstance(RelaxFactoryServer.class);
 		new Thread() {
 			public void run() {
 				try {
 					//blocking
-					server.start();
+					HttpMethod.init(null);
 				} catch (IOException e) {
 					e.printStackTrace();
 					System.exit(1);
 				}
 			}
 		}.start();
-		while (!server.isRunning()) {
-			Thread.sleep(10);
-		}
 		AgentStatusService service = i.getInstance(AgentStatusService.class);
 		Map<String, AgentManager> agentManagement = i.getInstance(Key.get(new TypeLiteral<Map<String, AgentManager>>(){}));
 
