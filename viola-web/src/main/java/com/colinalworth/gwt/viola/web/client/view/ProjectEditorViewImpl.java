@@ -15,9 +15,9 @@ import com.google.gwt.editor.client.ValueAwareEditor;
 import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
 import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.Label;
 import com.sencha.gxt.core.client.IdentityValueProvider;
-import com.sencha.gxt.core.client.Style.LayoutRegion;
 import com.sencha.gxt.core.client.Style.SelectionMode;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
@@ -29,6 +29,7 @@ import com.sencha.gxt.widget.core.client.ProgressBar;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData;
+import com.sencha.gxt.widget.core.client.container.HasLayout;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
@@ -47,6 +48,9 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 
 	TextField title = new TextField();
 	TextArea description = new TextArea();
+	private final ContentPanel example = new ContentPanel();
+	private String lastCompiledId;
+	private String lastUrl;
 
 
 	public interface Driver extends SimpleBeanEditorDriver<Project, ProjectEditorViewImpl> {}
@@ -62,15 +66,15 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 	private final Tree<String, String> files;
 
 	private final SimpleAcceptsView codeEditor = new SimpleAcceptsView();
-	private final SimpleAcceptsView runningExample = new SimpleAcceptsView();
+//	private final SimpleAcceptsView runningExample = new SimpleAcceptsView();
 
 	private ProgressBar progress = new ProgressBar();
 	private Label error = new Label("An error occurred compiling");// TODO link to error msg
 	private HyperlinkPushState compiledLink = new HyperlinkPushState();
 
 	public ProjectEditorViewImpl() {
-		blc = new BorderLayoutContainer();
-
+		BorderLayoutContainer code = new BorderLayoutContainer();
+		
 		ContentPanel projectDetailsPanel = new ContentPanel();
 		VerticalLayoutContainer container = new VerticalLayoutContainer();
 		projectDetailsPanel.setHeadingText("Project Details");
@@ -111,8 +115,10 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 		west.setMaxSize(5000);
 		west.setSplit(true);
 		west.setCollapsible(true);
+		west.setCollapseMini(true);
 		west.setMargins(new Margins(0, 8, 0, 0));
-		blc.setWestWidget(projectDetailsPanel, west);
+		west.setFloatable(false);
+		code.setWestWidget(projectDetailsPanel, west);
 
 		VerticalLayoutContainer center = new VerticalLayoutContainer();
 
@@ -127,8 +133,8 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 		toolBar.add(new TextButton("Compile", new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {
+				example.mask("Compiling...");
 				getPresenter().compile();
-				blc.collapse(LayoutRegion.EAST);
 			}
 		}));
 		progress.hide();
@@ -137,26 +143,31 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 		toolBar.add(error);
 		center.add(toolBar);
 
-		blc.setCenterWidget(center);
+		code.setCenterWidget(center);
 
-		ContentPanel east = new ContentPanel();
-		east.setHeadingText("Latest Compiled");
+
+		blc = new BorderLayoutContainer();
+		BorderLayoutData codeLayoutData = new BorderLayoutData(.5);
+		codeLayoutData.setCollapseMini(true);
+		codeLayoutData.setMaxSize(10000);
+		codeLayoutData.setSplit(true);
+		codeLayoutData.setCollapsible(true);
+		codeLayoutData.setMargins(new Margins(0, 8, 0, 0));
+		codeLayoutData.setFloatable(false);
+		ContentPanel codeWrap = new ContentPanel();
+		codeWrap.setWidget(code);
+		codeWrap.setHeaderVisible(false);
+		blc.setWestWidget(codeWrap, codeLayoutData);
+
+		example.setHeadingText("Output");
 //		east.addTool(new ToolButton(ToolButton.REFRESH, new SelectHandler() {
 //			@Override
 //			public void onSelect(SelectEvent event) {
 //				getPresenter().compile();
 //			}
 //		}));
-		east.setWidget(runningExample);
-
-		BorderLayoutData eastData = new BorderLayoutData(200);
-		eastData.setMaxSize(5000);
-		eastData.setCollapsible(true);
-		eastData.setSplit(true);
-		eastData.setFloatable(false);
-		eastData.setMargins(new Margins(0, 0, 0, 8));
-		blc.setEastWidget(east, eastData);
-		blc.collapse(LayoutRegion.EAST);
+		setCurrentCompiled(null, null);
+		blc.setCenterWidget(example);
 
 		initWidget(blc);
 
@@ -166,11 +177,6 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 	@Override
 	public AcceptsView getCodeEditorSlot() {
 		return codeEditor;
-	}
-
-	@Override
-	public SimpleAcceptsView getRunningExampleSlot() {
-		return runningExample;
 	}
 
 	@Override
@@ -220,24 +226,40 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 	}
 
 	@Override
-	public void setActiveFile(String activeFile) {
-		files.getSelectionModel().select(activeFile, false);
+	public void setCurrentCompiled(String compiledId, String url) {
+		this.lastCompiledId = compiledId;
+		this.lastUrl = url;
+		if (url != null) {
+			example.setWidget(new Frame(url));
+		} else {
+			example.setWidget(new Label("Waiting for project to load, or project not yet compiled..."));
+		}
+		example.forceLayout();
+		example.unmask();
 	}
 
 	@Override
+	public void setActiveFile(String activeFile) {
+		if (files.getStore().findModel(activeFile) != null) {
+			files.getSelectionModel().select(activeFile, false);
+		}
+	}
+
+	List<CompiledProjectStatus> statuses = Arrays.asList(
+			CompiledProjectStatus.QUEUED,
+			CompiledProjectStatus.ACCEPTED,
+			CompiledProjectStatus.PRECOMPILING,
+			CompiledProjectStatus.COMPILING,
+			CompiledProjectStatus.LINKING,
+			CompiledProjectStatus.COMPLETE);
+	@Override
 	public void showProgress(CompiledProjectStatus status) {
-		List<CompiledProjectStatus> statuses = Arrays.asList(
-				CompiledProjectStatus.QUEUED,
-				CompiledProjectStatus.ACCEPTED,
-				CompiledProjectStatus.PRECOMPILING,
-				CompiledProjectStatus.COMPILING,
-				CompiledProjectStatus.LINKING,
-				CompiledProjectStatus.COMPLETE);
 		int index = statuses.indexOf(status);
 		if (index == -1) {
 			//failed or stuck, draw error
 			error.setVisible(true);
 			progress.hide();
+			((HasLayout) error.getParent()).forceLayout();
 			return;
 		}
 		this.progress.show();
@@ -246,8 +268,8 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 
 		this.progress.updateProgress(progress, status.name());
 
-		if (status == CompiledProjectStatus.COMPLETE) {
-			blc.expand(LayoutRegion.EAST);
-		}
+//		if (status == CompiledProjectStatus.COMPLETE) {
+//			blc.expand(LayoutRegion.EAST);
+//		}
 	}
 }

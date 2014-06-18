@@ -4,7 +4,6 @@ import com.colinalworth.gwt.places.shared.Place;
 import com.colinalworth.gwt.places.shared.PlaceManager;
 import com.colinalworth.gwt.viola.web.shared.dto.CompiledProjectStatus;
 import com.colinalworth.gwt.viola.web.shared.dto.Project;
-import com.colinalworth.gwt.viola.web.shared.mvp.ExamplePresenter.ExamplePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorView;
 import com.colinalworth.gwt.viola.web.shared.request.JobRequest;
@@ -15,6 +14,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.name.Named;
 
 public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorView, ProjectEditorPlace> {
 
@@ -22,11 +22,14 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 	public interface ProjectEditorView extends View<ProjectEditorPresenter>, Editor<Project> {
 
 		AcceptsView getCodeEditorSlot();
-		AcceptsView getRunningExampleSlot();
+
+
 
 		SimpleBeanEditorDriver<Project, ?> getDriver();
 
 		void setActiveFile(String activeFile);
+
+		void setCurrentCompiled(String compiledId, String url);
 
 		void showProgress(CompiledProjectStatus status);
 	}
@@ -47,6 +50,11 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 
 	@Inject
 	ExamplePresenter examplePresenter;
+
+	@Inject
+	@Named("compiledServer")
+	String compiledServer;
+
 
 	private SimpleBeanEditorDriver<Project, ?> driver;
 	private Object editor;
@@ -144,7 +152,7 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 	}
 
 	private void updateCompiledId() {
-		jobRequest.get().getCompiledId(getCurrentPlace().getId(), new AsyncCallback<String>(){
+		jobRequest.get().getCompiledId(getCurrentPlace().getId(), new AsyncCallback<String>() {
 			@Override
 			public void onFailure(Throwable caught) {
 				Window.alert(caught.getMessage());
@@ -153,9 +161,7 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 			@Override
 			public void onSuccess(String result) {
 				if (result != null) {
-					ExamplePlace exPlace = placeManager.create(ExamplePlace.class);
-					exPlace.setId(result);
-					examplePresenter.go(getView().getRunningExampleSlot(), exPlace);
+					getView().setCurrentCompiled(result, compiledServer + "/compiled/" + result + "/");
 				}
 			}
 		});
@@ -177,6 +183,7 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 					case FAILED:
 					case STUCK:
 					case COMPLETE:
+						updateCompiledId();
 						break;
 					default:
 						poll();

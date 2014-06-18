@@ -30,18 +30,13 @@ public class ProjectEditorViewImpl extends AbstractServerView<ProjectEditorPrese
 	}
 
 	@Override
-	public AcceptsView getRunningExampleSlot() {
-		return new AcceptsView() {
-			@Override
-			public void setView(View view) {
-				//ignore
-			}
-		};
+	public SimpleBeanEditorDriver<Project, ?> getDriver() {
+		return driver;
 	}
 
 	@Override
-	public SimpleBeanEditorDriver<Project, ?> getDriver() {
-		return driver;
+	public void setCurrentCompiled(String compiledId, String url) {
+		//TODO
 	}
 
 	@Override
