@@ -101,6 +101,7 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 
 		//next, POST to access_token
 		execs.submit(new AccessTokenFetch(code, key));
+		key.interestOps(SelectionKey.OP_READ).attach(null);
 	}
 
 	@Override

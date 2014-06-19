@@ -99,7 +99,7 @@ public class ViolaServerApp extends Impl implements PreRead {
 			Errors.$404(key, path);
 			return;
 		}
-
+		key.interestOps(SelectionKey.OP_READ).attach(null);
 		//push the rest of this off into a submitted task, signal ready for write when done, write contents
 		WEBAPP_THREADS.submit(new Runnable() {
 			public void run() {
