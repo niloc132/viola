@@ -42,10 +42,13 @@ public class JobService {
 		List<CompiledProject> getProjectsWithStatus(@Limit int limit, @Keys Status... status);
 
 		@View(map = "function(doc) {" +
-					"emit(doc.sourceId, doc);" +
+//					"if (doc.status == 'COMPLETE') {" +
+						"emit([doc.sourceId, doc.submittedAt], doc);" +
+//					"}" +
 				"}")
 		@Descending(true)
-		List<CompiledProject> getCompiledForSource(@Key String id);
+		@Limit(1)
+		List<CompiledProject> getCompiledForSource(@EndKey String[] id, @StartKey String[] end);
 
 		@View(map = "function(doc) {" +
 					"emit([doc.submittedBy, doc.submittedAt], doc);" +
@@ -254,7 +257,7 @@ public class JobService {
 	}
 
 	public List<CompiledProject> getCompiledOuput(SourceProject proj) {
-		return compiledQueries.getCompiledForSource(proj.getId());
+		return compiledQueries.getCompiledForSource(new String[]{proj.getId()}, new String[]{proj.getId(), "Z"});
 	}
 
 	public SourceProject find(String id) {
