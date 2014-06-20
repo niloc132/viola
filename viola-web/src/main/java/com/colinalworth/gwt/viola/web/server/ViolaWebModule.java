@@ -6,20 +6,23 @@ import com.colinalworth.gwt.viola.service.UserService;
 import com.colinalworth.gwt.viola.web.client.ioc.Session;
 import com.colinalworth.gwt.viola.web.client.ioc.UserId;
 import com.colinalworth.gwt.viola.web.server.SearchService.SearchQueries;
+import com.colinalworth.gwt.viola.web.server.mvp.ErrorsServerImpl;
+import com.colinalworth.gwt.viola.web.server.mvp.ServerPlaceManager;
+import com.colinalworth.gwt.viola.web.server.mvp.TitleServerImpl;
+import com.colinalworth.gwt.viola.web.server.mvp.ViolaServerApp;
 import com.colinalworth.gwt.viola.web.server.oauth.OAuthCallbackVisitor;
 import com.colinalworth.gwt.viola.web.server.rpq.impl.RpqServerModuleBuilder;
 import com.colinalworth.gwt.viola.web.server.view.CreateProjectViewImpl;
-import com.colinalworth.gwt.viola.web.server.view.ExampleViewImpl;
 import com.colinalworth.gwt.viola.web.server.view.HomeViewImpl;
 import com.colinalworth.gwt.viola.web.server.view.JavaCodeEditorViewImpl;
 import com.colinalworth.gwt.viola.web.server.view.ProfileViewImpl;
 import com.colinalworth.gwt.viola.web.server.view.ProjectEditorViewImpl;
 import com.colinalworth.gwt.viola.web.server.view.SearchProjectViewImpl;
 import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreateProjectView;
-import com.colinalworth.gwt.viola.web.shared.mvp.ExamplePresenter.ExampleView;
 import com.colinalworth.gwt.viola.web.shared.mvp.HomePresenter.HomeView;
 import com.colinalworth.gwt.viola.web.shared.mvp.JavaCodeEditorPresenter.JavaCodeEditorView;
 import com.colinalworth.gwt.viola.web.shared.mvp.PlaceBasedPresenterFactory;
+import com.colinalworth.gwt.viola.web.shared.mvp.Presenter;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfileView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorView;
@@ -63,7 +66,10 @@ public class ViolaWebModule extends RxfModule {
 		bindConstant().annotatedWith(Names.named("hostname")).to("0.0.0.0");
 		bindConstant().annotatedWith(Names.named("port")).to(8000);
 
-		bindConstant().annotatedWith(Names.named("compiledServer")).to(RxfBootstrap.getVar("static.url", RxfBootstrap.getVar("url", "http://viola.colinalworth.com")));
+		bindConstant().annotatedWith(Names.named("compiledServer")).to(RxfBootstrap.getVar("static.url", RxfBootstrap.getVar("url", "https://viola.colinalworth.com")));
+
+		bind(Presenter.Errors.class).to(ErrorsServerImpl.class);
+		bind(Presenter.PageTitle.class).to(TitleServerImpl.class);
 
 		install(new PlaceFactoryModuleBuilder().build(ViolaPlaces.class));
 		bind(PlaceBasedPresenterFactory.class).to(ViolaPlaceMapper.class);
@@ -77,7 +83,6 @@ public class ViolaWebModule extends RxfModule {
 		bind(com.google.web.bindery.event.shared.EventBus.class).to(SimpleEventBus.class);
 
 		bind(SearchProjectView.class).to(SearchProjectViewImpl.class);
-		bind(ExampleView.class).to(ExampleViewImpl.class);
 		bind(CreateProjectView.class).to(CreateProjectViewImpl.class);
 		bind(ProjectEditorView.class).to(ProjectEditorViewImpl.class);
 		bind(HomeView.class).to(HomeViewImpl.class);

@@ -1,7 +1,8 @@
-package com.colinalworth.gwt.viola.web.server;
+package com.colinalworth.gwt.viola.web.server.mvp;
 
 import com.colinalworth.gwt.places.shared.Place;
 import com.colinalworth.gwt.places.shared.PlaceManager.PlaceFactory;
+import com.colinalworth.gwt.viola.web.server.Errors;
 import com.colinalworth.gwt.viola.web.shared.mvp.AcceptsView;
 import com.colinalworth.gwt.viola.web.shared.mvp.PlaceBasedPresenterFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.Presenter;
@@ -28,7 +29,7 @@ import java.util.concurrent.Executors;
  *
  */
 public class ViolaServerApp extends Impl implements PreRead {
-	public static ExecutorService WEBAPP_THREADS = Executors.newCachedThreadPool();
+	public static ExecutorService WEBAPP_THREADS = Executors.newFixedThreadPool(10);
 
 
 	private static final byte[][] APP_RESPONSE_TEMPLATE = {
@@ -106,6 +107,7 @@ public class ViolaServerApp extends Impl implements PreRead {
 				final ByteBuffer payload;
 				try {
 					final View<?>[] viewWrapper = new View[1];
+					presenter.getTitle().set("Viola: a fiddle for GWT");
 					presenter.go(new AcceptsView() {
 						@Override
 						public void setView(View view) {
@@ -113,15 +115,22 @@ public class ViolaServerApp extends Impl implements PreRead {
 						}
 					}, place);
 
-					final String response = viewWrapper[0] == null ? null :
+					String response = viewWrapper[0] == null ? null :
 							viewWrapper[0].asSafeHtml() == null ? null :
 									viewWrapper[0].asSafeHtml().asString();
-					if (response == null) {
+					String errors = ((ErrorsServerImpl)presenter.getErrors()).getErrors().asString();
+					if (response == null && (errors == null || errors.length() == 0)) {
 						// assume that if it returns null that it already sent back a response
 						return;
 					}
 
-					String title = "Viola: a fiddle for GWT";
+					if (response == null) {
+						response = errors;
+					} else if (errors != null && errors.length() != 0) {
+						response = errors + response;
+					}
+
+					String title = presenter.getTitle().get();
 					String script = "window.staticContentServer = '" + compiledServer + "';";
 					int length = APP_RESPONSE_WRAPPER_SIZE + response.length() + title.length() + script.length();
 					ByteBuffer resp = request.$res()

@@ -49,7 +49,7 @@ public class ProfileEditorPresenter extends AbstractPresenterImpl<ProfileEditorV
 		request.getProfile(userIdProvider.get(), new AsyncCallback<UserProfile>() {
 			@Override
 			public void onFailure(Throwable caught) {
-
+				getErrors().report(caught.getMessage());
 			}
 
 			@Override
@@ -60,7 +60,7 @@ public class ProfileEditorPresenter extends AbstractPresenterImpl<ProfileEditorV
 		request.getCompileCountToday(new AsyncCallback<Integer>() {
 			@Override
 			public void onFailure(Throwable caught) {
-
+				getErrors().report(caught.getMessage());
 			}
 
 			@Override
@@ -74,7 +74,7 @@ public class ProfileEditorPresenter extends AbstractPresenterImpl<ProfileEditorV
 		profileServiceProvider.get().updateProfile(driver.flush(), new AsyncCallback<UserProfile>() {
 			@Override
 			public void onFailure(Throwable caught) {
-				//TODO pass error to ui
+				getErrors().report(caught.getMessage());
 			}
 
 			@Override

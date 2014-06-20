@@ -12,7 +12,7 @@ public class ProjectSearchResult implements IsSerializable {
 	private String description;
 
 	//not actually part of the model, populated to speed up later requests
-	private String latestCompiledId;
+//	private String latestCompiledId;
 
 
 	public String getId() {
@@ -47,11 +47,11 @@ public class ProjectSearchResult implements IsSerializable {
 		this.description = description;
 	}
 
-	public String getLatestCompiledId() {
-		return latestCompiledId;
-	}
-
-	public void setLatestCompiledId(String latestCompiledId) {
-		this.latestCompiledId = latestCompiledId;
-	}
+//	public String getLatestCompiledId() {
+//		return latestCompiledId;
+//	}
+//
+//	public void setLatestCompiledId(String latestCompiledId) {
+//		this.latestCompiledId = latestCompiledId;
+//	}
 }

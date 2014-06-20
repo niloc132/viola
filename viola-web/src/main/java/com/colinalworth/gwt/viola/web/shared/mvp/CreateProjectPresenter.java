@@ -7,7 +7,6 @@ import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreatePr
 import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreateProjectView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.request.JobRequest;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -34,7 +33,7 @@ public class CreateProjectPresenter extends AbstractPresenterImpl<CreateProjectV
 			jobRequest.get().getProject(place.getCopy(), new AsyncCallback<Project>() {
 				@Override
 				public void onFailure(Throwable throwable) {
-					//TODO
+					getErrors().report(throwable.getMessage());
 				}
 
 				@Override
@@ -50,7 +49,7 @@ public class CreateProjectPresenter extends AbstractPresenterImpl<CreateProjectV
 		AsyncCallback<Project> callback = new AsyncCallback<Project>() {
 			@Override
 			public void onFailure(Throwable caught) {
-				Window.alert(caught.getMessage());
+				getErrors().report(caught.getMessage());
 			}
 
 			@Override
@@ -60,8 +59,7 @@ public class CreateProjectPresenter extends AbstractPresenterImpl<CreateProjectV
 				jobRequest.get().saveProject(result, new AsyncCallback<Project>() {
 					@Override
 					public void onFailure(Throwable caught) {
-						//TODO replace with general error handler that server can supply per-request
-						Window.alert(caught.getMessage());
+						getErrors().report(caught.getMessage());
 					}
 
 					@Override

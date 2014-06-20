@@ -51,10 +51,7 @@ public class ProfileViewImpl {
 					.appendHtmlConstant("<h2>Projects</h2>");
 
 			for (ProjectSearchResult project : createdProjects) {
-				if (project.getLatestCompiledId() == null) {
-					continue;
-				}
-				sb.appendHtmlConstant("<div><a href='/example/" + UriUtils.encode(project.getLatestCompiledId()) + "/'>")
+				sb.appendHtmlConstant("<div><a href='/proj/" + UriUtils.encode(project.getId()) + "/'>")
 						.appendEscaped(project.getTitle())
 						.appendHtmlConstant("</a>")
 						.appendEscaped(notNull(project.getDescription()))

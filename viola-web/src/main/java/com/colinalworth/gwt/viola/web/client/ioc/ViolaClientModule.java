@@ -5,8 +5,9 @@ import com.colinalworth.gwt.places.shared.PlaceManager.PlaceFactory;
 import com.colinalworth.gwt.viola.web.client.ioc.Session.SessionProvider;
 import com.colinalworth.gwt.viola.web.client.ioc.UserId.UserIdProvider;
 import com.colinalworth.gwt.viola.web.client.mvp.ClientPlaceManager;
+import com.colinalworth.gwt.viola.web.client.mvp.ErrorsClientImpl;
+import com.colinalworth.gwt.viola.web.client.mvp.TitleClientImpl;
 import com.colinalworth.gwt.viola.web.client.view.CreateProjectViewImpl;
-import com.colinalworth.gwt.viola.web.client.view.ExampleViewImpl;
 import com.colinalworth.gwt.viola.web.client.view.HomeViewImpl;
 import com.colinalworth.gwt.viola.web.client.view.JavaCodeEditorViewImpl;
 import com.colinalworth.gwt.viola.web.client.view.ProfileEditorViewImpl;
@@ -14,10 +15,10 @@ import com.colinalworth.gwt.viola.web.client.view.ProfileViewImpl;
 import com.colinalworth.gwt.viola.web.client.view.ProjectEditorViewImpl;
 import com.colinalworth.gwt.viola.web.client.view.SearchProjectViewImpl;
 import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreateProjectView;
-import com.colinalworth.gwt.viola.web.shared.mvp.ExamplePresenter.ExampleView;
 import com.colinalworth.gwt.viola.web.shared.mvp.HomePresenter.HomeView;
 import com.colinalworth.gwt.viola.web.shared.mvp.JavaCodeEditorPresenter.JavaCodeEditorView;
 import com.colinalworth.gwt.viola.web.shared.mvp.PlaceBasedPresenterFactory;
+import com.colinalworth.gwt.viola.web.shared.mvp.Presenter;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfileView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorView;
@@ -47,6 +48,9 @@ public class ViolaClientModule extends AbstractGinModule {
 		bind(EventBus.class).to(SimpleEventBus.class);
 		bind(com.google.gwt.event.shared.EventBus.class).to(SimpleEventBus.class);
 
+		bind(Presenter.Errors.class).to(ErrorsClientImpl.class);
+		bind(Presenter.PageTitle.class).to(TitleClientImpl.class);
+
 		bind(PlaceFactory.class).to(ViolaPlaces.class);
 
 		bind(ClientPlaceManager.class).in(Singleton.class);
@@ -55,7 +59,6 @@ public class ViolaClientModule extends AbstractGinModule {
 		bind(PlaceBasedPresenterFactory.class).to(ViolaPlaceMapper.class);
 
 		bind(SearchProjectView.class).to(SearchProjectViewImpl.class);
-		bind(ExampleView.class).to(ExampleViewImpl.class);
 		bind(CreateProjectView.class).to(CreateProjectViewImpl.class);
 		bind(ProjectEditorView.class).to(ProjectEditorViewImpl.class);
 		bind(HomeView.class).to(HomeViewImpl.class);

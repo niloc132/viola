@@ -5,10 +5,10 @@ import com.colinalworth.gwt.places.shared.PlaceManager;
 import com.colinalworth.gwt.viola.web.client.ioc.UserId;
 import com.colinalworth.gwt.viola.web.shared.dto.ProjectSearchResult;
 import com.colinalworth.gwt.viola.web.shared.dto.UserProfile;
-import com.colinalworth.gwt.viola.web.shared.mvp.ExamplePresenter.ExamplePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfilePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfileView;
+import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.request.ProfileRequest;
 import com.colinalworth.gwt.viola.web.shared.request.SearchRequest;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
@@ -58,7 +58,7 @@ public class ProfilePresenter extends AbstractPresenterImpl<ProfileView, Profile
 		request.getProfile(place.getId(), new AsyncCallback<UserProfile>() {
 			@Override
 			public void onFailure(Throwable caught) {
-
+				getErrors().report(caught.getMessage());
 			}
 
 			@Override
@@ -69,7 +69,7 @@ public class ProfilePresenter extends AbstractPresenterImpl<ProfileView, Profile
 		searchProvider.get().listProjectsByUser(place.getId(), "", 20, new AsyncCallback<List<ProjectSearchResult>>() {
 			@Override
 			public void onFailure(Throwable caught) {
-
+				getErrors().report(caught.getMessage());
 			}
 
 			@Override
@@ -86,8 +86,8 @@ public class ProfilePresenter extends AbstractPresenterImpl<ProfileView, Profile
 	}
 
 	public void select(ProjectSearchResult value) {
-		ExamplePlace example = placeManager.create(ExamplePlace.class);
-		example.setId(value.getLatestCompiledId());
+		ProjectEditorPlace example = placeManager.create(ProjectEditorPlace.class);
+		example.setId(value.getId());
 		placeManager.submit(example);
 	}
 

@@ -4,7 +4,6 @@ import com.colinalworth.gwt.viola.web.shared.dto.Project;
 import com.colinalworth.gwt.viola.web.shared.mvp.JavaCodeEditorPresenter.JavaCodeEditorView;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.request.JobRequest;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -19,7 +18,7 @@ public class JavaCodeEditorPresenter extends AbstractPresenterImpl<JavaCodeEdito
 		jobRequest.get().getAttachment(place.getId(), place.getActiveFile(), new AsyncCallback<String>() {
 			@Override
 			public void onFailure(Throwable caught) {
-				Window.alert(caught.getMessage());
+				getErrors().report(caught.getMessage());
 			}
 
 			@Override
@@ -39,7 +38,7 @@ public class JavaCodeEditorPresenter extends AbstractPresenterImpl<JavaCodeEdito
 		jobRequest.get().attach(getCurrentPlace().getId(), getCurrentPlace().getActiveFile(), getView().getValue(), new AsyncCallback<Project>() {
 			@Override
 			public void onFailure(Throwable caught) {
-				Window.alert("failed to save " + caught.getMessage());
+				getErrors().report(caught.getMessage());
 			}
 			@Override
 			public void onSuccess(Project result) {

@@ -4,11 +4,10 @@ import com.colinalworth.gwt.places.shared.Place;
 import com.colinalworth.gwt.places.shared.PlaceManager;
 import com.colinalworth.gwt.viola.web.shared.dto.ProfileSearchResult;
 import com.colinalworth.gwt.viola.web.shared.dto.ProjectSearchResult;
-import com.colinalworth.gwt.viola.web.shared.mvp.ExamplePresenter.ExamplePlace;
+import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.SearchProfilePresenter.SearchProfilePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.SearchProfilePresenter.SearchProfileView;
 import com.colinalworth.gwt.viola.web.shared.request.SearchRequest;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -42,7 +41,7 @@ public class SearchProfilePresenter extends AbstractPresenterImpl<SearchProfileV
 			searchRequest.get().searchProfiles(place.getQuery(), "", 20, new AsyncCallback<List<ProfileSearchResult>>() {
 				@Override
 				public void onFailure(Throwable caught) {
-					GWT.reportUncaughtException(caught);
+					getErrors().report(caught.getMessage());
 				}
 
 				@Override
@@ -60,8 +59,8 @@ public class SearchProfilePresenter extends AbstractPresenterImpl<SearchProfileV
 	}
 
 	public void select(ProjectSearchResult value) {
-		ExamplePlace example = placeManager.create(ExamplePlace.class);
-		example.setId(value.getLatestCompiledId());
+		ProjectEditorPlace example = placeManager.create(ProjectEditorPlace.class);
+		example.setId(value.getId());
 		placeManager.submit(example);
 	}
 }

@@ -2,7 +2,6 @@ package com.colinalworth.gwt.viola.web.shared.mvp;
 
 import com.colinalworth.gwt.places.shared.PlaceManager.PlaceFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreateProjectPlace;
-import com.colinalworth.gwt.viola.web.shared.mvp.ExamplePresenter.ExamplePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.HomePresenter.HomePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfilePlace;
@@ -11,9 +10,6 @@ import com.colinalworth.gwt.viola.web.shared.mvp.SearchProfilePresenter.SearchPr
 import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter.SearchProjectPlace;
 
 public interface ViolaPlaces extends PlaceFactory {
-
-	@Route(path = "example/{id}/", priority = 1)
-	ExamplePlace example();
 
 	@Route(path = "search/project/?q={query}", priority = 1)
 	SearchProjectPlace searchProject();

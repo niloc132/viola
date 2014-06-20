@@ -14,9 +14,11 @@ import one.xio.HttpHeaders;
 import one.xio.HttpMethod;
 import one.xio.HttpStatus;
 import org.apache.commons.io.IOUtils;
+import rxf.server.BlobAntiPatternObject;
 import rxf.server.PreRead;
 import rxf.server.Rfc822HeaderState;
 import rxf.server.Rfc822HeaderState.HttpRequest;
+import rxf.server.driver.CouchMetaDriver;
 import rxf.server.driver.RxfBootstrap;
 
 import java.io.IOException;
@@ -40,7 +42,7 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 	private String accessTokenUrl = "https://accounts.google.com/o/oauth2/token";
 	private String issuer = "accounts.google.com";
 
-	private String serverUrl = RxfBootstrap.getVar("url", "http://viola.colinalworth.com");
+	private String serverUrl = RxfBootstrap.getVar("url", "https://viola.colinalworth.com");
 
 	@Inject
 	UserService userService;

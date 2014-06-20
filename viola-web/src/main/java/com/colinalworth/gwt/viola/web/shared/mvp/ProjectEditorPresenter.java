@@ -7,10 +7,8 @@ import com.colinalworth.gwt.viola.web.shared.dto.Project;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorView;
 import com.colinalworth.gwt.viola.web.shared.request.JobRequest;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -49,9 +47,6 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 	PlaceManager placeManager;
 
 	@Inject
-	ExamplePresenter examplePresenter;
-
-	@Inject
 	@Named("compiledServer")
 	String compiledServer;
 
@@ -74,7 +69,7 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 		jobRequest.get().getProject(place.getId(), new AsyncCallback<Project>(){
 			@Override
 			public void onFailure(Throwable caught) {
-				GWT.reportUncaughtException(caught);
+				getErrors().report(caught.getMessage());
 			}
 
 			@Override
@@ -119,7 +114,7 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 		jobRequest.get().saveProject(p, new AsyncCallback<Project>() {
 			@Override
 			public void onFailure(Throwable caught) {
-				Window.alert(caught.getMessage());
+				getErrors().report(caught.getMessage());
 			}
 
 			@Override
@@ -140,7 +135,7 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 		jobRequest.get().build(getCurrentPlace().getId(), new AsyncCallback<Void>() {
 			@Override
 			public void onFailure(Throwable caught) {
-				Window.alert(caught.getMessage());
+				getErrors().report(caught.getMessage());
 			}
 
 			@Override
@@ -155,7 +150,7 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 		jobRequest.get().getCompiledId(getCurrentPlace().getId(), new AsyncCallback<String>() {
 			@Override
 			public void onFailure(Throwable caught) {
-				Window.alert(caught.getMessage());
+				getErrors().report(caught.getMessage());
 			}
 
 			@Override
@@ -171,7 +166,7 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 		jobRequest.get().checkStatus(getCurrentPlace().getId(), new AsyncCallback<CompiledProjectStatus>() {
 			@Override
 			public void onFailure(Throwable caught) {
-				Window.alert(caught.getMessage());
+				getErrors().report(caught.getMessage());
 			}
 
 			@Override

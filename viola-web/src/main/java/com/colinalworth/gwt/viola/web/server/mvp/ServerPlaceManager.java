@@ -1,7 +1,8 @@
-package com.colinalworth.gwt.viola.web.server;
+package com.colinalworth.gwt.viola.web.server.mvp;
 
 import com.colinalworth.gwt.places.shared.Place;
 import com.colinalworth.gwt.places.shared.PlaceManager;
+import com.colinalworth.gwt.viola.web.server.Errors;
 import com.colinalworth.gwt.viola.web.shared.mvp.PlaceBasedPresenterFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.Presenter;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;

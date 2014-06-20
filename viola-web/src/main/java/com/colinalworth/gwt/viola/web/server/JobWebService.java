@@ -7,6 +7,7 @@ import com.colinalworth.gwt.viola.service.UserService;
 import com.colinalworth.gwt.viola.web.shared.dto.CompileLimitException;
 import com.colinalworth.gwt.viola.web.shared.dto.CompiledProjectStatus;
 import com.colinalworth.gwt.viola.web.shared.dto.MustBeLoggedInException;
+import com.colinalworth.gwt.viola.web.shared.dto.NotFoundException;
 import com.colinalworth.gwt.viola.web.shared.dto.Project;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -26,11 +27,11 @@ public class JobWebService {
 	@Inject
 	UserService userService;
 
-	public String getAttachment(String projectId, String path) {
+	public String getAttachment(String projectId, String path) throws NotFoundException {
 		return jobService.getSourceAsString(jobService.find(projectId), path);
 	}
 
-	public Project attach(String projectId, String filename, String contents) throws MustBeLoggedInException {
+	public Project attach(String projectId, String filename, String contents) throws MustBeLoggedInException, NotFoundException {
 		//TODO limit to owner
 		SourceProject proj = jobService.find(projectId);
 		if (proj.getAuthorId().equals(sessionService.getThreadLocalUserId("attach"))) {
@@ -45,7 +46,7 @@ public class JobWebService {
 		throw new MustBeLoggedInException("Can't change files of project you don't own");
 	}
 
-	public Project delete(String projectId, String filename) throws MustBeLoggedInException {
+	public Project delete(String projectId, String filename) throws MustBeLoggedInException, NotFoundException {
 		SourceProject proj = jobService.find(projectId);
 		if (proj.getAuthorId().equals(sessionService.getThreadLocalUserId("delete"))) {
 			CouchTx tx = jobService.deleteSourceFile(proj, filename);
@@ -55,14 +56,17 @@ public class JobWebService {
 		throw new MustBeLoggedInException("Can't delete a project you don't own");
 	}
 
-	public Project getProject(String id) {
+	public Project getProject(String id) throws NotFoundException {
 		SourceProject sourceProject = jobService.find(id);
+		if (sourceProject == null) {
+			throw new NotFoundException("Project with id " + id + " could not be found");
+		}
 		Project p = new Project();
 		p.setId(id);
 		p.setDescription(sourceProject.getDescription());
 		p.setTitle(sourceProject.getTitle());
-		List<CompiledProject> compiledOutput = jobService.getCompiledOuput(sourceProject);
-		p.setLatestCompiledId(compiledOutput.isEmpty() ? null : compiledOutput.get(0).getId());
+//		List<CompiledProject> compiledOutput = jobService.getCompiledOuput(sourceProject);
+//		p.setLatestCompiledId(compiledOutput.isEmpty() ? null : compiledOutput.get(0).getId());
 		p.setFiles(new ArrayList<>(sourceProject.getAttachments().keySet()));
 		Collections.sort(p.getFiles());
 		return p;
@@ -76,21 +80,33 @@ public class JobWebService {
 
 		SourceProject project = jobService.createProject(owner);
 
-		return getProject(project.getId());
+		try {
+			return getProject(project.getId());
+		} catch (NotFoundException e) {
+			//not possible, just created it
+			return null;
+		}
 	}
-	public Project cloneProject(String otherId) throws MustBeLoggedInException {
+	public Project cloneProject(String otherId) throws MustBeLoggedInException, NotFoundException {
 		String owner = sessionService.getThreadLocalUserId("clone");
 		if (owner == null) {
 			throw new MustBeLoggedInException("Can't clone a project without logging in");
 		}
 
-		SourceProject clone = jobService.cloneProjectToUser(jobService.find(otherId), owner);
+		SourceProject original = jobService.find(otherId);
+		if (original == null) {
+			throw new NotFoundException("Project with id " + otherId + " could not be found");
+		}
+		SourceProject clone = jobService.cloneProjectToUser(original, owner);
 
 		return getProject(clone.getId());
 	}
 
-	public Project saveProject(Project project) throws MustBeLoggedInException {
+	public Project saveProject(Project project) throws MustBeLoggedInException, NotFoundException {
 		SourceProject sourceProject = jobService.find(project.getId());
+		if (sourceProject == null) {
+			throw new NotFoundException("Project with id " + project.getId() + " could not be found");
+		}
 		if (sourceProject.getAuthorId().equals(sessionService.getThreadLocalUserId("save"))) {
 			sourceProject.setDescription(project.getDescription());
 			sourceProject.setTitle(project.getTitle());

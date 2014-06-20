@@ -11,6 +11,12 @@ public abstract class AbstractPresenterImpl<V extends View, P extends Place> imp
 	@Inject
 	private V view;
 
+	@Inject
+	private Errors errors;
+
+	@Inject
+	private PageTitle title;
+
 	private P currentPlace;
 
 	@Override
@@ -46,6 +52,16 @@ public abstract class AbstractPresenterImpl<V extends View, P extends Place> imp
 	}
 	protected void setCurrentPlace(P place) {
 		this.currentPlace = place;
+	}
+
+	@Override
+	public PageTitle getTitle() {
+		return title;
+	}
+
+	@Override
+	public Errors getErrors() {
+		return errors;
 	}
 
 	public abstract static class AbstractClientView<P extends Presenter<?>> implements View<P> {

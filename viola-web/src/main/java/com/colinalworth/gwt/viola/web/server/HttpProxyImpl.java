@@ -1,5 +1,6 @@
 package com.colinalworth.gwt.viola.web.server;
 
+import com.colinalworth.gwt.viola.web.server.mvp.ViolaServerApp;
 import com.google.gwt.safehtml.shared.UriUtils;
 import one.xio.AsioVisitor.Impl;
 import one.xio.HttpHeaders;
