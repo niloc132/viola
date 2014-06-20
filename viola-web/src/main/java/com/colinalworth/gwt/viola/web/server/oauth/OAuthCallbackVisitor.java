@@ -14,11 +14,9 @@ import one.xio.HttpHeaders;
 import one.xio.HttpMethod;
 import one.xio.HttpStatus;
 import org.apache.commons.io.IOUtils;
-import rxf.server.BlobAntiPatternObject;
 import rxf.server.PreRead;
 import rxf.server.Rfc822HeaderState;
 import rxf.server.Rfc822HeaderState.HttpRequest;
-import rxf.server.driver.CouchMetaDriver;
 import rxf.server.driver.RxfBootstrap;
 
 import java.io.IOException;
@@ -32,25 +30,21 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static one.xio.HttpHeaders.Host;
-
 public class OAuthCallbackVisitor extends Impl implements PreRead {
 	private static final ExecutorService execs = Executors.newFixedThreadPool(2);
+	private static String serverUrl = RxfBootstrap.getVar("url", "https://viola.colinalworth.com");
 
+	//TODO continue with the refactor, since these are goog specific
 	private String clientId = "888496828889-cjuie9aotun74v1p9tbrb568rchtjkc9.apps.googleusercontent.com";
 	private String clientSecret = "SECRET";
-	private String accessTokenUrl = "https://accounts.google.com/o/oauth2/token";
-	private String issuer = "accounts.google.com";
-
-	private String serverUrl = RxfBootstrap.getVar("url", "https://viola.colinalworth.com");
 
 	@Inject
 	UserService userService;
 
 	private String sessionId;
 	private String userid;
-	private String displayName;
 	private boolean newAccount = false;
+	private String identityServer;
 
 	@Override
 	public void onRead(SelectionKey key) throws Exception {
@@ -69,8 +63,7 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 			return;
 		}
 
-		final HttpRequest req =
-				(HttpRequest) new Rfc822HeaderState().addHeaderInterest(Host).$req().apply(cursor);
+		final HttpRequest req = (HttpRequest) new Rfc822HeaderState().$req().apply(cursor);
 
 
 		String[] pathParts = req.path().split("\\?");
@@ -99,10 +92,16 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 			return;
 		}
 
-		//TODO verify state (though we need to get the original url to do that...)
+		if (state == null) {
+			Errors.$500(key);
+			return;
+		}
 
-		//next, POST to access_token
-		execs.submit(new AccessTokenFetch(code, key));
+		//TODO verify state (though we need to get the original url to do that...)
+		String identityServer = state.substring(state.lastIndexOf("-") + 1);
+
+		//next, POST to access_token in its own thread to avoid blocking this thread
+		execs.submit(new AccessTokenFetch(code, key, identityServer));
 		key.interestOps(SelectionKey.OP_READ).attach(null);
 	}
 
@@ -111,7 +110,7 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 		assert sessionId != null;
 		//write back out a constant/template to say 'yep, loaded, here's what the app should use to get its credentials'
 		//TODO escape this stuff...
-		String str = "<html><body>Authentication successful, finishing login...<script>setTimeout(close, 500); opener.authSuccess('" + sessionId + "', '"+ userid + "', " + newAccount + ")</script></html></body>";
+		String str = "<html><body>Authentication successful, finishing login...<script>setTimeout(close, 500); (opener||parent).authSuccess('" + sessionId + "', '"+ userid + "', " + newAccount + ", '" + identityServer + "')</script></html></body>";
 
 		ByteBuffer resp = new Rfc822HeaderState().$res()
 				.status(HttpStatus.$200)
@@ -126,13 +125,18 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 	}
 
 
+	/**
+	 * Distinct runnable to do the synchronous HttpURLConnection back to auth server
+	 */
 	private class AccessTokenFetch implements Runnable {
 		private final String code;
 		private final SelectionKey key;
+		private final String identityServer;
 
-		public AccessTokenFetch(String code, SelectionKey key) {
+		public AccessTokenFetch(String code, SelectionKey key, String identityServer) {
 			this.code = code;
 			this.key = key;
+			this.identityServer = identityServer;
 		}
 
 		@Override
@@ -156,7 +160,7 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 				//https://accounts.google.com/o/oauth2/token
 
 				//TODO gut this when we can instead make ssl calls via 1xio
-				c = (HttpURLConnection) new URL(accessTokenUrl).openConnection();
+				c = (HttpURLConnection) new URL(getAccessTokenUrl(identityServer)).openConnection();
 				c.setDoOutput(true);
 				c.setRequestMethod("POST");
 				c.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -172,16 +176,19 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 
 				//get back these args:
 				String access_token = resultObj.get("access_token").getAsString();
-				String id_token = resultObj.get("id_token").getAsString(); //goog only, can't find a consistent way to get a cross-access_token id from se or gh
+
+				//goog only so far, can't find a consistent way to get a cross-access_token id from se or gh
+				String id_token = resultObj.get("id_token").getAsString();
+
 				int expires = resultObj.get("expires_in").getAsInt();
 
 				//submit task to save, and create session
-				execs.submit(new CreateSession(access_token, id_token, key));
+				execs.submit(new CreateSession(access_token, id_token, key, identityServer));
 			} catch (IOException e) {
 				Errors.$500(key);
 				try {
-					if (c != null && c.getInputStream() != null) {
-						System.err.println(IOUtils.toString(c.getInputStream()));
+					if (c != null && c.getErrorStream() != null) {
+						System.err.println(IOUtils.toString(c.getErrorStream()));
 					}
 				} catch (IOException ex) {
 					//ignore, already handling an exception
@@ -190,16 +197,23 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 			}
 		}
 	}
+
+	private String getAccessTokenUrl(String identityServer) {
+		//TODO support more things that aren't google
+		return "https://accounts.google.com/o/oauth2/token";
+	}
+
 	public class CreateSession implements Runnable {
 		private final String access_token;
 		private final String id_token;
 		private final SelectionKey key;
+		private final String identityServer;
 
-		public CreateSession(String access_token, String id_token, SelectionKey key) {
-
+		public CreateSession(String access_token, String id_token, SelectionKey key, String identityServer) {
 			this.access_token = access_token;
 			this.id_token = id_token;
 			this.key = key;
+			this.identityServer = identityServer;
 		}
 
 		@Override
@@ -207,7 +221,7 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 			IdTokenVerifier verifier = new IdTokenVerifier.Builder()
 					.setAcceptableTimeSkewSeconds(60)
 					.setAudience(Arrays.asList(clientId))
-					.setIssuer(issuer)
+					.setIssuer(identityServer)
 					.build();
 
 			IdToken token;
@@ -223,12 +237,12 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 				return;
 			}
 			//find user, if any
-			User user = userService.findUserWithIdToken(token.getPayload().getSubject(), issuer);
+			User user = userService.findUserWithIdToken(token.getPayload().getSubject(), identityServer);
 
 
 			if (user == null) {
 				//if not, try to create
-				user = userService.createUserWithToken(token.getPayload().getSubject(), issuer, "user" + token.getPayload().getSubject());
+				user = userService.createUserWithToken(token.getPayload().getSubject(), identityServer, "user" + token.getPayload().getSubject());
 				if (user == null) {
 					//failed to create new user, something is wrong
 					Errors.$500(key);
@@ -247,7 +261,7 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 			//one session created, respond back with sessionid
 			OAuthCallbackVisitor.this.sessionId = sessionId;
 			OAuthCallbackVisitor.this.userid = user.getId();
-			OAuthCallbackVisitor.this.displayName = user.getDisplayName();
+			OAuthCallbackVisitor.this.identityServer = identityServer;
 			key.interestOps(SelectionKey.OP_WRITE).attach(OAuthCallbackVisitor.this);
 		}
 	}

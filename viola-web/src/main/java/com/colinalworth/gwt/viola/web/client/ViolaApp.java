@@ -10,6 +10,7 @@ import com.colinalworth.gwt.viola.web.client.mvp.ClientPlaceManager;
 import com.colinalworth.gwt.viola.web.client.mvp.PushStateHistoryManager;
 import com.colinalworth.gwt.viola.web.client.styles.ViolaBundle;
 import com.colinalworth.gwt.viola.web.shared.dto.UserProfile;
+import com.colinalworth.gwt.viola.web.shared.mvp.Presenter;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfilePresenter.ProfilePlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter.SearchProjectPlace;
@@ -17,10 +18,15 @@ import com.colinalworth.gwt.viola.web.shared.request.ProfileRequest;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.IFrameElement;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.storage.client.Storage;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -70,6 +76,9 @@ public class ViolaApp implements EntryPoint {
 	@Inject
 	EventBus eventBus;
 
+	@Inject
+	Presenter.Errors errors;
+
 	private String userId;//hacky way to track, but this class hopefully won't grow much futher
 
 
@@ -84,6 +93,13 @@ public class ViolaApp implements EntryPoint {
 		});
 
 		try {
+			if (Storage.isLocalStorageSupported()) {
+				String identityServer = Storage.getLocalStorageIfSupported().getItem("identityServer");
+				if (identityServer != null) {
+					hiddenLogin(identityServer);
+				}
+			}
+
 			ViolaBundle.INSTANCE.app().ensureInjected();
 
 			Viewport vp = new Viewport();
@@ -173,7 +189,7 @@ public class ViolaApp implements EntryPoint {
 		userbtn.getMenu().add(new MenuItem("Log out", new SelectionHandler<MenuItem>() {
 			@Override
 			public void onSelection(SelectionEvent<MenuItem> event) {
-				setSessionId(null, null, false);
+				setSessionId(null, null, false, null);
 			}
 		}));
 		userbtn.hide();
@@ -187,15 +203,44 @@ public class ViolaApp implements EntryPoint {
 
 	private void loginSequence() {
 		exportAuthSuccess();
-		String redirect = URL.encodeQueryString(Window.Location.getProtocol() + "//" + Window.Location.getHost() + "/oauth2callback");
-		String clientId = URL.encodeQueryString("888496828889-cjuie9aotun74v1p9tbrb568rchtjkc9.apps.googleusercontent.com");
-		String state = URL.encodeQueryString("foobarbaz");//TODO real state
-		Window.open("https://accounts.google.com/o/oauth2/auth?scope=openid&response_type=code&redirect_uri=" + redirect + "&client_id=" + clientId + "&state=" + state + "&hl=en&from_login=1", "oauth", "");
+		//TODO support other servers
+		Window.open(getOAuthUrl("accounts.google.com"), "oauth", "");
+	}
+	private void hiddenLogin(String identityServer) {
+		final IFrameElement hiddenIframe = Document.get().createIFrameElement();
+		hiddenIframe.setSrc(getOAuthUrl(identityServer));
+		hiddenIframe.getStyle().setDisplay(Display.NONE);
+
+		exportAuthSuccess();
+
+		Document.get().getBody().appendChild(hiddenIframe);
+
+		new Timer() {
+			@Override
+			public void run() {
+				hiddenIframe.removeFromParent();
+			}
+		}.schedule(2000);
 	}
 
-	private void setSessionId(String sessionId, String userId, boolean newUser) {
+	private String getOAuthUrl(String identityServer) {
+		String redirect = URL.encodeQueryString(Window.Location.getProtocol() + "//" + Window.Location.getHost() + "/oauth2callback");
+		String clientId = URL.encodeQueryString("888496828889-cjuie9aotun74v1p9tbrb568rchtjkc9.apps.googleusercontent.com");
+		String state = URL.encodeQueryString("foobarbaz" + "-" + identityServer);//TODO real state
+		//TODO pick a url based on the idServer arg
+		return "https://accounts.google.com/o/oauth2/auth?scope=openid&response_type=code&redirect_uri=" + redirect + "&client_id=" + clientId + "&state=" + state + "&hl=en&from_login=1";
+	}
+
+	private void setSessionId(String sessionId, String userId, boolean newUser, String identityServer) {
 		sessionManager.setCurrentSessionId(sessionId);
 		userIdManager.setCurrentUserId(userId);
+		if (Storage.isLocalStorageSupported()) {
+			if (identityServer == null) {
+				Storage.getLocalStorageIfSupported().removeItem("identityServer");
+			} else {
+				Storage.getLocalStorageIfSupported().setItem("identityServer", identityServer);
+			}
+		}
 		if (sessionId == null) {
 			loginbtn.show();
 			userbtn.hide();
@@ -213,7 +258,7 @@ public class ViolaApp implements EntryPoint {
 			profileRequestProvider.get().getProfile(userId, new AsyncCallback<UserProfile>() {
 				@Override
 				public void onFailure(Throwable caught) {
-					//error message...?
+					errors.report(caught.getMessage());
 				}
 
 				@Override
@@ -227,9 +272,9 @@ public class ViolaApp implements EntryPoint {
 	private native void exportAuthSuccess() /*-{
 		var that = this;
 		if (!$wnd.authSuccess) {
-			$wnd.authSuccess = $entry(function(sessionId, userId, newUser) {
-				that.@com.colinalworth.gwt.viola.web.client.ViolaApp::setSessionId(Ljava/lang/String;Ljava/lang/String;Z)(sessionId, userId, newUser);
-				$wnd.authSuccess = null;
+			$wnd.authSuccess = $entry(function(sessionId, userId, newUser, identityServer) {
+				that.@com.colinalworth.gwt.viola.web.client.ViolaApp::setSessionId(Ljava/lang/String;Ljava/lang/String;ZLjava/lang/String;)(sessionId, userId, newUser, identityServer);
+//				$wnd.authSuccess = null;
 			});
 		}
 	}-*/;
