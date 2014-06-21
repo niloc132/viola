@@ -9,7 +9,9 @@ import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.button.TextButton;
+import com.sencha.gxt.widget.core.client.container.CenterLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.FlowLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.MarginData;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.form.FieldLabel;
@@ -34,6 +36,7 @@ public class ProfileEditorViewImpl extends AbstractClientView<ProfileEditorPrese
 
 	public ProfileEditorViewImpl() {
 		ContentPanel panel = new ContentPanel();
+		panel.setShadow(true);
 		panel.setHeadingText("Your Profile");
 
 		FlowLayoutContainer container = new FlowLayoutContainer();
@@ -42,10 +45,12 @@ public class ProfileEditorViewImpl extends AbstractClientView<ProfileEditorPrese
 		container.add(new FieldLabel(displayName, "display name"));
 		container.add(new FieldLabel(organization, "organization"));
 		container.add(new FieldLabel(description, "about me"));
+		description.setHeight(100);
 		compiledTodayCount.setReadOnly(true);
+		compiledTodayCount.setEnabled(false);
 		container.add(new FieldLabel(compiledTodayCount, "times compiled today"));
 
-		panel.setWidget(container);
+		panel.add(container, new MarginData(10));
 
 		panel.addButton(new TextButton("Save", new SelectHandler() {
 			@Override
@@ -57,7 +62,11 @@ public class ProfileEditorViewImpl extends AbstractClientView<ProfileEditorPrese
 		driver.initialize(this);
 
 		//todo consider centerlc wrapper
-		initWidget(panel);
+
+		CenterLayoutContainer center = new CenterLayoutContainer();
+		center.setWidget(panel);
+
+		initWidget(center);
 	}
 
 	@Override
