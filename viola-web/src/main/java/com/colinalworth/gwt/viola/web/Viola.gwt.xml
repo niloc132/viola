@@ -8,7 +8,15 @@
 	<inherits name="com.google.gwt.inject.Inject"/>
 	<inherits name="com.colinalworth.rpq.RPQ"/>
 	<inherits name="de.barop.gwt.PushState" />
+	<set-property name="history.pushStateSupported" value="yes" />
+	<set-property name="history.pushStateSupported" value="no">
+		<any>
+			<when-property-is name="gxt.user.agent" value="ie8" />
+			<when-property-is name="gxt.user.agent" value="ie9" />
+		</any>
+	</set-property>
 	<inherits name="com.colinalworth.gwt.places.Places"/>
+	<inherits name="com.google.gwt.precompress.Precompress" />
 
 	<set-property name="gwt.logging.popupHandler" value="DISABLED" />
 
@@ -17,8 +25,19 @@
 	<source path="shared" />
 
 
+<!--	<set-property-fallback name="user.agent" value="safari"/>
+	<set-property-fallback name="gxt.user.agent" value="chrome"/>-->
+	<extend-property name="user.agent" values="unknown" fallback-value="safari" />
+	<extend-property name="gxt.user.agent" values="null" fallback-value="chrome" />
+
 	<entry-point class="com.colinalworth.gwt.viola.web.client.ViolaApp" />
-	<collapse-all-properties />
+	<!--<collapse-all-properties />-->
 	<add-linker name="xsiframe"/>
 
+<!--	<inherits name="com.google.gwt.logging.Logging" />
+	<set-property name="gxt.logging.enabled" value="true" />
+	<set-property name="gwt.logging.logLevel" value="FINEST"/>-->
+
+	<set-property name="compiler.stackMode" value="strip" />
+	<set-configuration-property name="CssResource.obfuscationPrefix" value="empty" />
 </module>

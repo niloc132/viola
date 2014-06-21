@@ -216,6 +216,9 @@
 							<goal>compile</goal>
 						</goals>
 						<configuration>
+							<strict>true</strict>
+							<disableCastChecking>true</disableCastChecking>
+							<disableClassMetadata>true</disableClassMetadata>
 							<webappDirectory>${project.build.directory}/web</webappDirectory>
 						</configuration>
 					</execution>
