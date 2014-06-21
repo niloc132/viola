@@ -28,8 +28,12 @@ import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
 import com.sencha.gxt.widget.core.client.ProgressBar;
 import com.sencha.gxt.widget.core.client.button.TextButton;
+import com.sencha.gxt.widget.core.client.button.ToolButton;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer.BorderLayoutData;
+import com.sencha.gxt.widget.core.client.container.BoxLayoutContainer.BoxLayoutData;
+import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer;
+import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer.CssFloatData;
 import com.sencha.gxt.widget.core.client.container.HasLayout;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
@@ -80,9 +84,13 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 		VerticalLayoutContainer container = new VerticalLayoutContainer();
 		projectDetailsPanel.setHeadingText("Project Details");
 		projectDetailsPanel.setWidget(container);
-		container.add(new FieldLabel(title, "Name"), new VerticalLayoutData(1, -1, new Margins(0, 10, 0, 10)));
-		container.add(new FieldLabel(description, "Description"), new VerticalLayoutData(1, -1, new Margins(0, 10, 0, 10)));
-		description.setHeight(150);
+
+		//TODO break this out to be replacable with a readonly form and a clone button
+		CssFloatLayoutContainer form = new CssFloatLayoutContainer();
+		form.add(new FieldLabel(title, "Name"), new CssFloatData(1));
+		form.add(new FieldLabel(description, "Description"), new CssFloatData(1));
+		description.setHeight(100);
+		container.add(form, new VerticalLayoutData(1, -1, new Margins(10)));
 
 		ContentPanel filePanel = new ContentPanel();
 		filePanel.setHeadingText("Project Files");
@@ -144,7 +152,9 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 		progress.hide();
 		toolBar.add(progress);
 		error.setVisible(false);
-		toolBar.add(error);
+		BoxLayoutData errorData = new BoxLayoutData();
+		errorData.setFlex(1);
+		toolBar.add(error, errorData);
 		center.add(toolBar);
 
 		code.setCenterWidget(center);
@@ -158,18 +168,20 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 		codeLayoutData.setCollapsible(true);
 		codeLayoutData.setMargins(new Margins(0, 8, 0, 0));
 		codeLayoutData.setFloatable(false);
+		codeLayoutData.setCollapseHidden(true);
 		ContentPanel codeWrap = new ContentPanel();
 		codeWrap.setWidget(code);
 		codeWrap.setHeaderVisible(false);
 		blc.setWestWidget(codeWrap, codeLayoutData);
 
 		example.setHeadingText("Output");
-//		east.addTool(new ToolButton(ToolButton.REFRESH, new SelectHandler() {
-//			@Override
-//			public void onSelect(SelectEvent event) {
-//				getPresenter().compile();
-//			}
-//		}));
+		example.addTool(new ToolButton(ToolButton.REFRESH, new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				setCurrentCompiled(null, null);
+				getPresenter().updateCompiledId();
+			}
+		}));
 		setCurrentCompiled(null, null);
 		blc.setCenterWidget(example);
 

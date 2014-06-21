@@ -130,6 +130,10 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 	}
 
 	public void compile() {
+		if (editor != null) {//TODO track editor better
+			javaEditor.save();
+		}
+		//save operation will be batched with this next request as well
 		jobRequest.get().build(getCurrentPlace().getId(), new AsyncCallback<Void>() {
 			@Override
 			public void onFailure(Throwable caught) {
@@ -139,12 +143,12 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 			@Override
 			public void onSuccess(Void result) {
 				poll();
-				updateCompiledId();
+				getView().setCurrentCompiled(null, null);
 			}
 		});
 	}
 
-	private void updateCompiledId() {
+	public void updateCompiledId() {
 		jobRequest.get().getCompiledId(getCurrentPlace().getId(), new AsyncCallback<String>() {
 			@Override
 			public void onFailure(Throwable caught) {

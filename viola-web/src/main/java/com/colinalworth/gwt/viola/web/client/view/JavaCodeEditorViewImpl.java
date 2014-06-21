@@ -18,7 +18,7 @@ public class JavaCodeEditorViewImpl extends AbstractClientView<JavaCodeEditorPre
 
 	@Override
 	public String getValue() {
-		return textArea.getValue();
+		return textArea.getCurrentValue();
 	}
 
 	@Override
