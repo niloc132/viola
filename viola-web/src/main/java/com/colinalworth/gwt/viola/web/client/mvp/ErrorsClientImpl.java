@@ -8,7 +8,7 @@ import com.sencha.gxt.widget.core.client.box.MessageBox;
 public class ErrorsClientImpl implements Errors {
 	@Override
 	public void report(String messageText) {
-		report(SafeHtmlUtils.fromString(messageText));
+		report(SafeHtmlUtils.fromString(messageText == null ? "null" : messageText));
 	}
 
 	@Override

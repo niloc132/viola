@@ -9,7 +9,7 @@ public class ErrorsServerImpl implements Errors {
 	private final SafeHtmlBuilder errors = new SafeHtmlBuilder();
 	@Override
 	public void report(String messageText) {
-		report(SafeHtmlUtils.fromString(messageText));
+		report(SafeHtmlUtils.fromString(messageText == null ? "null" : messageText));
 	}
 
 	@Override

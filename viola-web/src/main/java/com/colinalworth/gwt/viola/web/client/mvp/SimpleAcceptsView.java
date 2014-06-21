@@ -11,8 +11,13 @@ public class SimpleAcceptsView implements AcceptsView, IsWidget {
 
 	@Override
 	public void setView(View view) {
+		parent.unmask();
 		parent.setWidget(view);
 		parent.forceLayout();
+	}
+
+	public void mask() {
+		parent.mask("Loading...");
 	}
 
 	@Override

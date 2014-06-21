@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.sencha.gxt.core.client.IdentityValueProvider;
 import com.sencha.gxt.core.client.Style.SelectionMode;
 import com.sencha.gxt.core.client.util.Margins;
+import com.sencha.gxt.core.client.util.Util;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.data.shared.Store.StoreSortInfo;
@@ -81,6 +82,7 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 		projectDetailsPanel.setWidget(container);
 		container.add(new FieldLabel(title, "Name"), new VerticalLayoutData(1, -1, new Margins(0, 10, 0, 10)));
 		container.add(new FieldLabel(description, "Description"), new VerticalLayoutData(1, -1, new Margins(0, 10, 0, 10)));
+		description.setHeight(150);
 
 		ContentPanel filePanel = new ContentPanel();
 		filePanel.setHeadingText("Project Files");
@@ -101,6 +103,8 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 				if (!paths.hasChildren(event.getItem())) {
 					if (!getPresenter().tryLoadFile(event.getItem())) {
 						event.cancel();
+					} else {
+						codeEditor.mask();
 					}
 				} else {
 					event.cancel();
@@ -228,14 +232,16 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 	@Override
 	public void setCurrentCompiled(String compiledId, String url) {
 		this.lastCompiledId = compiledId;
-		this.lastUrl = url;
-		if (url != null) {
-			example.setWidget(new Frame(url));
-		} else {
-			example.setWidget(new Label("Waiting for project to load, or project not yet compiled..."));
+		if (!Util.equalWithNull(lastUrl, url)) {
+			this.lastUrl = url;
+			if (url != null) {
+				example.setWidget(new Frame(url));
+			} else {
+				example.setWidget(new Label("Waiting for project to load, or project not yet compiled..."));
+			}
+			example.forceLayout();
+			example.unmask();
 		}
-		example.forceLayout();
-		example.unmask();
 	}
 
 	@Override
@@ -262,6 +268,7 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 			((HasLayout) error.getParent()).forceLayout();
 			return;
 		}
+		error.setVisible(false);
 		this.progress.show();
 		((ToolBar) this.progress.getParent()).forceLayout();
 		double progress = ((double) index) / 5.0;

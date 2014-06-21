@@ -126,12 +126,12 @@ public class JobWebService {
 
 			//user is not presently compiling anything
 			if (jobService.isCurrentlyCompiling(userId)){
-				throw new CompileLimitException();
+				throw new CompileLimitException("You are already compiling, can't have multiple concurrent jobs running");
 			}
 
 			//user is within their quota
 			if (jobService.getCompileCountTodayForUser(userId) > 20) {
-				throw new CompileLimitException();
+				throw new CompileLimitException("You've exceeded your daily limit for compiles");
 			}
 
 			jobService.submitJob(project);

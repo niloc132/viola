@@ -47,7 +47,7 @@ public class ProfileWebService {
 	public int getCompileCountToday() throws MustBeLoggedInException {
 		String userId = sessionService.getThreadLocalUserId("getCompileCountToday");
 		if (userId == null) {
-			throw new MustBeLoggedInException();
+			throw new MustBeLoggedInException("Can't check compile count without being logged in");
 		}
 		return jobService.getCompileCountTodayForUser(userId);
 	}

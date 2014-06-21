@@ -7,10 +7,15 @@ import com.colinalworth.gwt.viola.web.shared.request.JobRequest;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.sencha.gxt.core.client.util.Util;
 
 public class JavaCodeEditorPresenter extends AbstractPresenterImpl<JavaCodeEditorView, ProjectEditorPlace> implements Presenter<ProjectEditorPlace> {
 	@Inject
 	Provider<JobRequest> jobRequest;
+
+	private boolean loaded = false;
+	private String loadedCode;
+
 	@Override
 	public void go(final AcceptsView parent, ProjectEditorPlace place) {
 		getView().setPresenter(this);
@@ -25,16 +30,24 @@ public class JavaCodeEditorPresenter extends AbstractPresenterImpl<JavaCodeEdito
 			public void onSuccess(String result) {
 				parent.setView(getView());
 				getView().setValue(result);
+				loaded = true;
+				loadedCode = result;
 			}
 		});
 	}
 
 	@Override
 	public void stop() {
-		save();
+		if (loaded) {
+			save();
+			loaded = false;
+		}
 	}
 
 	public void save() {
+		if (Util.equalWithNull(loadedCode, getView().getValue())) {
+			return;
+		}
 		jobRequest.get().attach(getCurrentPlace().getId(), getCurrentPlace().getActiveFile(), getView().getValue(), new AsyncCallback<Project>() {
 			@Override
 			public void onFailure(Throwable caught) {

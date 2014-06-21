@@ -21,8 +21,6 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 
 		AcceptsView getCodeEditorSlot();
 
-
-
 		SimpleBeanEditorDriver<Project, ?> getDriver();
 
 		void setActiveFile(String activeFile);
