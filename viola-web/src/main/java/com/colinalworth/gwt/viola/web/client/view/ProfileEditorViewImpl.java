@@ -52,6 +52,12 @@ public class ProfileEditorViewImpl extends AbstractClientView<ProfileEditorPrese
 
 		panel.add(container, new MarginData(10));
 
+		panel.addButton(new TextButton("Back", new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				getPresenter().back();
+			}
+		}));
 		panel.addButton(new TextButton("Save", new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent event) {

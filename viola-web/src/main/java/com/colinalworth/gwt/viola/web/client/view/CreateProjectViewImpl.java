@@ -29,6 +29,12 @@ public class CreateProjectViewImpl extends AbstractClientView<CreateProjectPrese
 		container.add(new FieldLabel(description, "Description"));
 		description.setHeight(150);
 
+		panel.addButton(new TextButton("Back", new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				getPresenter().back();
+			}
+		}));
 		panel.addButton(new TextButton("Create", new SelectHandler() {
 			@Override
 			public void onSelect(SelectEvent selectEvent) {

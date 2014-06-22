@@ -78,4 +78,8 @@ public class CreateProjectPresenter extends AbstractPresenterImpl<CreateProjectV
 			jobRequest.get().createProject(callback);
 		}
 	}
+
+	public void back() {
+		placeManager.back();
+	}
 }
