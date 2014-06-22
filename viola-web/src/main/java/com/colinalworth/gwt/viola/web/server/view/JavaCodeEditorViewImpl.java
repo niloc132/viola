@@ -21,7 +21,7 @@ public class JavaCodeEditorViewImpl extends AbstractServerView<JavaCodeEditorPre
 	public SafeHtml asSafeHtml() {
 		return new SafeHtmlBuilder()
 				.appendHtmlConstant("<textarea>")
-				.appendEscaped(java)
+				.appendEscaped(java == null ? "" : java)
 				.appendHtmlConstant("</textarea>").toSafeHtml();
 	}
 }

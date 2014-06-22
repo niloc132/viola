@@ -55,7 +55,7 @@ public class JavaCodeEditorPresenter extends AbstractPresenterImpl<JavaCodeEdito
 			}
 			@Override
 			public void onSuccess(Project result) {
-				//TODO
+				//save successful
 			}
 		});
 	}

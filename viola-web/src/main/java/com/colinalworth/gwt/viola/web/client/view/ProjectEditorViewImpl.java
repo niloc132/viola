@@ -26,7 +26,10 @@ import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.data.shared.Store.StoreSortInfo;
 import com.sencha.gxt.data.shared.TreeStore;
 import com.sencha.gxt.widget.core.client.ContentPanel;
+import com.sencha.gxt.widget.core.client.Dialog.PredefinedButton;
 import com.sencha.gxt.widget.core.client.ProgressBar;
+import com.sencha.gxt.widget.core.client.box.ConfirmMessageBox;
+import com.sencha.gxt.widget.core.client.box.PromptMessageBox;
 import com.sencha.gxt.widget.core.client.button.TextButton;
 import com.sencha.gxt.widget.core.client.button.ToolButton;
 import com.sencha.gxt.widget.core.client.container.BorderLayoutContainer;
@@ -37,6 +40,8 @@ import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer.CssFl
 import com.sencha.gxt.widget.core.client.container.HasLayout;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
+import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
+import com.sencha.gxt.widget.core.client.event.DialogHideEvent.DialogHideHandler;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.form.FieldLabel;
@@ -86,7 +91,7 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 		projectDetailsPanel.setHeadingText("Project Details");
 		projectDetailsPanel.setWidget(container);
 
-		//TODO break this out to be replacable with a readonly form and a clone button
+		//TODO break this out to be replacable with a readonly form and author details
 		CssFloatLayoutContainer form = new CssFloatLayoutContainer();
 		form.add(new FieldLabel(title, "Name"), new CssFloatData(1));
 		form.add(new FieldLabel(description, "Description"), new CssFloatData(1));
@@ -103,6 +108,44 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 
 		ContentPanel filePanel = new ContentPanel();
 		filePanel.setHeadingText("Project Files");
+		filePanel.addTool(new ToolButton(ToolButton.PLUS, new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				final PromptMessageBox prompt = new PromptMessageBox("Create new file", "");
+				//TODO feed in current file's dir to work our current dir, selected
+				prompt.getTextField().setValue("project/client/NewClass.java");
+				prompt.setPredefinedButtons(PredefinedButton.OK, PredefinedButton.CANCEL);
+				prompt.show();
+				prompt.getTextField().select("project/client/".length(), "NewClass".length());
+				prompt.addDialogHideHandler(new DialogHideHandler() {
+					@Override
+					public void onDialogHide(DialogHideEvent event) {
+						if (event.getHideButton() == PredefinedButton.OK) {
+							getPresenter().createFile(prompt.getTextField().getCurrentValue());
+						}
+					}
+				});
+			}
+		}));
+
+		filePanel.addTool(new ToolButton(ToolButton.MINUS, new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				final String path = files.getSelectionModel().getSelectedItem();
+				if (path != null) {
+					ConfirmMessageBox confirm = new ConfirmMessageBox("Confirm Delete", "Are you sure you want to delete file '" + path + "'?");
+					confirm.show();
+					confirm.addDialogHideHandler(new DialogHideHandler() {
+						@Override
+						public void onDialogHide(DialogHideEvent event) {
+							if (event.getHideButton() == PredefinedButton.YES) {
+								getPresenter().deleteFile(path);
+							}
+						}
+					});
+				}
+			}
+		}));
 
 		paths.addSortInfo(new StoreSortInfo<>(new IdentityValueProvider<String>(), SortDir.DESC));
 

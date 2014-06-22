@@ -14,11 +14,16 @@ import com.google.inject.Singleton;
 import rxf.shared.CouchTx;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Singleton
 public class JobWebService {
+	private Set<String> allowedExtensions = new HashSet<>(Arrays.asList("html", "xml", "java", "css", "js"));
+
 	@Inject
 	JobService jobService;
 
@@ -32,9 +37,12 @@ public class JobWebService {
 	}
 
 	public Project attach(String projectId, String filename, String contents) throws MustBeLoggedInException, NotFoundException {
-		//TODO limit to owner
 		SourceProject proj = jobService.find(projectId);
 		if (proj.getAuthorId().equals(sessionService.getThreadLocalUserId("attach"))) {
+			String file = filename.substring(1 + filename.lastIndexOf("/"));
+			if (!allowedExtensions.contains(file.substring(1 + file.lastIndexOf(".")))) {
+				throw new NotFoundException("Can't create that file extension");//TODO use a better named exception
+			}
 			final CouchTx tx;
 			if (proj.getAttachments().containsKey(filename)) {
 				tx = jobService.updateSourceFile(proj, filename, contents);
@@ -49,6 +57,9 @@ public class JobWebService {
 	public Project delete(String projectId, String filename) throws MustBeLoggedInException, NotFoundException {
 		SourceProject proj = jobService.find(projectId);
 		if (proj.getAuthorId().equals(sessionService.getThreadLocalUserId("delete"))) {
+			if (proj.getAttachments().size() <= 1) {
+				throw new NotFoundException("Can't delete last file");//TODO use a better named exception
+			}
 			CouchTx tx = jobService.deleteSourceFile(proj, filename);
 			return getProject(tx.id());
 		}
@@ -59,7 +70,7 @@ public class JobWebService {
 	public Project getProject(String id) throws NotFoundException {
 		SourceProject sourceProject = jobService.find(id);
 		if (sourceProject == null) {
-			throw new NotFoundException("Project with id " + id + " could not be found");
+			throw new NotFoundException("Project with id '" + id + "' could not be found");
 		}
 		Project p = new Project();
 		p.setId(id);

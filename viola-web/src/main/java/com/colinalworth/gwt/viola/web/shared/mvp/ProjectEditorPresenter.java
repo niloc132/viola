@@ -15,6 +15,7 @@ import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -63,9 +64,6 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 
 	@Inject
 	EventBus eventBus;
-
-
-
 
 	private SimpleBeanEditorDriver<Project, ?> driver;
 	private Object editor;
@@ -138,6 +136,12 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 			return true;
 		}
 		if (editor != null) {//TODO track editor better
+			String maybe = javaEditor.maybeStop();
+			if (maybe != null) {
+				if (!Window.confirm(maybe)) {
+					return false;
+				}
+			}
 			javaEditor.stop();
 		}
 		ProjectEditorPlace next = placeManager.create(ProjectEditorPlace.class);
@@ -210,6 +214,41 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 		CreateProjectPlace place = placeManager.create(CreateProjectPlace.class);
 		place.setCopy(getCurrentPlace().getId());
 		placeManager.submit(place);
+	}
+
+	public void createFile(final String path) {
+		if (current.getFiles().contains(path)) {
+			//select existing, don't create new
+			tryLoadFile(path);
+		}
+		jobRequest.get().attach(getCurrentPlace().getId(), path, "", new AsyncCallback<Project>() {
+			@Override
+			public void onFailure(Throwable throwable) {
+				getErrors().report(throwable.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Project project) {
+				tryLoadFile(path);
+				updateWithProject(project);
+			}
+		});
+	}
+
+	public void deleteFile(String path) {
+		javaEditor.stop();
+		jobRequest.get().delete(getCurrentPlace().getId(), path, new AsyncCallback<Project>() {
+			@Override
+			public void onFailure(Throwable throwable) {
+				getErrors().report(throwable.getMessage());
+			}
+
+			@Override
+			public void onSuccess(Project project) {
+				tryLoadFile(project.getFiles().get(0));//server asserts that all projects have at least one file
+				updateWithProject(project);
+			}
+		});
 	}
 
 	private void poll() {
