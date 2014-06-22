@@ -7,6 +7,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ProfileRequest {
 	void getProfile(String id, AsyncCallback<UserProfile> callback);
+
 	@Throws(MustBeLoggedInException.class)
 	void updateProfile(UserProfile profile, AsyncCallback<UserProfile> callback);
 

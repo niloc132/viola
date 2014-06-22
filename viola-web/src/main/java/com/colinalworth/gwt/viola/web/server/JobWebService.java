@@ -22,6 +22,7 @@ import java.util.Set;
 
 @Singleton
 public class JobWebService {
+	public static final int MAX_DAILY_COMPILES = 20;
 	private Set<String> allowedExtensions = new HashSet<>(Arrays.asList("html", "xml", "java", "css", "js"));
 
 	@Inject
@@ -77,8 +78,6 @@ public class JobWebService {
 		p.setAuthorId(sourceProject.getAuthorId());
 		p.setDescription(sourceProject.getDescription());
 		p.setTitle(sourceProject.getTitle());
-//		List<CompiledProject> compiledOutput = jobService.getCompiledOuput(sourceProject);
-//		p.setLatestCompiledId(compiledOutput.isEmpty() ? null : compiledOutput.get(0).getId());
 		p.setFiles(new ArrayList<>(sourceProject.getAttachments().keySet()));
 		Collections.sort(p.getFiles());
 		return p;
@@ -142,7 +141,7 @@ public class JobWebService {
 			}
 
 			//user is within their quota
-			if (jobService.getCompileCountTodayForUser(userId) > 20) {
+			if (jobService.getCompileCountTodayForUser(userId) > MAX_DAILY_COMPILES) {
 				throw new CompileLimitException("You've exceeded your daily limit for compiles");
 			}
 
@@ -152,15 +151,27 @@ public class JobWebService {
 		}
 	}
 
-	public CompiledProjectStatus checkStatus(String projectId) {
-		return CompiledProjectStatus.values()[jobService.getCompiledOuput(jobService.find(projectId)).get(0).getStatus().ordinal()];
+	public CompiledProjectStatus checkStatus(String projectId) throws NotFoundException {
+		SourceProject proj = jobService.find(projectId);
+		if (proj == null) {
+			throw new NotFoundException("Project with id " + projectId + " could not be found");
+		}
+		CompiledProject compiledOuput = jobService.getLatestCompiledOuput(proj);
+		if (compiledOuput == null) {
+			throw new NotFoundException("Project with id " + projectId + " has not been submitted to be compiled");
+		}
+		return CompiledProjectStatus.values()[compiledOuput.getStatus().ordinal()];
 	}
 
-	public String getCompiledId(String id) {
-		List<CompiledProject> output = jobService.getCompiledOuput(jobService.find(id));
-		if (output.isEmpty()) {
+	public String getCompiledId(String id) throws NotFoundException {
+		SourceProject proj = jobService.find(id);
+		if (proj == null) {
+			throw new NotFoundException("Project with id " + id + " could not be found");
+		}
+		CompiledProject output = jobService.getLatestCompiledOuput(proj);
+		if (output == null) {
 			return null;
 		}
-		return output.get(0).getId();
+		return output.getId();
 	}
 }

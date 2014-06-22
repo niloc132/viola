@@ -36,33 +36,30 @@ public class JobService {
 	}
 	public interface CompiledProjectQueries extends CouchService<CompiledProject> {
 		@View(map = "function(doc){" +
-					"emit(doc.status, doc);" +
-				"}")
-//		@Limit(5)
+						"emit(doc.status, doc);" +
+					"}")
 		List<CompiledProject> getProjectsWithStatus(@Limit int limit, @Keys Status... status);
 
 		@View(map = "function(doc) {" +
-//					"if (doc.status == 'COMPLETE') {" +
 						"emit([doc.sourceId, doc.submittedAt], doc);" +
-//					"}" +
-				"}")
+					"}")
 		@Descending(true)
 		@Limit(1)
 		List<CompiledProject> getCompiledForSource(@EndKey String[] id, @StartKey String[] end);
 
 		@View(map = "function(doc) {" +
-					"emit([doc.submittedBy, doc.submittedAt], doc);" +
-				"}",
+						"emit([doc.submittedBy, doc.submittedAt], doc);" +
+					"}",
 		reduce = "_count")
-//		@Descending(false)
 		int compiledByUserInRange(@StartKey String[] userIdAndStartDate, @EndKey String[] userAndEndDate, @Limit int limit);
 
 
 	}
 	public interface LogQueries extends CouchService<CompilerLog> {
 		@View(map="function(doc) {" +
-				"emit(doc.compiledProjectId, doc);" +
-				"}")
+						"emit(doc.compiledProjectId, doc);" +
+					"}")
+		@Limit(1)//can only have one result, this db is used to just keep crap out of the compiled db
 		List<CompilerLog> findFromCompiled(String id);
 	}
 
@@ -256,8 +253,9 @@ public class JobService {
 		return sourceQueries.find(proj.getSourceId());
 	}
 
-	public List<CompiledProject> getCompiledOuput(SourceProject proj) {
-		return compiledQueries.getCompiledForSource(new String[]{proj.getId()}, new String[]{proj.getId(), "Z"});
+	public CompiledProject getLatestCompiledOuput(SourceProject proj) {
+		List<CompiledProject> compiled = compiledQueries.getCompiledForSource(new String[]{proj.getId()}, new String[]{proj.getId(), "Z"});
+		return (compiled == null || compiled.isEmpty()) ? null : compiled.get(0);
 	}
 
 	public SourceProject find(String id) {

@@ -101,6 +101,7 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 	@Override
 	public void stop() {
 		super.stop();
+		current = null;
 		if (registration != null) {
 			registration.removeHandler();
 			registration = null;
@@ -109,11 +110,12 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 
 	@Override
 	public void cancel() {
-		super.cancel();
-		if (registration != null) {
-			registration.removeHandler();
-			registration = null;
-		}
+//		super.cancel();
+//		if (registration != null) {
+//			registration.removeHandler();
+//			registration = null;
+//		}
+		assert false : "cancel() call not expected, this presenter finishes start synchronously";
 	}
 
 	protected void updateWithProject(Project result) {
@@ -278,9 +280,13 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 
 
 	private void updateUserId() {
-		if (getView() != null && current != null) {
-			getView().setEditable(current.getAuthorId().equals(userIdProvider.get()));
+		if (current != null) {
+			getView().setEditable(isEditable());
 		}
+	}
+
+	private boolean isEditable() {
+		return current.getAuthorId().equals(userIdProvider.get());
 	}
 
 

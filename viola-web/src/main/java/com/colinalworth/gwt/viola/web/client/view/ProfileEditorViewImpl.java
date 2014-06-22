@@ -61,8 +61,6 @@ public class ProfileEditorViewImpl extends AbstractClientView<ProfileEditorPrese
 
 		driver.initialize(this);
 
-		//todo consider centerlc wrapper
-
 		CenterLayoutContainer center = new CenterLayoutContainer();
 		center.setWidget(panel);
 

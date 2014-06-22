@@ -35,5 +35,6 @@ public interface JobRequest {
 	@Throws(NotFoundException.class)
 	void checkStatus(String projectId, AsyncCallback<CompiledProjectStatus> callback);
 
+	@Throws(NotFoundException.class)
 	void getCompiledId(String id, AsyncCallback<String> asyncCallback);
 }
