@@ -46,7 +46,12 @@ public class ProjectEditorViewImpl extends AbstractServerView<ProjectEditorPrese
 
 	@Override
 	public void showProgress(CompiledProjectStatus status) {
-		//no op
+		//no op, server doesn't get updates on compiled status
+	}
+
+	@Override
+	public void setEditable(boolean editable) {
+		//no op, server generated content never editable
 	}
 
 	@Override

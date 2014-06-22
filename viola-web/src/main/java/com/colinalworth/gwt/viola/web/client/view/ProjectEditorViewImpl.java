@@ -53,6 +53,7 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 
 	TextField title = new TextField();
 	TextArea description = new TextArea();
+	private TextButton clone = new TextButton("Clone this project");
 	private final ContentPanel example = new ContentPanel();
 	private String lastCompiledId;
 	private String lastUrl;
@@ -90,6 +91,14 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 		form.add(new FieldLabel(title, "Name"), new CssFloatData(1));
 		form.add(new FieldLabel(description, "Description"), new CssFloatData(1));
 		description.setHeight(100);
+		clone.addSelectHandler(new SelectHandler() {
+			@Override
+			public void onSelect(SelectEvent event) {
+				getPresenter().cloneProject();
+			}
+		});
+		clone.setToolTip("Copy this project make your own changes to it");
+		form.add(clone);
 		container.add(form, new VerticalLayoutData(1, -1, new Margins(10)));
 
 		ContentPanel filePanel = new ContentPanel();
@@ -290,5 +299,12 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 //		if (status == CompiledProjectStatus.COMPLETE) {
 //			blc.expand(LayoutRegion.EAST);
 //		}
+	}
+
+	@Override
+	public void setEditable(boolean editable) {
+		title.setReadOnly(!editable);
+		description.setReadOnly(!editable);
+		clone.setVisible(!editable);
 	}
 }

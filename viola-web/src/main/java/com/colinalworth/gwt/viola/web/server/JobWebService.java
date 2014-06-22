@@ -63,6 +63,7 @@ public class JobWebService {
 		}
 		Project p = new Project();
 		p.setId(id);
+		p.setAuthorId(sourceProject.getAuthorId());
 		p.setDescription(sourceProject.getDescription());
 		p.setTitle(sourceProject.getTitle());
 //		List<CompiledProject> compiledOutput = jobService.getCompiledOuput(sourceProject);

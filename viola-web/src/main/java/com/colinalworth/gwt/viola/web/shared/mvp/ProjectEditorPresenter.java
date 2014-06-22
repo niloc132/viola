@@ -2,13 +2,19 @@ package com.colinalworth.gwt.viola.web.shared.mvp;
 
 import com.colinalworth.gwt.places.shared.Place;
 import com.colinalworth.gwt.places.shared.PlaceManager;
+import com.colinalworth.gwt.viola.web.client.events.ProfileUpdateEvent;
+import com.colinalworth.gwt.viola.web.client.events.ProfileUpdateEvent.ProfileUpdateHandler;
+import com.colinalworth.gwt.viola.web.client.ioc.UserId;
 import com.colinalworth.gwt.viola.web.shared.dto.CompiledProjectStatus;
 import com.colinalworth.gwt.viola.web.shared.dto.Project;
+import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreateProjectPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorView;
 import com.colinalworth.gwt.viola.web.shared.request.JobRequest;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -16,6 +22,7 @@ import com.google.inject.name.Named;
 
 public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorView, ProjectEditorPlace> {
 
+	private HandlerRegistration registration;
 
 	public interface ProjectEditorView extends View<ProjectEditorPresenter>, Editor<Project> {
 
@@ -28,6 +35,8 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 		void setCurrentCompiled(String compiledId, String url);
 
 		void showProgress(CompiledProjectStatus status);
+
+		void setEditable(boolean editable);
 	}
 	public interface ProjectEditorPlace extends Place {
 		String getId();
@@ -48,6 +57,15 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 	@Named("compiledServer")
 	String compiledServer;
 
+	@UserId
+	@Inject
+	Provider<String> userIdProvider;
+
+	@Inject
+	EventBus eventBus;
+
+
+
 
 	private SimpleBeanEditorDriver<Project, ?> driver;
 	private Object editor;
@@ -56,14 +74,19 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 
 	@Override
 	public void go(AcceptsView parent, ProjectEditorPlace place) {
-		driver = getView().getDriver();
-
 		super.go(parent, place);
+		driver = getView().getDriver();
 		if (current != null && place.getId().equals(current.getId())) {
 			//TODO reuse presenters
 			updateWithProject(current);
 			return;
 		}
+		registration = eventBus.addHandler(ProfileUpdateEvent.TYPE, new ProfileUpdateHandler() {
+			@Override
+			public void onProfileUpdate(ProfileUpdateEvent event) {
+				updateUserId();
+			}
+		});
 		jobRequest.get().getProject(place.getId(), new AsyncCallback<Project>(){
 			@Override
 			public void onFailure(Throwable caught) {
@@ -77,6 +100,24 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 		});
 	}
 
+	@Override
+	public void stop() {
+		super.stop();
+		if (registration != null) {
+			registration.removeHandler();
+			registration = null;
+		}
+	}
+
+	@Override
+	public void cancel() {
+		super.cancel();
+		if (registration != null) {
+			registration.removeHandler();
+			registration = null;
+		}
+	}
+
 	protected void updateWithProject(Project result) {
 		current = result;
 		driver.edit(result);
@@ -86,6 +127,7 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 			editor = javaEditor;
 		}
 		updateCompiledId();
+		updateUserId();
 	}
 
 	public boolean tryLoadFile(String path) {
@@ -164,6 +206,12 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 		});
 	}
 
+	public void cloneProject() {
+		CreateProjectPlace place = placeManager.create(CreateProjectPlace.class);
+		place.setCopy(getCurrentPlace().getId());
+		placeManager.submit(place);
+	}
+
 	private void poll() {
 		jobRequest.get().checkStatus(getCurrentPlace().getId(), new AsyncCallback<CompiledProjectStatus>() {
 			@Override
@@ -187,6 +235,13 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 				}
 			}
 		});
+	}
+
+
+	private void updateUserId() {
+		if (getView() != null && current != null) {
+			getView().setEditable(current.getAuthorId().equals(userIdProvider.get()));
+		}
 	}
 
 
