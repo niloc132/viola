@@ -7,17 +7,13 @@ import com.colinalworth.gwt.viola.entity.SourceProject;
 import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import rxf.server.Attachment;
-import rxf.server.CouchService;
-import rxf.server.CouchService.Attachments;
-import rxf.server.driver.CouchMetaDriver;
+import rxf.couch.Attachment;
+import rxf.couch.CouchService;
+import rxf.couch.CouchService.Attachments;
+import rxf.couch.driver.CouchMetaDriver;
 import rxf.shared.CouchTx;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URLConnection;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -131,7 +127,7 @@ public class JobService {
 		clone.setAuthorId(userId);
 		clone.setDescription(original.getDescription());
 		clone.setModule(original.getModule());
-		clone.setPrivate(original.isPrivate());
+//		clone.setPrivate(original.isPrivate());///todo: 0.9.9
 		clone.setTitle(original.getTitle());
 		clone.setLastUpdated(new Date());
 

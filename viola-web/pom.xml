@@ -23,7 +23,7 @@
 
 		<dependency>
 			<groupId>rxf</groupId>
-			<artifactId>rxf-server</artifactId>
+			<artifactId>rxf-couch</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>rxf</groupId>

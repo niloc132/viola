@@ -6,21 +6,13 @@ import com.colinalworth.gwt.viola.entity.AgentStatus.State;
 import com.colinalworth.gwt.viola.ioc.ViolaModule;
 import com.colinalworth.gwt.viola.service.AgentStatusService;
 import com.colinalworth.gwt.viola.service.AgentStatusService.CompiledProjectQueries;
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.TypeLiteral;
+import com.google.inject.*;
 import com.google.inject.multibindings.MapBinder;
-import one.xio.HttpMethod;
-import rxf.server.guice.CouchModuleBuilder;
+import rxf.core.Server;
+import rxf.couch.guice.CouchModuleBuilder;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 //TODO monitor updated agent.jar image, and cycle out all agents as available
 public class Governer {
@@ -50,7 +42,7 @@ public class Governer {
 			public void run() {
 				try {
 					//blocking
-					HttpMethod.init(null);
+					Server.init(null);
 				} catch (IOException e) {
 					e.printStackTrace();
 					System.exit(1);

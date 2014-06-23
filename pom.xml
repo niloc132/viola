@@ -13,7 +13,7 @@
 
 		<gwt.version>2.6.1</gwt.version>
 		<guice.version>3.0</guice.version>
-		<rxf.version>0.9.7.3</rxf.version>
+		<rxf.version>0.9.9.0</rxf.version>
 	</properties>
 	<scm>
 		<connection>scm:git:ssh://git@github.com:niloc132/viola.git</connection>
@@ -29,11 +29,14 @@
 			<comments>A business-friendly OSS license</comments>
 		</license>
 	</licenses>
+    <repositories>
+        <repository><id>misc-repo</id><url>http://raw.github.com/jnorthrup/misc-repo/master/</url></repository>
+    </repositories>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>rxf</groupId>
-				<artifactId>rxf-server</artifactId>
+				<artifactId>rxf-couch</artifactId>
 				<version>${rxf.version}</version>
 			</dependency>
 			<dependency>

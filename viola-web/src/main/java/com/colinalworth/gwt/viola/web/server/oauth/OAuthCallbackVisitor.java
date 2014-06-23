@@ -11,13 +11,11 @@ import com.google.gson.JsonParser;
 import com.google.inject.Inject;
 import one.xio.AsioVisitor.Impl;
 import one.xio.HttpHeaders;
-import one.xio.HttpMethod;
 import one.xio.HttpStatus;
 import org.apache.commons.io.IOUtils;
-import rxf.server.PreRead;
-import rxf.server.Rfc822HeaderState;
-import rxf.server.Rfc822HeaderState.HttpRequest;
-import rxf.server.driver.RxfBootstrap;
+import rxf.core.Config;
+import rxf.core.Rfc822HeaderState;
+import rxf.shared.PreRead;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,9 +28,11 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class OAuthCallbackVisitor extends Impl implements PreRead {
+import static java.nio.charset.StandardCharsets.UTF_8;
+@PreRead
+public class OAuthCallbackVisitor extends Impl  {
 	private static final ExecutorService execs = Executors.newFixedThreadPool(2);
-	private static String serverUrl = RxfBootstrap.getVar("url", "https://viola.colinalworth.com");
+	private static String serverUrl = Config.get("url", "https://viola.colinalworth.com");
 
 	//TODO continue with the refactor, since these are goog specific
 	private String clientId = "888496828889-cjuie9aotun74v1p9tbrb568rchtjkc9.apps.googleusercontent.com";
@@ -63,7 +63,7 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 			return;
 		}
 
-		final HttpRequest req = (HttpRequest) new Rfc822HeaderState().$req().apply(cursor);
+		final Rfc822HeaderState.HttpRequest req = (Rfc822HeaderState.HttpRequest) new Rfc822HeaderState().$req().read(cursor);
 
 
 		String[] pathParts = req.path().split("\\?");
@@ -119,7 +119,7 @@ public class OAuthCallbackVisitor extends Impl implements PreRead {
 				.as(ByteBuffer.class);
 
 		((SocketChannel) key.channel()).write(resp);
-		((SocketChannel) key.channel()).write(HttpMethod.UTF8.encode(str));
+		((SocketChannel) key.channel()).write(UTF_8.encode(str));
 		key.selector().wakeup();
 		key.interestOps(SelectionKey.OP_READ).attach(null);
 	}

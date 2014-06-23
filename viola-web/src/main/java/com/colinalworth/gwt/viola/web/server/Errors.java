@@ -2,13 +2,13 @@ package com.colinalworth.gwt.viola.web.server;
 
 import one.xio.AsioVisitor.Impl;
 import one.xio.HttpHeaders;
-import one.xio.HttpMethod;
 import one.xio.HttpStatus;
-import rxf.server.Rfc822HeaderState;
+import rxf.core.Rfc822HeaderState;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 
 public final class Errors {
 
@@ -33,7 +33,7 @@ public final class Errors {
 						.as(ByteBuffer.class);
 
 				((SocketChannel) key.channel()).write(headers);
-				((SocketChannel) key.channel()).write(HttpMethod.UTF8.encode(html));
+				((SocketChannel) key.channel()).write(StandardCharsets.UTF_8.encode(html));
 				key.selector().wakeup();
 				key.interestOps(SelectionKey.OP_READ).attach(null);
 			}
@@ -64,7 +64,7 @@ public final class Errors {
 						.as(ByteBuffer.class);
 				
 				((SocketChannel) key.channel()).write(headers);
-				((SocketChannel) key.channel()).write(HttpMethod.UTF8.encode(html));
+				((SocketChannel) key.channel()).write(StandardCharsets.UTF_8.encode(html));
 				key.selector().wakeup();
 				key.interestOps(SelectionKey.OP_READ).attach(null);
 			}

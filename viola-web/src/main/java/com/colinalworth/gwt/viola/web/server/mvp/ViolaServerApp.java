@@ -11,15 +11,14 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import one.xio.AsioVisitor.Impl;
 import one.xio.HttpHeaders;
-import one.xio.HttpMethod;
 import one.xio.HttpStatus;
-import rxf.server.PreRead;
-import rxf.server.Rfc822HeaderState;
-import rxf.server.Rfc822HeaderState.HttpRequest;
+import rxf.core.Rfc822HeaderState;
+import rxf.shared.PreRead;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,8 +26,8 @@ import java.util.concurrent.Executors;
  * This is the heart of the server side of the place-&gt;html bits of the app for RelaxFactory - it runs the presenter
  * with the server implementation of the view, and takes the html output from the view to build the output html file.
  *
- */
-public class ViolaServerApp extends Impl implements PreRead {
+ */@PreRead
+   public class ViolaServerApp extends Impl {
 	public static ExecutorService WEBAPP_THREADS = Executors.newFixedThreadPool(10);
 
 
@@ -69,7 +68,7 @@ public class ViolaServerApp extends Impl implements PreRead {
 
 	@Override
 	public void onRead(final SelectionKey key) throws Exception {
-		HttpRequest req1 = null;
+		Rfc822HeaderState.HttpRequest req1 = null;
 		if (key.attachment() instanceof Object[]) {
 			Object[] ar = (Object[]) key.attachment();
 			for (Object o : ar) {
@@ -78,7 +77,7 @@ public class ViolaServerApp extends Impl implements PreRead {
 				}
 			}
 		}
-		final HttpRequest request = req1;
+		final Rfc822HeaderState.HttpRequest request = req1;
 		if (request == null) {
 			Errors.$500(key);
 			return;//fail, something miswired
@@ -146,7 +145,7 @@ public class ViolaServerApp extends Impl implements PreRead {
 
 					payload.put(title.getBytes());
 					payload.put(APP_RESPONSE_TEMPLATE[1]);
-					payload.put(HttpMethod.UTF8.encode(response));
+					payload.put(StandardCharsets.UTF_8.encode(response));
 					payload.put(APP_RESPONSE_TEMPLATE[2]);
 					payload.put(script.getBytes());
 					payload.put(APP_RESPONSE_TEMPLATE[3]).rewind();

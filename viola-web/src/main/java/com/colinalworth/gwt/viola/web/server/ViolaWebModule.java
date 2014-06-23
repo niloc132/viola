@@ -12,12 +12,7 @@ import com.colinalworth.gwt.viola.web.server.mvp.TitleServerImpl;
 import com.colinalworth.gwt.viola.web.server.mvp.ViolaServerApp;
 import com.colinalworth.gwt.viola.web.server.oauth.OAuthCallbackVisitor;
 import com.colinalworth.gwt.viola.web.server.rpq.impl.RpqServerModuleBuilder;
-import com.colinalworth.gwt.viola.web.server.view.CreateProjectViewImpl;
-import com.colinalworth.gwt.viola.web.server.view.HomeViewImpl;
-import com.colinalworth.gwt.viola.web.server.view.JavaCodeEditorViewImpl;
-import com.colinalworth.gwt.viola.web.server.view.ProfileViewImpl;
-import com.colinalworth.gwt.viola.web.server.view.ProjectEditorViewImpl;
-import com.colinalworth.gwt.viola.web.server.view.SearchProjectViewImpl;
+import com.colinalworth.gwt.viola.web.server.view.*;
 import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreateProjectView;
 import com.colinalworth.gwt.viola.web.shared.mvp.HomePresenter.HomeView;
 import com.colinalworth.gwt.viola.web.shared.mvp.JavaCodeEditorPresenter.JavaCodeEditorView;
@@ -40,10 +35,10 @@ import com.google.gwt.event.shared.SimpleEventBus;
 import com.google.inject.Provides;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
-import rxf.server.RequestQueueVisitor;
-import rxf.server.driver.RxfBootstrap;
-import rxf.server.guice.CouchModuleBuilder;
-import rxf.server.guice.RxfModule;
+import rxf.core.Config;
+import rxf.couch.guice.CouchModuleBuilder;
+import rxf.couch.guice.RxfModule;
+import rxf.rpc.RequestQueueVisitor;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -66,7 +61,8 @@ public class ViolaWebModule extends RxfModule {
 		bindConstant().annotatedWith(Names.named("hostname")).to("0.0.0.0");
 		bindConstant().annotatedWith(Names.named("port")).to(8000);
 
-		bindConstant().annotatedWith(Names.named("compiledServer")).to(RxfBootstrap.getVar("static.url", RxfBootstrap.getVar("url", "https://viola.colinalworth.com")));
+		bindConstant().annotatedWith(Names.named("compiledServer")).to(Config
+                .get("static.url", Config.get("url", "https://viola.colinalworth.com")));
 
 		bind(Presenter.Errors.class).to(ErrorsServerImpl.class);
 		bind(Presenter.PageTitle.class).to(TitleServerImpl.class);
@@ -94,7 +90,7 @@ public class ViolaWebModule extends RxfModule {
 
 		install(new RpqServerModuleBuilder().build(ViolaRequestQueue.class));
 
-		install(new CouchModuleBuilder("v").withService(SearchQueries.class).build());
+		install(new CouchModuleBuilder("v").withService((Class<? extends rxf.couch.CouchService<?>>) SearchQueries.class).build());
 	}
 
 	@Provides

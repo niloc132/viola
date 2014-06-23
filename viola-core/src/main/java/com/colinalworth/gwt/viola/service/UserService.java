@@ -3,7 +3,7 @@ package com.colinalworth.gwt.viola.service;
 import com.colinalworth.gwt.viola.entity.Session;
 import com.colinalworth.gwt.viola.entity.User;
 import com.google.inject.Inject;
-import rxf.server.CouchService;
+import rxf.couch.CouchService;
 import rxf.shared.CouchTx;
 
 import java.util.Arrays;
@@ -12,7 +12,7 @@ import java.util.List;
 public class UserService {
 
 	public interface UserQueries extends CouchService<User> {
-		@View(map = "function(doc) {" +
+		@CouchService.View(map = "function(doc) {" +
 						"emit([doc.identityServer, doc.identityData], doc);" +
 					"}")
 		List<User> findWithToken(@Key List<String> key);

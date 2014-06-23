@@ -5,7 +5,7 @@ import com.colinalworth.gwt.viola.service.JobService;
 import com.colinalworth.gwt.viola.web.shared.dto.ProfileSearchResult;
 import com.colinalworth.gwt.viola.web.shared.dto.ProjectSearchResult;
 import com.google.inject.Inject;
-import rxf.server.CouchService;
+import rxf.couch.CouchService;
 
 import java.util.ArrayList;
 import java.util.List;
