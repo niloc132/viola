@@ -6,6 +6,7 @@ import com.colinalworth.gwt.viola.web.shared.mvp.SearchProjectPresenter.SearchPr
 import com.colinalworth.gwt.viola.web.shared.mvp.ViolaPlaces;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.junit.client.GWTTestCase;
+import org.junit.Test;
 
 public class ViolaPlacesClientTest extends GWTTestCase {
 	@Override
@@ -13,12 +14,12 @@ public class ViolaPlacesClientTest extends GWTTestCase {
 		return "com.colinalworth.gwt.viola.web.Viola";
 	}
 
+    @Test(timeout = 39000L)
 	public void testRouteToString() throws Exception {
 		ViolaPlaces places = createPlaces();
-
-
 	}
 
+    @Test(timeout = 39000L)
 	public void testRouteToPlace() throws Exception {
 		ViolaPlaces places = createPlaces();
 
@@ -48,6 +49,7 @@ public class ViolaPlacesClientTest extends GWTTestCase {
 		assert searchResult.getQuery().equals("foo");
 	}
 
+    @Test(timeout = 39000L)
 	protected ViolaPlaces createPlaces() {
 		return GWT.create(ViolaPlaces.class);
 	}

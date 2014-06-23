@@ -1,7 +1,7 @@
 package com.colinalworth.gwt.viola.entity;
 
 import com.google.gson.annotations.SerializedName;
-import rxf.server.Attachment;
+import rxf.couch.Attachment;
 
 import java.util.Collections;
 import java.util.HashMap;

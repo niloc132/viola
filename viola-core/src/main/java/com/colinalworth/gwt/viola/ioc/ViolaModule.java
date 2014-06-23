@@ -1,12 +1,7 @@
 
 package com.colinalworth.gwt.viola.ioc;
 
-import com.colinalworth.gwt.viola.entity.AgentStatus;
-import com.colinalworth.gwt.viola.entity.CompiledProject;
-import com.colinalworth.gwt.viola.entity.CompilerLog;
-import com.colinalworth.gwt.viola.entity.Session;
-import com.colinalworth.gwt.viola.entity.SourceProject;
-import com.colinalworth.gwt.viola.entity.User;
+import com.colinalworth.gwt.viola.entity.*;
 import com.colinalworth.gwt.viola.gson.DateTypeAdapter;
 import com.colinalworth.gwt.viola.service.AgentStatusService.AgentStatusQueries;
 import com.colinalworth.gwt.viola.service.JobService.CompiledProjectQueries;
@@ -15,8 +10,8 @@ import com.colinalworth.gwt.viola.service.JobService.SourceProjectQueries;
 import com.colinalworth.gwt.viola.service.UserService.SessionQueries;
 import com.colinalworth.gwt.viola.service.UserService.UserQueries;
 import com.google.inject.AbstractModule;
-import rxf.server.driver.CouchMetaDriver;
-import rxf.server.guice.CouchModuleBuilder;
+import rxf.couch.driver.CouchMetaDriver;
+import rxf.couch.guice.CouchModuleBuilder;
 
 import java.util.Date;
 

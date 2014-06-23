@@ -8,8 +8,8 @@ import com.google.gwt.dev.ThreadedPermutationWorkerFactory;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import one.xio.HttpMethod;
-import rxf.server.guice.CouchModuleBuilder;
+import rxf.core.Server;
+import rxf.couch.guice.CouchModuleBuilder;
 
 import java.io.IOException;
 
@@ -39,7 +39,7 @@ public class CompilerServer {
 			public void run() {
 				try {
 					//blocking
-					HttpMethod.init(null);
+					Server.init(null);
 				} catch (IOException e) {
 					e.printStackTrace();
 					System.exit(1);

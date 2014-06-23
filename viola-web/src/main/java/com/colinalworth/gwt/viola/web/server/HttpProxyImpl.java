@@ -5,12 +5,9 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import one.xio.AsioVisitor.Impl;
 import one.xio.HttpHeaders;
 import one.xio.HttpStatus;
-import rxf.server.PreRead;
-import rxf.server.Rfc822HeaderState;
-import rxf.server.Rfc822HeaderState.HttpRequest;
-import rxf.server.Rfc822HeaderState.HttpResponse;
-import rxf.server.gen.CouchDriver;
-import rxf.server.gen.CouchDriver.DocFetch.DocFetchActionBuilder;
+import rxf.core.Rfc822HeaderState;
+import rxf.couch.gen.CouchDriver;
+import rxf.shared.PreRead;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -21,7 +18,8 @@ import java.util.regex.Pattern;
 
 import static java.nio.channels.SelectionKey.OP_READ;
 
-public class HttpProxyImpl extends Impl implements PreRead {
+@PreRead
+public class HttpProxyImpl extends Impl  {
 	private final Pattern passthroughExpr;
 	private final String prefix;
 	private final String suffix;
@@ -34,7 +32,7 @@ public class HttpProxyImpl extends Impl implements PreRead {
 
 	@Override
 	public void onRead(SelectionKey key) throws Exception {
-		HttpRequest req1 = null;
+		Rfc822HeaderState.HttpRequest req1 = null;
 		if (key.attachment() instanceof Object[]) {
 			Object[] ar = (Object[]) key.attachment();
 			for (Object o : ar) {
@@ -44,7 +42,7 @@ public class HttpProxyImpl extends Impl implements PreRead {
 				}
 			}
 		}
-		final HttpRequest req = req1;
+		final Rfc822HeaderState.HttpRequest req = req1;
 		if (req == null) {
 			Errors.$500(key);
 			return;//fail, something miswired
@@ -60,8 +58,8 @@ public class HttpProxyImpl extends Impl implements PreRead {
 		if (link.endsWith("/")) {
 			link += "index.html";
 		}
-		DocFetchActionBuilder to = CouchDriver.DocFetch.$().db("").docId(link).to();
-		final HttpResponse state = to.state().$res();
+		CouchDriver.DocFetch.DocFetchActionBuilder to = new CouchDriver.DocFetch().db("").docId(link).to();
+		final Rfc822HeaderState.HttpResponse state = to.state().$res();
 		state.addHeaderInterest(HttpHeaders.Content$2dType);
 		final Future<ByteBuffer> result = to.fire().future();
 

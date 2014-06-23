@@ -3,7 +3,7 @@ package com.colinalworth.gwt.viola.web.server;
 import com.colinalworth.gwt.viola.ioc.ViolaModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import rxf.server.RelaxFactoryServer;
+import rxf.rpc.RelaxFactoryServer;
 
 import java.io.IOException;
 

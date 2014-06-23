@@ -4,7 +4,7 @@ import com.colinalworth.gwt.viola.entity.AgentStatus;
 import com.colinalworth.gwt.viola.entity.AgentStatus.State;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import rxf.server.CouchService;
+import rxf.couch.CouchService;
 import rxf.shared.CouchTx;
 
 import java.util.Date;
