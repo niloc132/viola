@@ -6,7 +6,6 @@ import one.xio.MimeType;
 import rxf.core.CouchNamespace;
 import rxf.core.DateHeaderParser;
 import rxf.core.Rfc822HeaderState;
-import rxf.core.Server;
 import rxf.shared.CompressionTypes;
 import rxf.shared.PreRead;
 import rxf.web.inf.ProtocolMethodDispatch;
@@ -144,7 +143,7 @@ public class ContentRootImpl extends Impl{
 						if (accepts.contains(compType.name())) {
 							File f = new File(file.getAbsoluteFile() + "." + compType.suffix);
 							if (f.isFile() && f.canRead()) {
-								if (Server.DEBUG_SENDJSON) {
+								if (rxf.core.Server.DEBUG_SENDJSON) {
 									System.err.println("sending compressed archive: " + f.getAbsolutePath());
 								}
 								ceString = (compType.name());
