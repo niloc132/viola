@@ -49,6 +49,6 @@ pre=$PWD
 pn=$(grep '<artifactId>' pom.xml |head -n 1|cut -f2 -d ">"|cut -f1 -d"<")
 vers=$(grep '<version>' pom.xml  |head -n 1|cut -f2 -d ">"|cut -f1 -d"<")
 CP=$(cat target/cp.txt)
-pushd target/$pn-$vers
-${JAVA_HOME}/bin/java -cp $CP:WEB-INF/classes -Drxf.url=http://localhost:8000 -Drxf.couch.prefix=http://weatherwax.colinalworth.com:8003/  -Drxf.cached.threadpool="true" com.colinalworth.gwt.viola.web.server.WebServer
+pushd target
+${JAVA_HOME}/bin/java -cp $CP:WEB-INF/classes -Drxf.url=http://localhost:8000 -Drxf.couch.prefix=http://weatherwax.colinalworth.com:8003/  -Drxf.cached.threadpool="true" -jar $pn-$vers.jar
 }
