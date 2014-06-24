@@ -12,6 +12,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
@@ -129,7 +130,7 @@ public class ClientPlaceManager implements PlaceManager {
 
 	@Override
 	public void back() {
-		//TODO
+		History.back();
 	}
 
 

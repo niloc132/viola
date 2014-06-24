@@ -34,6 +34,9 @@ public class JobWebService {
 	UserService userService;
 
 	public String getAttachment(String projectId, String path) throws NotFoundException {
+		if (path.endsWith("/")) {
+			return "";
+		}
 		return jobService.getSourceAsString(jobService.find(projectId), path);
 	}
 

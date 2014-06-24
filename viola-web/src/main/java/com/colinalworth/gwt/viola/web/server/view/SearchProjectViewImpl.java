@@ -40,7 +40,7 @@ public class SearchProjectViewImpl extends AbstractServerView<SearchProjectPrese
 				if ((project.getTitle() == null && project.getDescription() == null)) {
 					continue;
 				}
-				sb.appendHtmlConstant("<div><a href='/example/" + UriUtils.encode(project.getId()) + "/'>");
+				sb.appendHtmlConstant("<div><a href='/proj/" + UriUtils.encode(project.getId()) + "/'>");
 				if (project.getTitle() == null) {
 					sb.appendEscaped(project.getDescription());
 					sb.appendHtmlConstant("</a>");

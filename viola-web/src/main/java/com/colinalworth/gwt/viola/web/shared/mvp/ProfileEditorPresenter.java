@@ -1,6 +1,7 @@
 package com.colinalworth.gwt.viola.web.shared.mvp;
 
 import com.colinalworth.gwt.places.shared.Place;
+import com.colinalworth.gwt.places.shared.PlaceManager;
 import com.colinalworth.gwt.viola.web.client.events.ProfileUpdateEvent;
 import com.colinalworth.gwt.viola.web.client.ioc.UserId;
 import com.colinalworth.gwt.viola.web.shared.dto.UserProfile;
@@ -8,7 +9,6 @@ import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileE
 import com.colinalworth.gwt.viola.web.shared.mvp.ProfileEditorPresenter.ProfileEditorView;
 import com.colinalworth.gwt.viola.web.shared.request.ProfileRequest;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -35,6 +35,9 @@ public class ProfileEditorPresenter extends AbstractPresenterImpl<ProfileEditorV
 
 	@Inject
 	EventBus eventBus;
+
+	@Inject
+	PlaceManager placeManager;
 
 	private SimpleBeanEditorDriver<UserProfile, ?> driver;
 
@@ -86,6 +89,6 @@ public class ProfileEditorPresenter extends AbstractPresenterImpl<ProfileEditorV
 	}
 
 	public void back() {
-		History.back();
+		placeManager.back();
 	}
 }
