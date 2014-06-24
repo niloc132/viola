@@ -56,11 +56,6 @@ public class JobService {
 
 	}
 	public interface LogQueries extends CouchService<CompilerLog> {
-		@View(map="function(doc) {" +
-						"emit(doc.compiledProjectId, doc);" +
-					"}")
-		@Limit(1)//can only have one result, this db is used to just keep crap out of the compiled db
-		List<CompilerLog> findFromCompiled(String id);
 	}
 
 	@Inject SourceProjectQueries sourceQueries;
@@ -242,11 +237,6 @@ public class JobService {
 
 	public void saveLog(CompilerLog log) {
 		logQueries.persist(log);
-	}
-
-	public CompilerLog getLogs(CompiledProject project) {
-		List<CompilerLog> logs = logQueries.findFromCompiled(project.getId());
-		return logs == null || logs.isEmpty() ? null : logs.get(0);
 	}
 
 	public SourceProject getSourceProject(CompiledProject proj) {
