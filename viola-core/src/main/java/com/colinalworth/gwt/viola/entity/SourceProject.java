@@ -15,6 +15,8 @@ public class SourceProject extends CouchEntityWithAttachments {
 	
 	private String previousVersionSource;
 
+	private boolean isPrivate;
+
 
 	public String getAuthorId() {
 		return authorId;
@@ -58,5 +60,12 @@ public class SourceProject extends CouchEntityWithAttachments {
 	public void setPreviousVersionSource(String previousVersionSource) {
 		this.previousVersionSource = previousVersionSource;
 	}
-	
+
+	public boolean isPrivate() {
+		return isPrivate;
+	}
+
+	public void setPrivate(boolean aPrivate) {
+		isPrivate = aPrivate;
+	}
 }
