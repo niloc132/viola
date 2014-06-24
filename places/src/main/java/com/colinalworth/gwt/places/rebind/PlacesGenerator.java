@@ -145,7 +145,7 @@ public class PlacesGenerator extends Generator {
 					PathVariable var = (PathVariable) pathComponent;
 					String getterExpression = getGetterMethod(l, model.getPlaceType(), var.getVarName());
 					if (var.isOptional()) {
-						sw.println("sb.append(urlEncodeOrDefault(p.%1$s)).append(\"/\");", getterExpression);
+						sw.println("sb.append(urlEncodeOrDefault(p.%1$s));", getterExpression);
 					} else {
 						sw.println("sb.append(urlEncodeOrThrow(p.%1$s, \"%2$s\")).append(\"/\");", getterExpression, escape(model.getPlaceType().getQualifiedSourceName() + "." + getterExpression));
 					}
