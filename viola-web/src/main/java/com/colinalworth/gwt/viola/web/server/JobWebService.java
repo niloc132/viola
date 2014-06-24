@@ -1,16 +1,19 @@
 package com.colinalworth.gwt.viola.web.server;
 
 import com.colinalworth.gwt.viola.entity.CompiledProject;
+import com.colinalworth.gwt.viola.entity.CompilerLog;
 import com.colinalworth.gwt.viola.entity.SourceProject;
 import com.colinalworth.gwt.viola.service.JobService;
 import com.colinalworth.gwt.viola.service.UserService;
 import com.colinalworth.gwt.viola.web.shared.dto.CompileLimitException;
 import com.colinalworth.gwt.viola.web.shared.dto.CompiledProjectStatus;
+import com.colinalworth.gwt.viola.web.shared.dto.CompilerLogNode;
 import com.colinalworth.gwt.viola.web.shared.dto.MustBeLoggedInException;
 import com.colinalworth.gwt.viola.web.shared.dto.NotFoundException;
 import com.colinalworth.gwt.viola.web.shared.dto.Project;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import rxf.server.CouchService;
 import rxf.shared.CouchTx;
 
 import java.util.ArrayList;
@@ -176,5 +179,24 @@ public class JobWebService {
 			return null;
 		}
 		return output.getId();
+	}
+
+	public interface LogQueries extends CouchService<CompilerLog> {
+		@View(map="function(doc) {" +
+				"emit(doc.compiledProjectId, doc);" +
+				"}")
+//		@Limit(1)//can only have one result, this db is used to just keep crap out of the compiled db
+		List<LogWrap> findFromCompiled(String id);
+	}
+	public static class LogWrap {
+		CompilerLogNode node;
+	}
+	@Inject LogQueries logQueries;
+
+
+	public CompilerLogNode getLog(String compiledId) throws NotFoundException {
+		//should be 1 or 0
+		List<LogWrap> logs = logQueries.findFromCompiled(compiledId);
+		return logs.isEmpty() ? null : logs.get(0).node;
 	}
 }

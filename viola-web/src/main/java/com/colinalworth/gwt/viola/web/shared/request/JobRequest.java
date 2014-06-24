@@ -2,6 +2,7 @@ package com.colinalworth.gwt.viola.web.shared.request;
 
 import com.colinalworth.gwt.viola.web.shared.dto.CompileLimitException;
 import com.colinalworth.gwt.viola.web.shared.dto.CompiledProjectStatus;
+import com.colinalworth.gwt.viola.web.shared.dto.CompilerLogNode;
 import com.colinalworth.gwt.viola.web.shared.dto.MustBeLoggedInException;
 import com.colinalworth.gwt.viola.web.shared.dto.NotFoundException;
 import com.colinalworth.gwt.viola.web.shared.dto.Project;
@@ -37,4 +38,7 @@ public interface JobRequest {
 
 	@Throws(NotFoundException.class)
 	void getCompiledId(String id, AsyncCallback<String> asyncCallback);
+
+	@Throws(NotFoundException.class)
+	void getLog(String compiledId, AsyncCallback<CompilerLogNode> callback);
 }

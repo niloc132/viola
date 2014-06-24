@@ -5,6 +5,8 @@ import com.colinalworth.gwt.places.vm.PlaceFactoryModuleBuilder;
 import com.colinalworth.gwt.viola.service.UserService;
 import com.colinalworth.gwt.viola.web.client.ioc.Session;
 import com.colinalworth.gwt.viola.web.client.ioc.UserId;
+import com.colinalworth.gwt.viola.web.server.JobWebService.LogQueries;
+import com.colinalworth.gwt.viola.web.server.JobWebService.LogWrap;
 import com.colinalworth.gwt.viola.web.server.SearchService.SearchQueries;
 import com.colinalworth.gwt.viola.web.server.mvp.ErrorsServerImpl;
 import com.colinalworth.gwt.viola.web.server.mvp.ServerPlaceManager;
@@ -51,7 +53,6 @@ import java.util.regex.Pattern;
 public class ViolaWebModule extends RxfModule {
 	@Override
 	protected void configureHttpVisitors() {
-//		get("/source/([a-fA-F0-9]+/[^?]*)").with(new HttpProxyImpl(Pattern.compile("/source/([a-fA-F0-9]+/[^?]*)"), "/vsourceproject/", ""));
 		get("/compiled/([a-fA-F0-9]+/[^?]*)").with(new HttpProxyImpl(Pattern.compile("/compiled/([a-fA-F0-9]+/[^?]*)"), "/vcompiledproject/", ""));
 
 		post(".*/rpq").with(RequestQueueVisitor.class);
@@ -94,7 +95,7 @@ public class ViolaWebModule extends RxfModule {
 
 		install(new RpqServerModuleBuilder().build(ViolaRequestQueue.class));
 
-		install(new CouchModuleBuilder("v").withService(SearchQueries.class).build());
+		install(new CouchModuleBuilder("v").withService(SearchQueries.class).withService(LogQueries.class).withEntity(LogWrap.class).build());
 	}
 
 	@Provides

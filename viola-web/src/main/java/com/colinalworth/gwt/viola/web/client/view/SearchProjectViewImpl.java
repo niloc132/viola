@@ -58,9 +58,9 @@ public class SearchProjectViewImpl extends AbstractClientView<SearchProjectPrese
 		});
 
 		ProjectProperties props = GWT.create(ProjectProperties.class);
-		store = new ListStore<ProjectSearchResult>(props.key());
+		store = new ListStore<>(props.key());
 
-		listview = new ListView<ProjectSearchResult, ProjectSearchResult>(store, new IdentityValueProvider<ProjectSearchResult>(), new SearchResultsListViewAppearance<ProjectSearchResult>());
+		listview = new ListView<>(store, new IdentityValueProvider<ProjectSearchResult>(), new SearchResultsListViewAppearance<ProjectSearchResult>());
 		ViolaBundle.INSTANCE.searchResults().ensureInjected();
 		listview.setCell(new AbstractCell<ProjectSearchResult>("click") {
 			ProjectSearchResultTemplate template = GWT.create(ProjectSearchResultTemplate.class);

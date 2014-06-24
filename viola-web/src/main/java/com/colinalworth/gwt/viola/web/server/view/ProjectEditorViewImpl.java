@@ -1,6 +1,7 @@
 package com.colinalworth.gwt.viola.web.server.view;
 
 import com.colinalworth.gwt.viola.web.shared.dto.CompiledProjectStatus;
+import com.colinalworth.gwt.viola.web.shared.dto.CompilerLogNode;
 import com.colinalworth.gwt.viola.web.shared.dto.Project;
 import com.colinalworth.gwt.viola.web.shared.mvp.AbstractPresenterImpl.AbstractServerView;
 import com.colinalworth.gwt.viola.web.shared.mvp.AcceptsView;
@@ -52,6 +53,12 @@ public class ProjectEditorViewImpl extends AbstractServerView<ProjectEditorPrese
 	@Override
 	public void setEditable(boolean editable) {
 		//no op, server generated content never editable
+	}
+
+	@Override
+	public void setLogTree(CompilerLogNode compilerLogNode) {
+		//no op, log is presently only loaded when requested
+		//TODO have this view impl request if error, print it all
 	}
 
 	@Override

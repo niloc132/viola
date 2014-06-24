@@ -6,6 +6,7 @@ import com.colinalworth.gwt.viola.web.client.events.ProfileUpdateEvent;
 import com.colinalworth.gwt.viola.web.client.events.ProfileUpdateEvent.ProfileUpdateHandler;
 import com.colinalworth.gwt.viola.web.client.ioc.UserId;
 import com.colinalworth.gwt.viola.web.shared.dto.CompiledProjectStatus;
+import com.colinalworth.gwt.viola.web.shared.dto.CompilerLogNode;
 import com.colinalworth.gwt.viola.web.shared.dto.Project;
 import com.colinalworth.gwt.viola.web.shared.mvp.CreateProjectPresenter.CreateProjectPlace;
 import com.colinalworth.gwt.viola.web.shared.mvp.ProjectEditorPresenter.ProjectEditorPlace;
@@ -38,6 +39,8 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 		void showProgress(CompiledProjectStatus status);
 
 		void setEditable(boolean editable);
+
+		void setLogTree(CompilerLogNode compilerLogNode);
 	}
 	public interface ProjectEditorPlace extends Place {
 		String getId();
@@ -287,6 +290,20 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 
 	private boolean isEditable() {
 		return current.getAuthorId().equals(userIdProvider.get());
+	}
+
+	public void loadErrorLog(String lastCompiledId) {
+		jobRequest.get().getLog(lastCompiledId, new AsyncCallback<CompilerLogNode>() {
+			@Override
+			public void onFailure(Throwable throwable) {
+				getErrors().report(throwable.getMessage());
+			}
+
+			@Override
+			public void onSuccess(CompilerLogNode compilerLogNode) {
+				getView().setLogTree(compilerLogNode);
+			}
+		});
 	}
 
 

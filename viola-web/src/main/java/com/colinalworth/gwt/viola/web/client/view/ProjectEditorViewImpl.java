@@ -2,6 +2,7 @@ package com.colinalworth.gwt.viola.web.client.view;
 
 import com.colinalworth.gwt.viola.web.client.mvp.SimpleAcceptsView;
 import com.colinalworth.gwt.viola.web.shared.dto.CompiledProjectStatus;
+import com.colinalworth.gwt.viola.web.shared.dto.CompilerLogNode;
 import com.colinalworth.gwt.viola.web.shared.dto.Project;
 import com.colinalworth.gwt.viola.web.shared.mvp.AbstractPresenterImpl.AbstractClientView;
 import com.colinalworth.gwt.viola.web.shared.mvp.AcceptsView;
@@ -12,6 +13,8 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.editor.client.EditorDelegate;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.editor.client.ValueAwareEditor;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
 import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -22,6 +25,7 @@ import com.sencha.gxt.core.client.Style.SelectionMode;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.Util;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
+import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.data.shared.SortDir;
 import com.sencha.gxt.data.shared.Store.StoreSortInfo;
 import com.sencha.gxt.data.shared.TreeStore;
@@ -204,6 +208,12 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 		progress.hide();
 		toolBar.add(progress);
 		error.setVisible(false);
+		error.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent clickEvent) {
+				getPresenter().loadErrorLog(lastCompiledId);
+			}
+		});
 		BoxLayoutData errorData = new BoxLayoutData();
 		errorData.setFlex(1);
 		toolBar.add(error, errorData);
@@ -306,6 +316,27 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 			example.forceLayout();
 			example.unmask();
 		}
+	}
+
+
+	interface CLNProps extends PropertyAccess<CompilerLogNode> {
+		ModelKeyProvider<CompilerLogNode> id();
+	}
+	@Override
+	public void setLogTree(CompilerLogNode compilerLogNode) {
+		CLNProps props = GWT.create(CLNProps.class);
+		TreeStore<CompilerLogNode> store = new TreeStore<CompilerLogNode>(props.id());
+		store.addSubTree(0, compilerLogNode.getChildren());
+		Tree<CompilerLogNode, CompilerLogNode> tree = new Tree<CompilerLogNode, CompilerLogNode>(store, new IdentityValueProvider<CompilerLogNode>());
+		tree.setCell(new AbstractCell<CompilerLogNode>() {
+			@Override
+			public void render(Context context, CompilerLogNode compilerLogNode, SafeHtmlBuilder sb) {
+				//TODO style based on level
+				sb.appendHtmlConstant("<code>[").appendEscaped(compilerLogNode.getEntry().getType().name()).appendEscaped("] ").appendEscaped(compilerLogNode.getEntry().getMessage()).appendHtmlConstant("</code>");
+			}
+		});
+		example.setWidget(tree);
+		example.forceLayout();
 	}
 
 	@Override

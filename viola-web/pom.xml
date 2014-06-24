@@ -34,7 +34,6 @@
 			<groupId>com.sencha.gxt</groupId>
 			<artifactId>gxt</artifactId>
 			<version>${gxt.version}</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
