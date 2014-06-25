@@ -21,6 +21,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.Label;
 import com.sencha.gxt.core.client.IdentityValueProvider;
+import com.sencha.gxt.core.client.Style.LayoutRegion;
 import com.sencha.gxt.core.client.Style.SelectionMode;
 import com.sencha.gxt.core.client.util.Margins;
 import com.sencha.gxt.core.client.util.Util;
@@ -44,8 +45,12 @@ import com.sencha.gxt.widget.core.client.container.CssFloatLayoutContainer.CssFl
 import com.sencha.gxt.widget.core.client.container.HasLayout;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer;
 import com.sencha.gxt.widget.core.client.container.VerticalLayoutContainer.VerticalLayoutData;
+import com.sencha.gxt.widget.core.client.event.CollapseItemEvent;
+import com.sencha.gxt.widget.core.client.event.CollapseItemEvent.CollapseItemHandler;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent;
 import com.sencha.gxt.widget.core.client.event.DialogHideEvent.DialogHideHandler;
+import com.sencha.gxt.widget.core.client.event.ExpandItemEvent;
+import com.sencha.gxt.widget.core.client.event.ExpandItemEvent.ExpandItemHandler;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.event.SelectEvent.SelectHandler;
 import com.sencha.gxt.widget.core.client.form.FieldLabel;
@@ -236,6 +241,20 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 		codeWrap.setHeaderVisible(false);
 		blc.setWestWidget(codeWrap, codeLayoutData);
 
+		blc.addCollapseHandler(new CollapseItemHandler<ContentPanel>() {
+			@Override
+			public void onCollapse(CollapseItemEvent<ContentPanel> event) {
+				((BorderLayoutData) event.getItem().getLayoutData()).setCollapsed(true);//WORKAROUND
+				getPresenter().toggleCode(false);
+			}
+		});
+		blc.addExpandHandler(new ExpandItemHandler<ContentPanel>() {
+			@Override
+			public void onExpand(ExpandItemEvent<ContentPanel> event) {
+				getPresenter().toggleCode(true);
+			}
+		});
+
 		example.setHeadingText("Output");
 		example.addTool(new ToolButton(ToolButton.REFRESH, new SelectHandler() {
 			@Override
@@ -380,5 +399,17 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 		title.setReadOnly(!editable);
 		description.setReadOnly(!editable);
 		clone.setVisible(!editable);
+	}
+
+	@Override
+	public void setCodeVisible(boolean visible) {
+		BorderLayoutData layoutData = (BorderLayoutData) blc.getRegionWidget(LayoutRegion.WEST).getLayoutData();
+		if (visible) {
+			if (layoutData.isCollapsed()) {
+				blc.expand(LayoutRegion.WEST);
+			}
+		} else if (!layoutData.isCollapsed()) {
+			blc.collapse(LayoutRegion.WEST);
+		}
 	}
 }

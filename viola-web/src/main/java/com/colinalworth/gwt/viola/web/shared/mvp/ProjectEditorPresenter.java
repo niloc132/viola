@@ -32,6 +32,8 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 
 		SimpleBeanEditorDriver<Project, ?> getDriver();
 
+		void setCodeVisible(boolean visible);
+
 		void setActiveFile(String activeFile);
 
 		void setCurrentCompiled(String compiledId, String url);
@@ -48,6 +50,11 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 
 		String getActiveFile();
 		void setActiveFile(String activeFile);
+
+		//TODO support boolean
+		/** null or 'true' by default, false means hide the code/tree */
+		String getCode();
+		void setCode(String code);
 	}
 
 	@Inject
@@ -77,6 +84,7 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 	public void go(AcceptsView parent, ProjectEditorPlace place) {
 		super.go(parent, place);
 		driver = getView().getDriver();
+		getView().setCodeVisible(!"false".equals(place.getCode()));
 		if (current != null && place.getId().equals(current.getId())) {
 			//TODO reuse presenters
 			updateWithProject(current);
@@ -151,6 +159,7 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 		}
 		ProjectEditorPlace next = placeManager.create(ProjectEditorPlace.class);
 		next.setId(getCurrentPlace().getId());
+		next.setCode(null);
 		next.setActiveFile(path);
 		placeManager.submit(next);
 
@@ -306,6 +315,16 @@ public class ProjectEditorPresenter extends AbstractPresenterImpl<ProjectEditorV
 		});
 	}
 
+	public void toggleCode(boolean codeVisible) {
+		//if codeVisible is false, make sure that the code is *not* false
+		if (codeVisible == ("false".equals(getCurrentPlace().getCode()))) {
+			ProjectEditorPlace next = placeManager.create(ProjectEditorPlace.class);
+			next.setId(getCurrentPlace().getId());
+			next.setCode(codeVisible ? null : "false");
+			next.setActiveFile(getCurrentPlace().getActiveFile());
+			placeManager.submit(next);
+		}
+	}
 
 	@Override
 	public boolean equals(Object obj) {

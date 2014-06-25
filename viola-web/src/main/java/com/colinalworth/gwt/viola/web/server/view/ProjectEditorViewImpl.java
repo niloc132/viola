@@ -62,6 +62,11 @@ public class ProjectEditorViewImpl extends AbstractServerView<ProjectEditorPrese
 	}
 
 	@Override
+	public void setCodeVisible(boolean visible) {
+		//no op, just draw code at the moment
+	}
+
+	@Override
 	public SafeHtml asSafeHtml() {
 		SafeHtmlBuilder sb = new SafeHtmlBuilder();
 		sb.appendHtmlConstant("<div>");

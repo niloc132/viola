@@ -58,6 +58,7 @@ public class SearchProjectPresenter extends AbstractPresenterImpl<SearchProjectV
 
 	public void select(ProjectSearchResult value) {
 		ProjectEditorPlace example = placeManager.create(ProjectEditorPlace.class);
+		example.setCode("false");
 		example.setId(value.getId());
 		placeManager.submit(example);
 	}
