@@ -30,6 +30,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.inject.Inject;
@@ -48,7 +49,6 @@ import com.sencha.gxt.widget.core.client.menu.MenuItem;
 import com.sencha.gxt.widget.core.client.menu.SeparatorMenuItem;
 import com.sencha.gxt.widget.core.client.toolbar.FillToolItem;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
-import de.barop.gwt.client.ui.HyperlinkPushState;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -139,7 +139,7 @@ public class ViolaApp implements EntryPoint {
 	private IsWidget mainApp() {
 		VerticalLayoutContainer outer = new VerticalLayoutContainer();
 		ToolBar toolBar = new ToolBar();
-		toolBar.add(new HyperlinkPushState("Viola: a fiddle for GWT", ""));
+		toolBar.add(new Anchor("Viola: a fiddle for GWT", "/"));
 
 		toolBar.add(new FillToolItem());
 

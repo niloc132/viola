@@ -1,29 +1,23 @@
 <module rename-to="viola">
 	<inherits name="com.google.gwt.user.User" />
 	<inherits name="com.sencha.gxt.ui.GXT" />
+	<replace-with class="com.sencha.gxt.theme.blue.client.menu.BlueItemAppearance">
+		<when-type-is class="com.sencha.gxt.widget.core.client.menu.Item.ItemAppearance" />
+	</replace-with>
 
 	<inherits name="com.sencha.gxt.theme.neptune.Theme" />
 
 
 	<inherits name="com.google.gwt.inject.Inject"/>
 	<inherits name="com.colinalworth.rpq.RPQ"/>
-	<inherits name="de.barop.gwt.PushState" />
-	<set-property name="history.pushStateSupported" value="yes" />
-	<set-property name="history.pushStateSupported" value="no">
-		<any>
-			<when-property-is name="gxt.user.agent" value="ie8" />
-			<when-property-is name="gxt.user.agent" value="ie9" />
-		</any>
-	</set-property>
+
 	<inherits name="com.colinalworth.gwt.places.Places"/>
 	<inherits name="com.google.gwt.precompress.Precompress" />
-
-	<set-property name="gwt.logging.popupHandler" value="DISABLED" />
-
 
 	<source path="client" />
 	<source path="shared" />
 
+	<super-source path="super"/>
 
 <!--	<set-property-fallback name="user.agent" value="safari"/>
 	<set-property-fallback name="gxt.user.agent" value="chrome"/>-->

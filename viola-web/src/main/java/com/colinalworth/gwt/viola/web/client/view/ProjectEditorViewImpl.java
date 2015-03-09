@@ -18,6 +18,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.BeforeSelectionEvent;
 import com.google.gwt.event.logical.shared.BeforeSelectionHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.Label;
 import com.sencha.gxt.core.client.IdentityValueProvider;
@@ -53,7 +54,6 @@ import com.sencha.gxt.widget.core.client.form.TextArea;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.toolbar.ToolBar;
 import com.sencha.gxt.widget.core.client.tree.Tree;
-import de.barop.gwt.client.ui.HyperlinkPushState;
 
 import java.util.Arrays;
 import java.util.List;
@@ -85,7 +85,7 @@ public class ProjectEditorViewImpl extends AbstractClientView<ProjectEditorPrese
 
 	private ProgressBar progress = new ProgressBar();
 	private Label error = new Label("An error occurred compiling");// TODO link to error msg
-	private HyperlinkPushState compiledLink = new HyperlinkPushState();
+	private Anchor compiledLink = new Anchor();
 
 	public ProjectEditorViewImpl() {
 		BorderLayoutContainer code = new BorderLayoutContainer();

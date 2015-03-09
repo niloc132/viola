@@ -2,6 +2,7 @@ package com.colinalworth.gwt.viola.web.client.mvp;
 
 import com.colinalworth.gwt.places.shared.Place;
 import com.colinalworth.gwt.places.shared.PlaceManager;
+import com.colinalworth.gwt.viola.web.client.history.HistoryImpl;
 import com.colinalworth.gwt.viola.web.shared.mvp.AcceptsView;
 import com.colinalworth.gwt.viola.web.shared.mvp.PlaceBasedPresenterFactory;
 import com.colinalworth.gwt.viola.web.shared.mvp.Presenter;
@@ -12,7 +13,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
@@ -40,6 +40,10 @@ public class ClientPlaceManager implements PlaceManager {
 	PlaceBasedPresenterFactory presenters;
 	@Inject
 	PlaceFactory placeFactory;
+
+	@Inject
+	HistoryImpl history;
+
 	private HandlerManager handlerManager = new HandlerManager(this);
 
 
@@ -130,7 +134,7 @@ public class ClientPlaceManager implements PlaceManager {
 
 	@Override
 	public void back() {
-		History.back();
+		history.back();
 	}
 
 

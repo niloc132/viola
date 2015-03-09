@@ -8,8 +8,8 @@
 	</parent>
 	<artifactId>viola-web</artifactId>
 	<properties>
-		<gwt.plugin.version>2.6.0</gwt.plugin.version>
-		<gxt.version>3.1.0</gxt.version>
+		<gwt.plugin.version>2.7.0</gwt.plugin.version>
+		<gxt.version>3.1.1</gxt.version>
 		<gin.version>2.1.2</gin.version>
 
 		<gwt.test.mode>htmlunit</gwt.test.mode>
@@ -215,10 +215,12 @@
 							<goal>compile</goal>
 						</goals>
 						<configuration>
-							<strict>true</strict>
+							<strict>false</strict><!-- GWT changed an interface, GXT 3.1.1 has the old impl -->
 							<disableCastChecking>true</disableCastChecking>
 							<disableClassMetadata>true</disableClassMetadata>
 							<webappDirectory>${project.build.directory}/web</webappDirectory>
+							<sourceLevel>1.8</sourceLevel>
+							<jsInteropMode>JS</jsInteropMode>
 						</configuration>
 					</execution>
 					<execution>
@@ -229,7 +231,6 @@
 						</goals>
 						<configuration>
 							<includes>**/client/**/*Test.java</includes>
-
 						</configuration>
 					</execution>
 				</executions>
