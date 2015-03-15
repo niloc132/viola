@@ -224,7 +224,7 @@ public class CouchCompiler {
 	}
 
 	private Object makeOptions(SourceProject source, File warDir, File workDir, File deployDir) {
-		return new CouchCompilerOptions(warDir, workDir, deployDir);
+		return new CouchCompilerOptions(warDir, workDir, deployDir, source.getModule());
 	}
 
 	private ModuleDef makeModule(final SourceProject source, CompilerContext ctx, TreeLogger logger) throws UnableToCompleteException {
