@@ -10,9 +10,7 @@ import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
 import com.google.inject.Singleton;
-import com.sencha.gxt.core.client.util.BaseEventPreview;
 
 /**
  * Java-ish impl of PushState wiring, covering up all the ugly bits
@@ -69,7 +67,7 @@ public class HistoryImpl implements HasValueChangeHandlers<String> {
   //TODO static as a workaround for failing default methods, and helper is workaround for no @JsFunction...
   //TODO also, should be in Window...
   static void addPopStateListener(Window window, History.PopStateEventListener listener) {
-    window.addEventListener("popstate", FunctionHelper.func(listener::onPopState));
+    window.addEventListener("popstate", listener::onPopState);
   }
 
   public void back() {

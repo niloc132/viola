@@ -1,12 +1,8 @@
 package com.colinalworth.gwt.viola.web.client.history;
 
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.js.JsExport;
 import com.google.gwt.core.client.js.JsProperty;
 import com.google.gwt.core.client.js.JsType;
-import com.google.gwt.user.client.EventListener;
-
-import java.util.concurrent.Callable;
 
 /**
  * DOM Window object, cast a $wnd to this to let it magically work
@@ -25,9 +21,9 @@ public interface Window {
 
 //  //TODO static as a workaround for failing default methods, and helper is workaround for no @JsFunction...
 //  static void addPopStateListener(Window window, History.PopStateEventListener listener) {
-//    window.addEventListener("popstate", FunctionHelper.func(listener::onPopState));
+//    window.addEventListener("popstate", listener::onPopState);
 //  }
 
 
-  void addEventListener(String type, JavaScriptObject listenerFunction);
+  <T> void addEventListener(String type, BoringConsumer<T> listenerFunction);
 }

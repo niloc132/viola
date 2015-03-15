@@ -17,8 +17,6 @@
 	<source path="client" />
 	<source path="shared" />
 
-	<super-source path="super"/>
-
 <!--	<set-property-fallback name="user.agent" value="safari"/>
 	<set-property-fallback name="gxt.user.agent" value="chrome"/>-->
 	<extend-property name="user.agent" values="unknown" fallback-value="safari" />
