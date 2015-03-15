@@ -9,31 +9,31 @@ import com.google.gwt.core.client.js.JsType;
 @JsType
 public interface Location {
 
-  void assign(String newLocation);
-  void replace(String newLocation);
-  void reload();
-  String toString();
+	void assign(String newLocation);
+	void replace(String newLocation);
+	void reload();
+	String toString();
 
-  @JsProperty
-  String href();
-  @JsProperty
-  String protocol();
-  @JsProperty
-  String host();
-  @JsProperty
-  String hostname();
-  @JsProperty
-  String port();
-  @JsProperty
-  String pathname();
-  @JsProperty
-  String search();
-  @JsProperty
-  String hash();
-  @JsProperty
-  String username();
-  @JsProperty
-  String password();
-  @JsProperty
-  String origin();
+	@JsProperty
+	String href();
+	@JsProperty
+	String protocol();
+	@JsProperty
+	String host();
+	@JsProperty
+	String hostname();
+	@JsProperty
+	String port();
+	@JsProperty
+	String pathname();
+	@JsProperty
+	String search();
+	@JsProperty
+	String hash();
+	@JsProperty
+	String username();
+	@JsProperty
+	String password();
+	@JsProperty
+	String origin();
 }

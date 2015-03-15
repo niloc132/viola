@@ -10,20 +10,20 @@ import com.google.gwt.core.client.js.JsType;
 @JsType
 @JsExport
 public interface Window {
-  @JsProperty
-  Document document();
+	@JsProperty
+	Document document();
 
-  @JsProperty
-  History history();
+	@JsProperty
+	History history();
 
-  @JsProperty
-  Location location();
+	@JsProperty
+	Location location();
 
-//  //TODO static as a workaround for failing default methods, and helper is workaround for no @JsFunction...
-//  static void addPopStateListener(Window window, History.PopStateEventListener listener) {
-//    window.addEventListener("popstate", listener::onPopState);
-//  }
+//	//TODO static as a workaround for failing default methods, and helper is workaround for no @JsFunction...
+//	static void addPopStateListener(Window window, History.PopStateEventListener listener) {
+//		window.addEventListener("popstate", listener::onPopState);
+//	}
 
 
-  <T> void addEventListener(String type, BoringConsumer<T> listenerFunction);
+	<T> void addEventListener(String type, BoringConsumer<T> listenerFunction);
 }
