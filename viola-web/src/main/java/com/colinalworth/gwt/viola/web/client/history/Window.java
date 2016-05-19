@@ -1,28 +1,26 @@
 package com.colinalworth.gwt.viola.web.client.history;
 
-import com.google.gwt.core.client.js.JsExport;
-import com.google.gwt.core.client.js.JsProperty;
-import com.google.gwt.core.client.js.JsType;
+import jsinterop.annotations.JsProperty;
+import jsinterop.annotations.JsType;
 
 /**
  * DOM Window object, cast a $wnd to this to let it magically work
  */
 @JsType
-@JsExport
 public interface Window {
 	@JsProperty
-	Document document();
+	Document getDocument();
 
 	@JsProperty
-	History history();
+	History getHistory();
 
 	@JsProperty
-	Location location();
+	Location getLocation();
 
 //	//TODO static as a workaround for failing default methods, and helper is workaround for no @JsFunction...
-//	static void addPopStateListener(Window window, History.PopStateEventListener listener) {
-//		window.addEventListener("popstate", listener::onPopState);
-//	}
+	static void addPopStateListener(Window window, History.PopStateEventListener listener) {
+		window.addEventListener("popstate", listener::onPopState);
+	}
 
 
 	<T> void addEventListener(String type, BoringConsumer<T> listenerFunction);

@@ -1,7 +1,7 @@
 package com.colinalworth.gwt.viola.web.client.history;
 
-import com.google.gwt.core.client.js.JsProperty;
-import com.google.gwt.core.client.js.JsType;
+import jsinterop.annotations.JsProperty;
+import jsinterop.annotations.JsType;
 
 /**
  * DOM Location object, more or less $doc.location
@@ -15,25 +15,25 @@ public interface Location {
 	String toString();
 
 	@JsProperty
-	String href();
+	String getHref();
 	@JsProperty
-	String protocol();
+	String getProtocol();
 	@JsProperty
-	String host();
+	String getHost();
 	@JsProperty
-	String hostname();
+	String getHostname();
 	@JsProperty
-	String port();
+	String getPort();
 	@JsProperty
-	String pathname();
+	String getPathname();
 	@JsProperty
-	String search();
+	String getSearch();
 	@JsProperty
-	String hash();
+	String getHash();
 	@JsProperty
-	String username();
+	String getUsername();
 	@JsProperty
-	String password();
+	String getPassword();
 	@JsProperty
-	String origin();
+	String getOrigin();
 }

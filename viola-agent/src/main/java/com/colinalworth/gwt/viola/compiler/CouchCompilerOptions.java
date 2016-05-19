@@ -9,7 +9,6 @@ import com.google.gwt.dev.CompilerOptions;
 import com.google.gwt.dev.cfg.Properties;
 import com.google.gwt.dev.jjs.JsOutputOption;
 import com.google.gwt.dev.js.JsNamespaceOption;
-import com.google.gwt.dev.util.arg.OptionJsInteropMode;
 import com.google.gwt.dev.util.arg.OptionMethodNameDisplayMode;
 import com.google.gwt.dev.util.arg.SourceLevel;
 import com.google.gwt.thirdparty.guava.common.collect.ImmutableListMultimap;
@@ -400,16 +399,6 @@ public class CouchCompilerOptions implements CompilerOptions {
 	}
 
 	@Override
-	public OptionJsInteropMode.Mode getJsInteropMode() {
-		return OptionJsInteropMode.Mode.JS;
-	}
-
-	@Override
-	public void setJsInteropMode(OptionJsInteropMode.Mode mode) {
-
-	}
-
-	@Override
 	public boolean isJsonSoycEnabled() {
 		return false;
 	}
@@ -460,32 +449,22 @@ public class CouchCompilerOptions implements CompilerOptions {
 	}
 
 	@Override
-	public boolean enforceStrictPublicResources() {
-		return false;
-	}
-
-	@Override
-	public void setEnforceStrictPublicResources(boolean strictPublicResources) {
-
-	}
-
-	@Override
-	public boolean enforceStrictSourceResources() {
-		return false;
-	}
-
-	@Override
-	public void setEnforceStrictSourceResources(boolean strictSourceResources) {
-
-	}
-
-	@Override
 	public boolean useDetailedTypeIds() {
 		return false;
 	}
 
 	@Override
 	public void setUseDetailedTypeIds(boolean enabled) {
+
+	}
+
+	@Override
+	public boolean shouldGenerateJsInteropExports() {
+		return true;
+	}
+
+	@Override
+	public void setGenerateJsInteropExports(boolean b) {
 
 	}
 }

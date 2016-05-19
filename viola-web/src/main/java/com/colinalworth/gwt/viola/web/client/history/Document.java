@@ -1,7 +1,7 @@
 package com.colinalworth.gwt.viola.web.client.history;
 
-import com.google.gwt.core.client.js.JsProperty;
-import com.google.gwt.core.client.js.JsType;
+import jsinterop.annotations.JsProperty;
+import jsinterop.annotations.JsType;
 
 /**
  * DOM Document object, i.e. $doc.

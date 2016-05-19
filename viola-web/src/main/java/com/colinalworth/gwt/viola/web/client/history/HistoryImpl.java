@@ -40,7 +40,7 @@ public class HistoryImpl implements HasValueChangeHandlers<String> {
 	}
 
 	private void initPopStateHandler() {
-		addPopStateListener(window(), (event) -> doPopState(event.getState().getHistoryToken()));
+		Window.addPopStateListener(window(), (event) -> doPopState(event.getState().getHistoryToken()));
 	}
 
 	private void doPopState(String historyToken) {
@@ -55,7 +55,7 @@ public class HistoryImpl implements HasValueChangeHandlers<String> {
 	}
 
 	private void newToken(String token) {
-		window().history().pushState(new History.StateImpl(token), window().document().getTitle(), "/" + token);
+		window().getHistory().pushState(new History.StateImpl(token), window().getDocument().getTitle(), "/" + token);
 	}
 
 	private native Window window() /*-{
@@ -64,18 +64,18 @@ public class HistoryImpl implements HasValueChangeHandlers<String> {
 	}-*/;
 
 
-	//TODO static as a workaround for failing default methods, and helper is workaround for no @JsFunction...
-	//TODO also, should be in Window...
-	static void addPopStateListener(Window window, History.PopStateEventListener listener) {
-		window.addEventListener("popstate", listener::onPopState);
-	}
+//	//TODO static as a workaround for failing default methods, and helper is workaround for no @JsFunction...
+//	//TODO also, should be in Window...
+//	static void addPopStateListener(Window window, History.PopStateEventListener listener) {
+//		window.addEventListener("popstate", listener::onPopState);
+//	}
 
 	public void back() {
-		window().history().back();
+		window().getHistory().back();
 	}
 
 	public void fireCurrentHistoryState() {
-		ValueChangeEvent.fire(this, window().location().pathname().substring(1) + window().location().search());
+		ValueChangeEvent.fire(this, window().getLocation().getPathname().substring(1) + window().getLocation().getSearch());
 	}
 
 	@Override

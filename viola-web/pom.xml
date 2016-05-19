@@ -8,7 +8,7 @@
 	</parent>
 	<artifactId>viola-web</artifactId>
 	<properties>
-		<gwt.plugin.version>2.7.0</gwt.plugin.version>
+		<gwt.plugin.version>2.8.0-beta1</gwt.plugin.version>
 		<gxt.version>3.1.1</gxt.version>
 		<gin.version>2.1.2</gin.version>
 
@@ -220,7 +220,6 @@
 							<disableClassMetadata>true</disableClassMetadata>
 							<webappDirectory>${project.build.directory}/web</webappDirectory>
 							<sourceLevel>1.8</sourceLevel>
-							<jsInteropMode>JS</jsInteropMode>
 						</configuration>
 					</execution>
 					<execution>
@@ -231,6 +230,7 @@
 						</goals>
 						<configuration>
 							<includes>**/client/**/*Test.java</includes>
+							<htmlunit>FF38</htmlunit>
 						</configuration>
 					</execution>
 				</executions>

@@ -228,7 +228,7 @@ public class CouchCompiler {
 	}
 
 	private ModuleDef makeModule(final SourceProject source, CompilerContext ctx, TreeLogger logger) throws UnableToCompleteException {
-		return ModuleDefLoader.loadFromClassPath(logger, ctx, source.getModule());
+		return ModuleDefLoader.loadFromClassPath(logger, source.getModule(), true);
 	}
 
 	private void shutdownAndAwaitTermination(int timeoutInSeconds) {

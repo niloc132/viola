@@ -1,6 +1,6 @@
 package com.colinalworth.gwt.viola.web.client.history;
 
-import com.google.gwt.core.client.js.JsFunction;
+import jsinterop.annotations.JsFunction;
 
 /**
 * Like Consumer, but no default methods, so can be a JsFunction
