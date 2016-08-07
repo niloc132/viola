@@ -22,5 +22,12 @@
 			<groupId>com.google.inject</groupId>
 			<artifactId>guice</artifactId>
 		</dependency>
+
+		<!-- TODO replace this with internal gson/rxf wiring... -->
+		<dependency>
+			<groupId>org.apache.solr</groupId>
+			<artifactId>solr-solrj</artifactId>
+			<version>5.5.1</version>
+		</dependency>
 	</dependencies>
 </project>
