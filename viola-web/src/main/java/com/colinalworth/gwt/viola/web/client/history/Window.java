@@ -1,27 +1,31 @@
 package com.colinalworth.gwt.viola.web.client.history;
 
+import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 /**
  * DOM Window object, cast a $wnd to this to let it magically work
  */
-@JsType
-public interface Window {
+@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "window")
+public class Window {
 	@JsProperty
-	Document getDocument();
+	public native static Window getSelf();
 
 	@JsProperty
-	History getHistory();
+	public native Document getDocument();
 
 	@JsProperty
-	Location getLocation();
+	public native History getHistory();
+
+	@JsProperty
+	public native Location getLocation();
 
 //	//TODO static as a workaround for failing default methods, and helper is workaround for no @JsFunction...
-	static void addPopStateListener(Window window, History.PopStateEventListener listener) {
-		window.addEventListener("popstate", listener::onPopState);
-	}
+//	static void addPopStateListener(Window window, History.PopStateEventListener listener) {
+//		window.addEventListener("popstate", listener::onPopState);
+//	}
 
 
-	<T> void addEventListener(String type, BoringConsumer<T> listenerFunction);
+	public native <T> void addEventListener(String type, BoringConsumer<T> listenerFunction);
 }

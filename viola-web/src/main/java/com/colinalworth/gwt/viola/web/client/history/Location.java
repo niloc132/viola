@@ -1,39 +1,40 @@
 package com.colinalworth.gwt.viola.web.client.history;
 
+import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 /**
  * DOM Location object, more or less $doc.location
  */
-@JsType
-public interface Location {
+@JsType(isNative = true, namespace = JsPackage.GLOBAL)
+public class Location {
 
-	void assign(String newLocation);
-	void replace(String newLocation);
-	void reload();
-	String toString();
+	public native void assign(String newLocation);
+	public native void replace(String newLocation);
+	public native void reload();
+	public native String toString();
 
 	@JsProperty
-	String getHref();
+	public native String getHref();
 	@JsProperty
-	String getProtocol();
+	public native String getProtocol();
 	@JsProperty
-	String getHost();
+	public native String getHost();
 	@JsProperty
-	String getHostname();
+	public native String getHostname();
 	@JsProperty
-	String getPort();
+	public native String getPort();
 	@JsProperty
-	String getPathname();
+	public native String getPathname();
 	@JsProperty
-	String getSearch();
+	public native String getSearch();
 	@JsProperty
-	String getHash();
+	public native String getHash();
 	@JsProperty
-	String getUsername();
+	public native String getUsername();
 	@JsProperty
-	String getPassword();
+	public native String getPassword();
 	@JsProperty
-	String getOrigin();
+	public native String getOrigin();
 }

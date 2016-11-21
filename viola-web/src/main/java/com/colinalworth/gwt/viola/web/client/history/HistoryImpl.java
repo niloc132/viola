@@ -1,12 +1,10 @@
 package com.colinalworth.gwt.viola.web.client.history;
 
+import com.colinalworth.gwt.viola.web.client.history.BeforeHistoryChangeEvent.BeforeHistoryChangeHandler;
+import com.colinalworth.gwt.viola.web.client.history.HistoryChangeEvent.HistoryChangeHandler;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.GwtEvent;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Event;
@@ -16,8 +14,9 @@ import com.google.inject.Singleton;
  * Java-ish impl of PushState wiring, covering up all the ugly bits
  */
 @Singleton
-public class HistoryImpl implements HasValueChangeHandlers<String> {
+public class HistoryImpl {
 	private HandlerManager handlerManager = new HandlerManager(this);
+	private boolean handlingState;
 
 	public HistoryImpl() {
 		initPopStateHandler();
@@ -40,29 +39,43 @@ public class HistoryImpl implements HasValueChangeHandlers<String> {
 	}
 
 	private void initPopStateHandler() {
-		Window.addPopStateListener(window(), (event) -> doPopState(event.getState().getHistoryToken()));
+		History.PopStateEventListener listener = (event) -> doPopState(event.getState().historyToken);
+		Window.getSelf().addEventListener("popstate", listener::onPopState);
 	}
 
 	private void doPopState(String historyToken) {
-		ValueChangeEvent.fire(this, historyToken);
+		fireChange(historyToken);
 	}
 
 	public void newItem(String token, boolean fireEvent) {
+		if (handlingState) {
+			return;
+		}
 		newToken(token);
 		if (fireEvent) {
-			ValueChangeEvent.fire(this, token);
+			fireChange(token);
 		}
 	}
 
-	private void newToken(String token) {
-		window().getHistory().pushState(new History.StateImpl(token), window().getDocument().getTitle(), "/" + token);
+	private void fireChange(String token) {
+		BeforeHistoryChangeEvent event = new BeforeHistoryChangeEvent(token);
+		handlerManager.fireEvent(event);
+		if (event.getCanonicalToken() != null) {
+			assert !event.getCanonicalToken().equals(token);
+			replaceToken(event.getCanonicalToken());
+		}
+		handlingState = true;
+		handlerManager.fireEvent(new HistoryChangeEvent(event.getCanonicalToken() == null ? token : event.getCanonicalToken()));
+		handlingState = false;
 	}
 
-	private native Window window() /*-{
-		//window.history.pushState({}, '', '');
-		return $wnd;
-	}-*/;
+	private void newToken(String token) {
+		Window.getSelf().getHistory().pushState(History.state(token), Window.getSelf().getDocument().getTitle(), "/" + token);
+	}
 
+	private void replaceToken(String token) {
+		Window.getSelf().getHistory().replaceState(History.state(token), Window.getSelf().getDocument().getTitle(), "/" + token);
+	}
 
 //	//TODO static as a workaround for failing default methods, and helper is workaround for no @JsFunction...
 //	//TODO also, should be in Window...
@@ -71,21 +84,22 @@ public class HistoryImpl implements HasValueChangeHandlers<String> {
 //	}
 
 	public void back() {
-		window().getHistory().back();
+		Window.getSelf().getHistory().back();
 	}
 
 	public void fireCurrentHistoryState() {
-		ValueChangeEvent.fire(this, window().getLocation().getPathname().substring(1) + window().getLocation().getSearch());
+		String token = Window.getSelf().getLocation().getPathname().substring(1) + Window.getSelf().getLocation().getSearch();
+
+		replaceToken(token);
+		fireChange(token);
 	}
 
-	@Override
-	public HandlerRegistration addValueChangeHandler(ValueChangeHandler<String> handler) {
-		initPopStateHandler();
-		return handlerManager.addHandler(ValueChangeEvent.getType(), handler);
+
+	public HandlerRegistration addBeforeHistoryChangeHandler(BeforeHistoryChangeHandler handler) {
+		return handlerManager.addHandler(BeforeHistoryChangeEvent.TYPE, handler);
+	}
+	public HandlerRegistration addHistoryChangeHandler(HistoryChangeHandler handler) {
+		return handlerManager.addHandler(HistoryChangeEvent.TYPE, handler);
 	}
 
-	@Override
-	public void fireEvent(GwtEvent<?> event) {
-		handlerManager.fireEvent(event);
-	}
 }

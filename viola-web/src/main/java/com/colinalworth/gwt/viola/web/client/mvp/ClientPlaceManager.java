@@ -75,7 +75,7 @@ public class ClientPlaceManager implements PlaceManager {
 		if (equals(place, current)) {
 			//already there, don't do anything
 			logger.finest("Already at current location, no need to do anything: " + placeFactory.route(place));
-			return false;
+			return true;
 		}
 
 		//sanity check the place, make sure it is valid (or throws an exception because it has nulls it shouldn't have)

@@ -90,11 +90,6 @@
 			<artifactId>places</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		<dependency>
-			<groupId>de.barop.gwt</groupId>
-			<artifactId>gwt-pushstate</artifactId>
-			<version>1.0.0</version>
-		</dependency>
 
 		<dependency>
 			<groupId>commons-io</groupId>

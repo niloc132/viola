@@ -1,47 +1,36 @@
 package com.colinalworth.gwt.viola.web.client.history;
 
+import jsinterop.annotations.JsOverlay;
+import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 /**
  * Quick and dirty PushState api
  */
-@JsType
-public interface History {
-	void back();
-	void forward();
-	void pushState(State state, String title, String url);
-	void replaceState(State state, String title, String url);
+@JsType(isNative = true, namespace = JsPackage.GLOBAL)
+public class History {
+	public native void back();
+	public native void forward();
+	public native void pushState(State state, String title, String url);
+	public native void replaceState(State state, String title, String url);
 
 	@JsProperty
-	State getState();
+	public native State getState();
 
-	@JsType
-	public static interface State {
-		@JsProperty
-		void setHistoryToken(String token);
-		@JsProperty
-		String getHistoryToken();
+	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "Object")
+	public static class State {
+		public String historyToken;
+
 	}
-	public static class StateImpl implements State {
-		private String historyToken;
-
-		public StateImpl(String historyToken) {
-			this.historyToken = historyToken;
-		}
-
-		@Override
-		public String getHistoryToken() {
-			return historyToken;
-		}
-
-		@Override
-		public void setHistoryToken(String historyToken) {
-			this.historyToken = historyToken;
-		}
+	@JsOverlay
+	public static State state(String token) {
+		State s = new State();
+		s.historyToken = token;
+		return s;
 	}
 
-	@JsType
+	@JsType(isNative = true)
 	public interface PopStateEvent {
 		@JsProperty
 		State getState();
