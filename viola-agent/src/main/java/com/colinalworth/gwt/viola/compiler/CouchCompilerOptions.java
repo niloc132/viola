@@ -1,24 +1,31 @@
 package com.colinalworth.gwt.viola.compiler;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.core.ext.TreeLogger.Type;
 import com.google.gwt.dev.CompilerOptions;
+import com.google.gwt.dev.cfg.Properties;
 import com.google.gwt.dev.jjs.JsOutputOption;
+import com.google.gwt.dev.js.JsNamespaceOption;
+import com.google.gwt.dev.util.arg.OptionMethodNameDisplayMode;
 import com.google.gwt.dev.util.arg.SourceLevel;
+import com.google.gwt.thirdparty.guava.common.collect.ImmutableListMultimap;
+import com.google.gwt.thirdparty.guava.common.collect.ListMultimap;
 
 public class CouchCompilerOptions implements CompilerOptions {
 
 	private File warDir;
 	private File workDir;
 	private File deployDir;
+	private String moduleName;
 
-	public CouchCompilerOptions(File warDir, File workDir, File deployDir) {
+	public CouchCompilerOptions(File warDir, File workDir, File deployDir, String moduleName) {
 		this.warDir = warDir;
 		this.workDir = workDir;
 		this.deployDir = deployDir;
-		
+		this.moduleName = moduleName;
 	}
 
 	public int getOptimizationLevel() {
@@ -158,15 +165,17 @@ public class CouchCompilerOptions implements CompilerOptions {
 	}
 
 	public List<String> getModuleNames() {
-		return null;//TODO
+		return Collections.singletonList(moduleName);
 	}
 
 	public void addModuleName(String moduleName) {
 		//TODO
+		assert false;
 	}
 
 	public void setModuleNames(List<String> moduleNames) {
 		//TODO
+		assert false;
 	}
 
 	public Type getLogLevel() {
@@ -312,22 +321,12 @@ public class CouchCompilerOptions implements CompilerOptions {
 
 	@Override
 	public void setRemoveDuplicateFunctions(boolean enabled) {
-		
-	}
 
-	@Override
-	public boolean enforceStrictResources() {
-		return false;
-	}
-
-	@Override
-	public void setEnforceStrictResources(boolean strictResources) {
-		
 	}
 
 	@Override
 	public SourceLevel getSourceLevel() {
-		return SourceLevel.JAVA7;
+		return SourceLevel.JAVA8;
 	}
 
 	@Override
@@ -354,4 +353,118 @@ public class CouchCompilerOptions implements CompilerOptions {
 	public void setSaveSourceOutput(File dest) {
 	}
 
+	@Override
+	public boolean shouldJDTInlineCompileTimeConstants() {
+		return false;
+	}
+
+	@Override
+	public boolean shouldAddRuntimeChecks() {
+		return true;
+	}
+
+	@Override
+	public void setAddRuntimeChecks(boolean enabled) {
+
+	}
+
+	@Override
+	public boolean isClosureCompilerFormatEnabled() {
+		return false;
+	}
+
+	@Override
+	public void setClosureCompilerFormatEnabled(boolean enabled) {
+
+	}
+
+	@Override
+	public Properties getFinalProperties() {
+		return null;
+	}
+
+	@Override
+	public void setFinalProperties(Properties properties) {
+
+	}
+
+	@Override
+	public boolean isIncrementalCompileEnabled() {
+		return false;
+	}
+
+	@Override
+	public void setIncrementalCompileEnabled(boolean enabled) {
+
+	}
+
+	@Override
+	public boolean isJsonSoycEnabled() {
+		return false;
+	}
+
+	@Override
+	public void setJsonSoycEnabled(boolean value) {
+
+	}
+
+	@Override
+	public OptionMethodNameDisplayMode.Mode getMethodNameDisplayMode() {
+		return OptionMethodNameDisplayMode.Mode.NONE;
+	}
+
+	@Override
+	public void setMethodNameDisplayMode(OptionMethodNameDisplayMode.Mode methodNameDisplayMode) {
+
+	}
+
+	@Override
+	public JsNamespaceOption getNamespace() {
+		return JsNamespaceOption.NONE;
+	}
+
+	@Override
+	public void setNamespace(JsNamespaceOption newValue) {
+
+	}
+
+	@Override
+	public void setPropertyValues(String name, Iterable<String> values) {
+
+	}
+
+	@Override
+	public ListMultimap<String, String> getProperties() {
+		return ImmutableListMultimap.of();
+	}
+
+	@Override
+	public String getSourceMapFilePrefix() {
+		return null;
+	}
+
+	@Override
+	public void setSourceMapFilePrefix(String path) {
+
+	}
+
+	@Override
+	public boolean useDetailedTypeIds() {
+		return false;
+	}
+
+	@Override
+	public void setUseDetailedTypeIds(boolean enabled) {
+
+	}
+
+	@Override
+	public boolean shouldGenerateJsInteropExports() {
+		return true;
+	}
+
+	@Override
+	public void setGenerateJsInteropExports(boolean b) {
+
+	}
 }

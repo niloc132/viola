@@ -96,21 +96,15 @@ public class JobService {
 		attachments.addAttachment("package project.client;\n" +
 				"\n" +
 				"import com.google.gwt.core.client.EntryPoint;\n" +
-				"import com.google.gwt.event.dom.client.ClickEvent;\n" +
-				"import com.google.gwt.event.dom.client.ClickHandler;\n" +
 				"import com.google.gwt.user.client.ui.Label;\n" +
 				"import com.google.gwt.user.client.ui.RootPanel;\n" +
 				"import com.google.gwt.user.client.Window;\n" +
 				"\n" +
 				"public class SampleEntryPoint implements EntryPoint {\n" +
+				"  @Override\n" +
 				"  public void onModuleLoad() {\n" +
 				"    Label label = new Label(\"Hello, World!\");\n" +
-				"    label.addClickHandler(new ClickHandler() {\n" +
-				"      @Override\n" +
-				"      public void onClick(ClickEvent event) {\n" +
-				"        Window.alert(\"Click!\");\n" +
-				"      }\n" +
-				"    });\n" +
+				"    label.addClickHandler(e -> Window.alert(\"Click!\"));\n" +
 				"    RootPanel.get().add(label);\n" +
 				"  }\n" +
 				"}","project/client/SampleEntryPoint.java", "application/java");

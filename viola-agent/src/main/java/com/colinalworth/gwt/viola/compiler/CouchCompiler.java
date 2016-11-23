@@ -16,11 +16,11 @@ import com.google.gwt.dev.Link;
 import com.google.gwt.dev.Permutation;
 import com.google.gwt.dev.Precompilation;
 import com.google.gwt.dev.Precompile;
+import com.google.gwt.dev.PrecompileTaskOptions;
 import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.dev.cfg.ModuleDefLoader;
-import com.google.gwt.dev.jjs.JJSOptions;
 import com.google.gwt.dev.jjs.PermutationResult;
-import com.google.gwt.dev.util.FileBackedObject;
+import com.google.gwt.dev.util.PersistenceBackedObject;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -159,15 +160,15 @@ public class CouchCompiler {
 			//compile
 			proj = jobs.setJobStatus(proj, Status.COMPILING);
 			Permutation[] allPerms = precompilation.getPermutations();
-			List<FileBackedObject<PermutationResult>> resultFiles = CompilePerms.makeResultFiles(workDir, allPerms);
+			List<PersistenceBackedObject<PermutationResult>> resultFiles = CompilePerms.makeResultFiles(workDir, allPerms, options);
 			CompilePerms.compile(logger, compilerContext, precompilation, allPerms, options.getLocalWorkers(), resultFiles);
 
 			ArtifactSet generatedArtifacts = precompilation.getGeneratedArtifacts();
-			JJSOptions precompileOptions = precompilation.getUnifiedAst().getOptions();
+			PrecompileTaskOptions precompileOptions = precompilation.getUnifiedAst().getOptions();
 
 			//link
 			proj = jobs.setJobStatus(proj, Status.LINKING);
-			Link.link(logger, module, generatedArtifacts, allPerms, resultFiles, precompileOptions, options);
+			Link.link(logger, module, module.getPublicResourceOracle(), generatedArtifacts, allPerms, resultFiles, Collections.emptySet(), precompileOptions, options);
 
 			//attach results to document
 			proj = jobs.attachOutputDir(proj, new File(warDir, module.getName()));
@@ -223,11 +224,11 @@ public class CouchCompiler {
 	}
 
 	private Object makeOptions(SourceProject source, File warDir, File workDir, File deployDir) {
-		return new CouchCompilerOptions(warDir, workDir, deployDir);
+		return new CouchCompilerOptions(warDir, workDir, deployDir, source.getModule());
 	}
 
 	private ModuleDef makeModule(final SourceProject source, CompilerContext ctx, TreeLogger logger) throws UnableToCompleteException {
-		return ModuleDefLoader.loadFromClassPath(logger, ctx, source.getModule());
+		return ModuleDefLoader.loadFromClassPath(logger, source.getModule(), true);
 	}
 
 	private void shutdownAndAwaitTermination(int timeoutInSeconds) {
